@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.commons.lang.math.NumberUtils;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -37,15 +38,18 @@ public class BoardController {
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
 	@RequestMapping(value = "/board/boardList.do", method = RequestMethod.GET)
-	public String boardList(Locale locale, Model model,PageVo pageVo) throws Exception{
+	public String boardList(Locale locale, Model model, String pageNo) throws Exception{
 		
 		List<BoardVo> boardList = new ArrayList<BoardVo>();
 		
 		int page = 1;
 		int totalCnt = 0;
+		PageVo pageVo = new PageVo();
+		
+		pageVo.setPageNo(NumberUtils.toInt(pageNo));
 		
 		if(pageVo.getPageNo() == 0){
-			pageVo.setPageNo(page);;
+			pageVo.setPageNo(page);
 		}
 		
 		boardList = boardService.SelectBoardList(pageVo);
@@ -116,7 +120,6 @@ public class BoardController {
 	public String boardUpdateAction(Locale locale,BoardVo boardVo
 			,@PathVariable("boardType")String boardType
 			,@PathVariable("boardNum")int boardNum) throws Exception{
-		System.out.println("컨트롤러 실행!!");
 		HashMap<String, String> result = new HashMap<String, String>();
 		CommonUtil commonUtil = new CommonUtil();
 		
@@ -132,13 +135,23 @@ public class BoardController {
 		return callbackMsg;
 	}
 	
-	@RequestMapping(value = "/board/{boardType}/{boardNum}/boardDelete.do", method = RequestMethod.GET)
+	@RequestMapping(value = "/board/{boardType}/{boardNum}/boardDelete.do", method = RequestMethod.POST)
+	@ResponseBody
 	public String boardDelete(Locale locale, Model model
 			,@PathVariable("boardType")String boardType
 			,@PathVariable("boardNum")int boardNum) throws Exception{
+		HashMap<String, String> result = new HashMap<String, String>();
+		CommonUtil commonUtil = new CommonUtil();
 		
-		boardService.boardDelete(boardType,boardNum);
+		int resultCnt = boardService.boardDelete(boardType,boardNum);
 		
-		return "redirect:/board/boardList.do";
+		result.put("success", (resultCnt > 0)?"Y":"N");
+		
+		String callbackMsg = commonUtil.getJsonCallBackString(" ",result);
+		
+		System.out.println("callbackMsg::"+callbackMsg);
+		
+		return callbackMsg;
 	}
+	
 }

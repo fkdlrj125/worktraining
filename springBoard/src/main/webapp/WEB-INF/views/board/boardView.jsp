@@ -7,6 +7,42 @@
 <meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
 <title>boardView</title>
 </head>
+<script type="text/javascript">
+
+	$j(document).ready(function(){
+		var path = `/board/${boardType}/${boardNum}`;
+	
+		// 삭제
+		// ajax 하나 쓰고 삭제만으로 동시 삭제 해결
+		// 체크 필요 없음
+		$j("#delete").on("click", function(){
+			
+			if(confirm("삭제하시겠습니까?")){
+				$j.ajax({
+					url : path + "/boardDelete.do",
+					type : "POST",
+					dataType : "json",
+					success : function(data) {
+						
+						if(data.success == "Y") {
+							alert("삭제성공");
+						} else {
+							alert("삭제실패")
+						}
+						
+						location.href = "/board/boardList.do?pageNo=";
+					}
+				});
+			}
+		});
+		
+		// 수정
+		$j("#update").on("click", function(){
+			location.href = path + `/boardUpdate.do`;
+		});
+	});
+
+</script>
 <body>
 <table align="center">
 	<tr>
@@ -40,8 +76,8 @@
 	</tr>
 	<tr>
 		<td align="right">
-			<a href="/board/${board.boardType}/${board.boardNum}/boardUpdate.do">Update</a>
-			<a href="/board/${board.boardType}/${board.boardNum}/boardDelete.do">Delete</a>
+			<button id="update">Update</button>
+			<button id="delete">Delete</button>
 			<a href="/board/boardList.do">List</a>
 		</td>
 	</tr>

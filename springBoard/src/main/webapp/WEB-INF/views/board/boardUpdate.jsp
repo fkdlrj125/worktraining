@@ -14,25 +14,33 @@
 		$j("#submit").on("click",function(){
 			var $frm = $j('.boardWrite :input');
 			var param = $frm.serialize();
+			var path = `/board/${boardType}/${boardNum}`;
 			
-			$j.ajax({
-			    url : `/board/${boardType}/${boardNum}/boardUpdateAction.do`,
-			    dataType: "json",
-			    type: "POST",
-			    data : param,
-			    success: function(data, textStatus, jqXHR)
-			    {
-					alert("작성완료");
-					
-					alert("메세지:"+data.success);
-					
-					location.href = `/board/boardList.do`;
-			    },
-			    error: function (jqXHR, textStatus, errorThrown)
-			    {
-			    	alert("실패");
-			    }
-			});
+			if(confirm("수정하시겠습니까?")) {
+				$j.ajax({
+				    url : `/board/${boardType}/${boardNum}/boardUpdateAction.do`,
+				    dataType: "json",
+				    type: "POST",
+				    data : param,
+				    success: function(data, textStatus, jqXHR)
+				    {
+						
+						if(data.success == "Y") {
+							alert("수정완료");
+							location.href = `/board/${boardType}/${boardNum}/boardView.do`;
+						} 
+						else {
+							alert("수정실패");
+							location.href = "/board/boardList.do?pageNo=";
+						}
+						
+				    },
+				    error: function (jqXHR, textStatus, errorThrown)
+				    {
+				    	alert("실패");
+				    }
+				});
+			}
 		});
 	});
 	

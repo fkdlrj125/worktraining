@@ -15,33 +15,59 @@
 			var $frm = $j('.boardWrite :input');
 			var param = $frm.serialize();
 			
-			$j.ajax({
-			    url : "/board/boardWriteAction.do",
-			    dataType: "json",
-			    type: "POST",
-			    data : param,
-			    success: function(data, textStatus, jqXHR)
-			    {
-					alert("작성완료");
-					
-					alert("메세지:"+data.success);
-					
-					location.href = "/board/boardList.do?pageNo=0";
-			    },
-			    error: function (jqXHR, textStatus, errorThrown)
-			    {
-			    	alert("실패");
-			    }
-			});
+			if(!$frm[1].value?.trim()){ // 옵셔널 체이닝을 이용한 null, undefine, 빈 문자 체크 
+				alert("제목을 입력해주세요");
+			}
+			else{
+				$j.ajax({
+				    url : "/board/boardWriteAction.do",
+				    dataType: "json",
+				    type: "POST",
+				    data : param,
+				    success: function(data, textStatus, jqXHR)
+				    {
+						alert("작성완료");
+						
+						alert("메세지:"+data.success);
+						location.href = "/board/boardList.do?pageNo=";
+				    },
+				    error: function (jqXHR, textStatus, errorThrown)
+				    {
+				    	alert("실패");
+				    }
+				});
+			}
+		});
+		
+		// 글 추가에서 행 추가 행 삭제 기능 추가
+		// 행 -> title 과 comment 한 묶음
+		// 행 삭제는 원하는 행을 지정해서 삭제 가능하도록
+		// 행 추가는 됐는데 기존 행에 값이 있을 때 그 값도 같이 복사되는 상태 -> 해결해야됨
+		
+		$j("#addrow").on("click", function() {
+			var length = $j('tbody:eq(1) tr').length-2;
+			var position = $j('tbody:eq(1) tr:eq(-2)');
+			
+			var titleClone = $j("tbody:eq(1) tr:eq(0)").clone(true);
+			var commentClone = $j("tbody:eq(1) tr:eq(1)").clone(true);
+			
+			var newComment = position.after(commentClone);
+			var newTitle = position.after(titleClone);
+			
 		});
 	});
 	
-
 </script>
 <body>
 <form class="boardWrite">
 	<table align="center">
 		<tr>
+			<td align="right">
+			<input id="addrow" type="button" value="행추가">
+			</td>
+			<td align="right">
+			<input id="subrow" type="button" value="행삭제">
+			</td>
 			<td align="right">
 			<input id="submit" type="button" value="작성">
 			</td>
