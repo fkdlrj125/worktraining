@@ -8,52 +8,142 @@
 <title>boardWrite</title>
 </head>
 <script type="text/javascript">
-
+	// 게시글 작성에 type추가(selectbox로 선택가능하게/DB에 있는 정보 사용)
+	// 게시글 리스트에 게시글의 타입 보이게, 하단에 체크박스를 통해 원하는 게시글 타입들만 볼 수 있게
+	
+	// 백단에서 게시글 타입 표현은 코드id를 사용하는 게 좋아 보임
+	// 저장
+	// 1. 컨트롤러에서 작성폼에 게시글 타입에 대한 정보 전달 
+	// 2. 뷰에 타이틀 선택하는 selet태그 생성(name="boardType")
+	// 3. 컨트롤러에서 객체에 게시글 타입도 추가
+	
+	// 출력
+	// 1. 컨트롤러에서 게시글 리스트에 게시글 타입에 대한 정보 전달
+	// 2. 하단 필터링에 맞는 스크립트 작성
+	//  2-1. 전체를 누르면 모든 체크박스 체크
+	//  2-2. 선택한 게시글 타입에 대한 게시물만 출력
+	
+	
 	$j(document).ready(function(){
+		$j.fn.serializeObject = function() {
+			var result = [];
+			var obj = null;
+			
+			try {
+				var arr = this.serializeArray();
+
+				if(arr) {
+					obj = {};
+					$j.each(arr, function(index) {
+						obj[this.name] = this.value;
+						
+						if(index%2 == 1){
+							result.push(Object.assign({},obj));
+						}
+					});
+				}
+			} catch (e) {
+				alert(e.message);
+			}
+			return result;
+		}
 		
 		$j("#submit").on("click",function(){
 			var $frm = $j('.boardWrite :input');
-			var param = $frm.serialize();
+			var param = $frm.serializeObject();
 			
-			if(!$frm[1].value?.trim()){ // 옵셔널 체이닝을 이용한 null, undefine, 빈 문자 체크 
-				alert("제목을 입력해주세요");
+			
+			 for(var i=0; i < param.length/2; i++) {
+				if(!param[i]["boardTitle"]?.trim()) {
+					alert("제목을 입력해주세요");
+					return;
+				}
 			}
-			else{
-				$j.ajax({
-				    url : "/board/boardWriteAction.do",
-				    dataType: "json",
-				    type: "POST",
-				    data : param,
-				    success: function(data, textStatus, jqXHR)
-				    {
-						alert("작성완료");
-						
-						alert("메세지:"+data.success);
-						location.href = "/board/boardList.do?pageNo=";
-				    },
-				    error: function (jqXHR, textStatus, errorThrown)
-				    {
-				    	alert("실패");
-				    }
-				});
-			}
+			 
+			 console.log(param);
+			 
+			$j.ajax({
+			    url : "/board/boardWriteAction.do",
+			    type : "POST",
+			    traditional : true,
+			    data : {"param" : JSON.stringify(param)},
+			    dataType : "json",
+			    success: function(data, textStatus, jqXHR)
+			    {
+					alert("작성완료");
+					
+					alert("메세지:"+data.success);
+					location.href = "/board/boardList.do?pageNo=";
+			    },
+			    error: function (jqXHR, textStatus, errorThrown)
+			    {
+			    	alert("실패");
+			    }
+			}); 
+			 
+			// ver.1
+			
+			// var param = $frm.serialize();
+			
+			// var values = param.split("&");
+			
+			<%-- for(var i=0; i < values.length/2; i++) {
+				if(!values[i*2].split("=")[1]?.trim()) {
+					alert("제목을 입력해주세요");
+					return;
+				}
+			} --%>
+			
+			<%-- $j.ajax({
+			    url : "/board/boardWriteAction.do",
+			    type : "POST",
+			    data : param, 
+			    dataType : "json",
+			    success: function(data, textStatus, jqXHR)
+			    {
+					alert("작성완료");
+					
+					alert("메세지:"+data.success);
+					location.href = "/board/boardList.do?pageNo=";
+			    },
+			    error: function (jqXHR, textStatus, errorThrown)
+			    {
+			    	alert("실패");
+			    }
+			}); --%>
 		});
 		
-		// 글 추가에서 행 추가 행 삭제 기능 추가
-		// 행 -> title 과 comment 한 묶음
-		// 행 삭제는 원하는 행을 지정해서 삭제 가능하도록
-		// 행 추가는 됐는데 기존 행에 값이 있을 때 그 값도 같이 복사되는 상태 -> 해결해야됨
-		
 		$j("#addrow").on("click", function() {
-			var length = $j('tbody:eq(1) tr').length-2;
-			var position = $j('tbody:eq(1) tr:eq(-2)');
-			
 			var titleClone = $j("tbody:eq(1) tr:eq(0)").clone(true);
 			var commentClone = $j("tbody:eq(1) tr:eq(1)").clone(true);
 			
-			var newComment = position.after(commentClone);
-			var newTitle = position.after(titleClone);
+			var newComment = $j("tbody:eq(1) tr:eq(-2)").after(commentClone);
+			var newTitle = $j("tbody:eq(1) tr:eq(-3)").after(titleClone);
 			
+			$j("tbody:eq(1) tr:eq(-3) :input")[0].value = "";
+			$j("tbody:eq(1) tr:eq(-3) input:checkbox.dcheck").prop("checked", false);
+			$j("tbody:eq(1) tr:eq(-2) :input")[0].value = "";
+		});
+		
+		$j("#subrow").on("click", function() {
+			var iarr = [];
+			$j(".dcheck").each(function(index, el) {
+				if(el.checked) {
+					iarr.push(index);
+				}
+			})
+			
+			if((($j("tbody:eq(1) tr").length-1)/2) > iarr.length) {
+				var count = 0;
+				iarr.forEach(function(i){
+					i -= count;
+					$j(`tbody:eq(1) tr:eq(\${i*2})`).remove();
+					$j(`tbody:eq(1) tr:eq(\${i*2})`).remove();
+					count++;
+				});
+			} else {
+				alert("최소 한 개의 행을 남겨주세요.");
+			}
 		});
 	});
 	
@@ -63,13 +153,9 @@
 	<table align="center">
 		<tr>
 			<td align="right">
-			<input id="addrow" type="button" value="행추가">
-			</td>
-			<td align="right">
-			<input id="subrow" type="button" value="행삭제">
-			</td>
-			<td align="right">
-			<input id="submit" type="button" value="작성">
+				<input id="addrow" type="button" value="행추가">
+				<input id="subrow" type="button" value="행삭제">
+				<input id="submit" type="button" value="작성">
 			</td>
 		</tr>
 		<tr>
@@ -79,8 +165,9 @@
 						<td width="120" align="center">
 						Title
 						</td>
-						<td width="400">
-						<input name="boardTitle" type="text" size="50" value="${board.boardTitle}"> 
+						<td width="420" align="left">
+						<input name="boardTitle" type="text" size="50" value="${board.boardTitle}">
+						<input class="dcheck" type="checkbox">
 						</td>
 					</tr>
 					<tr>

@@ -63,10 +63,10 @@
         ,MODIFIED_TIME
         )
         VALUES
-        ('1'
+        (#{boardType}
         ,(SELECT TO_NUMBER(NVL(MAX(BOARD_NUM),0)+1)
 	    FROM BOARD
-	    WHERE BOARD_TYPE = '1')
+	    WHERE BOARD_TYPE = #{boardType})
         ,#{boardTitle}
         ,#{boardComment}
         ,'SYSTEM'
