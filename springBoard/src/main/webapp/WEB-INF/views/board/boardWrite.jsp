@@ -14,7 +14,14 @@
 	// 백단에서 게시글 타입 표현은 코드id를 사용하는 게 좋아 보임
 	// 저장
 	// 1. 컨트롤러에서 작성폼에 게시글 타입에 대한 정보 전달 
+	//  -> 문제1. 맵퍼에서 클래스의 경로를 지정하지 않고 그냥 넣어서 에러 발생
+	//	-> 문제2. root-context.xml에 component-scan을 지정하지 않아 빈이 생성되지 않음
+	//  -> 문제3. 맵퍼의 개념이 부족해 제대로 적용하지 못 함
+	//		-> sql을 호출하기 위한 것
+	//		-> namespace는 이 맵퍼들을 모아놓은 곳(경로와 같은 개념이라 생각됨)
+	//		-> 빈에 등록해 주입받아 쓰는 방법도 있고 MapperFactoryBean을 이용해 등록하는 방법도 있음
 	// 2. 뷰에 타이틀 선택하는 selet태그 생성(name="boardType")
+	
 	// 3. 컨트롤러에서 객체에 게시글 타입도 추가
 	
 	// 출력
@@ -31,14 +38,15 @@
 			
 			try {
 				var arr = this.serializeArray();
-
+				
+				console.log(arr);
+				
 				if(arr) {
 					obj = {};
-					$j.each(arr, function(index) {
+					$j.each(arr, function(index, data) {
 						obj[this.name] = this.value;
-						
-						if(index%2 == 1){
-							result.push(Object.assign({},obj));
+						if((index+1)%3==0) {
+							result.push(Object.assign({}, obj));
 						}
 					});
 				}
@@ -49,19 +57,17 @@
 		}
 		
 		$j("#submit").on("click",function(){
-			var $frm = $j('.boardWrite :input');
+			var $frm = $j(".boardWrite :input");
 			var param = $frm.serializeObject();
 			
 			
-			 for(var i=0; i < param.length/2; i++) {
+			for(var i=1; i < param.length; i++) {
 				if(!param[i]["boardTitle"]?.trim()) {
 					alert("제목을 입력해주세요");
 					return;
 				}
 			}
-			 
-			 console.log(param);
-			 
+			
 			$j.ajax({
 			    url : "/board/boardWriteAction.do",
 			    type : "POST",
@@ -83,6 +89,7 @@
 			 
 			// ver.1
 			
+			// var $frm = $j(":input")
 			// var param = $frm.serialize();
 			
 			// var values = param.split("&");
@@ -114,11 +121,14 @@
 		});
 		
 		$j("#addrow").on("click", function() {
-			var titleClone = $j("tbody:eq(1) tr:eq(0)").clone(true);
-			var commentClone = $j("tbody:eq(1) tr:eq(1)").clone(true);
+			var typeClone = $j("tbody:eq(1) tr:eq(0)").clone(true);
+			var titleClone = $j("tbody:eq(1) tr:eq(1)").clone(true);
+			var commentClone = $j("tbody:eq(1) tr:eq(2)").clone(true);
 			
-			var newComment = $j("tbody:eq(1) tr:eq(-2)").after(commentClone);
-			var newTitle = $j("tbody:eq(1) tr:eq(-3)").after(titleClone);
+			$j("tbody:eq(1) tr:eq(-2)").after(typeClone);
+			$j("tbody:eq(1) tr:eq(-2)").after(titleClone);
+			$j("tbody:eq(1) tr:eq(-2)").after(commentClone);
+			
 			
 			$j("tbody:eq(1) tr:eq(-3) :input")[0].value = "";
 			$j("tbody:eq(1) tr:eq(-3) input:checkbox.dcheck").prop("checked", false);
@@ -133,10 +143,11 @@
 				}
 			})
 			
-			if((($j("tbody:eq(1) tr").length-1)/2) > iarr.length) {
+			if(($j("tbody:eq(1) tr").length-3) > iarr.length) {
 				var count = 0;
 				iarr.forEach(function(i){
 					i -= count;
+					$j(`tbody:eq(1) tr:eq(\${i*2})`).remove();
 					$j(`tbody:eq(1) tr:eq(\${i*2})`).remove();
 					$j(`tbody:eq(1) tr:eq(\${i*2})`).remove();
 					count++;
@@ -163,9 +174,24 @@
 				<table border ="1"> 
 					<tr>
 						<td width="120" align="center">
-						Title
+						Type
 						</td>
 						<td width="420" align="left">
+						<select name="boardType">
+							<c:forEach items="${typeList}" var="list">
+								<option value="${list.codeId}" 
+								<c:if test ="${list.codeId eq 'a01'}">selected="selected"</c:if>>
+								${list.codeName}
+								</option>
+							</c:forEach>
+						</select>
+						</td>
+					</tr>
+					<tr>
+						<td align="center">
+						Title
+						</td>
+						<td align="left">
 						<input name="boardTitle" type="text" size="50" value="${board.boardTitle}">
 						<input class="dcheck" type="checkbox">
 						</td>

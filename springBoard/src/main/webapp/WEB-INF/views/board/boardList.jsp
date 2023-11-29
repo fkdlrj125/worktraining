@@ -8,19 +8,112 @@
 <title>list</title>
 </head>
 <script type="text/javascript">
+	
+	<%-- 
+	window.onpageshow = function() {
+			if(sessionStorage.getItem("html")){
+				$j("#boardTable").html(sessionStorage.getItem("html"));
+				const reg = new RegExp(/type.../, "g");
+				var checkList = sessionStorage.getItem("checkList").match(reg);
+				
+				$j.each(checkList, function(index, check) {
+					$j(`#\${check}`).prop("checked", true);
+				})
+			}
+		}
+	--%>
+	
+	function drawHTML(data) {
+		var html = `<tr>
+			<td width="80" align="center">
+				Type
+			</td>
+			<td width="40" align="center">
+				No
+			</td>
+			<td width="300" align="center">
+				Title
+			</td>
+		</tr>`;
+		
+		var {totalCnt, typeList, pageNo, boardList} = data[0];
+		
+		$j.each(boardList, function(index, board){
+			html += `
+				<tr>
+					<td align="center">
+						\${board.boardType}
+					</td>
+					<td>
+						\${board.boardNum}
+					</td>
+					<td>
+						<a href = '/board/\${board.boardType}/\${board.boardNum}/boardView.do?pageNo=\${pageNo}'>\${board.boardTitle}</a>
+					</td>
+				</tr>	
+				`;
+		});
+		
+		$j("#boardTable").html(html);
+		$j("#totalCnt").text(`total : \${totalCnt}`);
+	}
 
-	$j(document).ready(function(){
-		$j("#search").on("click", function(){
-			var checkedBoxes = [];
-			
-			$j("input:checkbox").each((index, el) => {
-				if(el.checked) {
-					checkedBoxes.push(el[0].id);
-				}
-			});
-			
-			console.log(checkedBoxes[0].id);	
+	$j(document).ready(function() {
+		
+		<%--
+		if(performance.navigation.type == 1) {
+			if(sessionStorage.getItem("checkedData")){
+				var checkedData = sessionStorage.getItem("checkedData")
+				checkedData = JSON.parse(checkedData);
+				console.log(checkedData);
+				drawHTML(checkedData);
+				
+				const reg = new RegExp(/type.../, "g");
+				var checkList = sessionStorage.getItem("checkList").match(reg);
+				
+				$j.each(checkList, function(index, check) {
+					$j(`#\${check}`).prop("checked", true);
+				})
+			}
+		}
+		--%>
+		
+		$j("#checkAll").on("click", function(){
+			if($j("#checkAll").is(":checked")) {
+				$j("input:not(#checkAll):checkbox").prop("checked", true);
+			} else {
+				$j("input:not(#checkAll):checkbox").prop("checked", false);
+			}
 		})
+		
+//		일반적으로 ajax로 받은 데이터는 jstl(jsp의 확장태그 ex.forEach등)에 다시 뿌리지 못함
+//		서버의 작업 순서가 JAVA > JSTL > HTML > JavaScript순으로 이루어지기 때문에 기본적으로는 불가능
+//		다른 파일에서 ajax를 통해 데이터를 요청하고 컨트롤러에서 데이터를 그려줄 파일로 보내서 하는 법이 있기는 함
+//		하지만 .append나 .html를 이용하는 방법을 권장함
+		
+		$j("#search").on("click", function(){
+			var checkList = $j("input:not(#checkAll):checkbox").serialize();
+
+			if(!!checkList?.trim()) {
+				$j.ajax({
+					url : `/board/boardList.do?pageNo=${pageNo}`,
+					type : "POST",
+					data : {"param" : checkList},
+					dataType : "json",
+					success : function(data){
+						drawHTML(data);
+						sessionStorage.setItem("checkedData", JSON.stringify(data));
+						sessionStorage.setItem("checkList", checkList);
+					},
+					error : function(errorThrown) {
+						alert("실패");
+					}
+				});
+			}
+		});
+//			새로고침하면 필터가 풀림
+//			재요청을 하기 때문에 당연히 그런다
+//			쿼리파라미터를 이용해 요청 자체를 바꿔야 겠다
 	});
 
 </script>
@@ -33,7 +126,7 @@
 					<a href="/user/userLogin.do">login</a>
 					<a href="/user/userJoin.do">join</a>
 				</div>
-				<div style="display: inline">
+				<div style="display: inline" id="totalCnt">
 					total : ${totalCnt}
 				</div>
 			</div>
@@ -76,16 +169,12 @@
 	</tr>
 	<tr align="left">
 		<td>
-			<input type="checkbox" id="typeAll">
-			<label for="typeAll">전체</label>
-			<input type="checkbox" id="typeNomal">
-			<label for="typeNomal">일반</label>
-			<input type="checkbox" id="typeQA">
-			<label for="typeQA">Q&A</label>
-			<input type="checkbox" id="typeAnoy">
-			<label for="typeAnoy">익명</label>
-			<input type="checkbox" id="typeFree">
-			<label for="typeFree">자유</label>
+			<input type="checkbox" id="checkAll">
+			<label for="checkAll">전체</label>
+			<c:forEach items="${typeList}" var="tlist">
+				<input type="checkbox" id="type${tlist.codeId}" name="type${tlist.codeId}">
+				<label for="type${tlist.codeId}">${tlist.codeName}</label>
+			</c:forEach>
 			<input type=button id="search" value="조회">
 		</td>
 	</tr>

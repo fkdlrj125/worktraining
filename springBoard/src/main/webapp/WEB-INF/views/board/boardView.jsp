@@ -50,9 +50,17 @@
 			<table border ="1">
 				<tr>
 					<td width="120" align="center">
-					Title
+					Type
 					</td>
 					<td width="400">
+					${board.boardType}
+					</td>
+				</tr>
+				<tr>
+					<td align="center">
+					Title
+					</td>
+					<td>
 					${board.boardTitle}
 					</td>
 				</tr>

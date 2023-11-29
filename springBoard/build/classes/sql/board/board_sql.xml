@@ -3,19 +3,23 @@
 <mapper namespace="board">
     
     <resultMap type="com.spring.board.vo.BoardVo" id="boardVo">
-    	<result property="boardType" 	column="BOARD_TYPE"/>
+    	<result property="boardType" 	column="CODE_NAME"/>
     	<result property="boardNum" 	column="BOARD_NUM"/>
     	<result property="boardTitle" 	column="BOARD_TITLE"/>
     	<result property="boardComment" column="BOARD_COMMENT"/>
     </resultMap>
     
+    <resultMap type="com.spring.common.vo.TypeVo" id="typeVo">
+    	<result property="codeId" 	column="CODE_ID"/>
+    </resultMap>
+    
     <select id="boardList" parameterType="com.spring.board.vo.PageVo" resultMap="boardVo">
         SELECT 
-		  BOARD_TYPE
-		  ,BOARD_NUM
-		  ,BOARD_TITLE
-		  ,BOARD_COMMENT
-		  ,TOTAL_CNT
+		  c.CODE_NAME
+		  ,b.BOARD_NUM
+		  ,b.BOARD_TITLE
+		  ,b.BOARD_COMMENT
+		  ,b.TOTAL_CNT
 		FROM 
 		(
 		  SELECT
@@ -27,66 +31,94 @@
 		      	,COUNT(*) OVER() AS TOTAL_CNT
 			FROM
 				BOARD	
-		)
-		WHERE NUMROW BETWEEN (#{pageNo}-1)*10 + 1 AND (#{pageNo})*10
+		  	<if test="boardType != null">  	
+			  	WHERE	
+			  		BOARD_TYPE IN (	
+				  	<foreach collection="boardType" index="boardType" item="type" separator=",">
+				  		#{type}
+				  	</foreach>
+			  		)
+		 	</if>
+		) b, COM_CODE c
+		WHERE 
+			NUMROW BETWEEN (#{pageNo}-1)*10 + 1 AND (#{pageNo})*10 
+			AND b.BOARD_TYPE = c.CODE_ID
+
     </select>
     
-    <select id="boardTotal" parameterType="Integer" resultType="Integer">
-		  SELECT
-		      	COUNT(*) AS TOTAL_CNT
-			FROM
-				BOARD	
+    <select id="boardTotal" parameterType="com.spring.board.vo.PageVo" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL_CNT
+		FROM
+			BOARD	
+		<if test="boardType != null">  
+			WHERE	
+		  		BOARD_TYPE IN (	
+			  		<foreach collection="boardType" index="boardType" item="type" separator=",">
+			  			#{type}
+			  		</foreach>
+		  		)
+	  	</if>
     </select>
     	
     <select id="boardView" parameterType="com.spring.board.vo.BoardVo" resultMap="boardVo">
     	SELECT
-        	BOARD_TYPE
-			,BOARD_NUM
-			,BOARD_TITLE
-			,BOARD_COMMENT
+        	c.CODE_NAME
+			,b.BOARD_NUM
+			,b.BOARD_TITLE
+			,b.BOARD_COMMENT
 		FROM
-			BOARD
-    	WHERE 	BOARD_TYPE = #{boardType}
-    	AND 	BOARD_NUM  = #{boardNum}
+    		BOARD b,
+   			COM_CODE c
+    	WHERE 
+    		b.BOARD_TYPE = c.CODE_ID 
+    		AND
+    		c.CODE_NAME like #{boardType}
+    		AND
+    		b.BOARD_NUM = #{boardNum} 
     </select>	
     
     <select id="boardInsert" parameterType="com.spring.board.vo.BoardVo">
         INSERT INTO 
-        BOARD
-        (BOARD_TYPE
-        ,BOARD_NUM
-        ,BOARD_TITLE
-        ,BOARD_COMMENT
-        ,CREATOR
-        ,CREATE_TIME
-        ,MODIFIER
-        ,MODIFIED_TIME
-        )
+	        BOARD
+	        (BOARD_TYPE
+	        ,BOARD_NUM
+	        ,BOARD_TITLE
+	        ,BOARD_COMMENT
+	        ,CREATOR
+	        ,CREATE_TIME
+	        ,MODIFIER
+	        ,MODIFIED_TIME
+	        )
         VALUES
-        (#{boardType}
-        ,(SELECT TO_NUMBER(NVL(MAX(BOARD_NUM),0)+1)
-	    FROM BOARD
-	    WHERE BOARD_TYPE = #{boardType})
-        ,#{boardTitle}
-        ,#{boardComment}
-        ,'SYSTEM'
-        ,TO_CHAR(SYSDATE)
-        ,'SYSTEM'
-        ,TO_CHAR(SYSDATE)
-        )
+	        (#{boardType}
+	        ,(SELECT TO_NUMBER(NVL(MAX(BOARD_NUM),0)+1)
+		    FROM BOARD
+		    WHERE BOARD_TYPE = #{boardType})
+	        ,#{boardTitle}
+	        ,#{boardComment}
+	        ,'SYSTEM'
+	        ,TO_CHAR(SYSDATE)
+	        ,'SYSTEM'
+	        ,TO_CHAR(SYSDATE)
+	        )
     </select>
     
     <select id="boardUpdate" parameterType="com.spring.board.vo.BoardVo">
     	UPDATE BOARD 
     	SET
-    	BOARD_TITLE = #{boardTitle},
-    	BOARD_COMMENT = #{boardComment}
-        WHERE BOARD_TYPE = #{boardType} AND BOARD_NUM = #{boardNum}
+	    	BOARD_TITLE = #{boardTitle},
+	    	BOARD_COMMENT = #{boardComment}
+        WHERE 
+	        BOARD_TYPE = #{boardType} 
+	       	AND BOARD_NUM = #{boardNum}
  
     </select>
     
     <select id="boardDelete" parameterType="com.spring.board.vo.BoardVo">
     	DELETE FROM BOARD 
-    	WHERE BOARD_TYPE=#{boardType} AND BOARD_NUM=#{boardNum}
+    	WHERE 
+    		BOARD_TYPE=#{boardType} 
+    		AND BOARD_NUM=#{boardNum}
     </select>
 </mapper>

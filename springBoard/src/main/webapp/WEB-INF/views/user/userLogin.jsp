@@ -8,6 +8,57 @@
 <title>userLogin</title>
 </head>
 <script type="text/javascript">
+<%--
+		로그인 기능
+		1. 아이디 비밀번호 유효성 테스트
+			1-1. 아이디 비밀번호가 틀릴 시 알람창
+--%>
+
+	$j(document).ready(function() {
+		$j("#login").on("click", function() {
+			var $frm = $j(":input");
+			var param = $frm.serialize();
+			
+			console.log(param);
+			
+			$j.ajax({
+				url : "/user/userLogin.do",
+				type : "POST",
+				data : param,
+				dataType : "json",
+				success : function(data) {
+					switch (data.result) {
+					
+					case "":
+						location.href="/board/boardList.do";
+						break;
+					case "1":
+						alert("비밀번호가 일치하지 않습니다.");
+						break;
+					case "2":
+						alert("아이디가 존재하지 않습니다.");
+						break;
+					default:
+						alert("아이디와 비밀번호를 다시 입력해주세요.")
+						break;
+					}
+					
+				},
+				error : function(thrownError) {
+					console.log(thrownError);
+				},
+				beforeSend : function(xhr) {
+					if(!$j("#id").val()) {
+						alert("아이디를 입력해주세요.");
+						xhr.abort();
+					} else if(!$j("#pw").val()) {
+						alert("비밀번호를 입력해주세요.");
+						xhr.abort();
+					}
+				}
+			});
+		});
+	})
 </script>
 <body>
 	<form class="userJoin">

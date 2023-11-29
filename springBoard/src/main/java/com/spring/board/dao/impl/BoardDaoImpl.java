@@ -34,9 +34,9 @@ public class BoardDaoImpl implements BoardDao{
 	}
 	
 	@Override
-	public int selectBoardCnt() throws Exception {
+	public int selectBoardCnt(PageVo pageVo) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.selectOne("board.boardTotal");
+		return sqlSession.selectOne("board.boardTotal", pageVo);
 	}
 	
 	@Override
@@ -46,20 +46,18 @@ public class BoardDaoImpl implements BoardDao{
 	}
 	
 	@Override
-	public int boardInsert(BoardVo boardVo) throws Exception {
+	public int insertBoard(BoardVo boardVo) throws Exception {
 		// TODO Auto-generated method stub
 		return sqlSession.insert("board.boardInsert", boardVo);
 	}
 	@Override
-	public int boardUpdate(BoardVo boardVo) throws Exception {
+	public int updateBoard(BoardVo boardVo) throws Exception {
 		// TODO Auto-generated method stub
 		return sqlSession.update("board.boardUpdate", boardVo);
 	}
 	@Override
-	public int boardDelete(BoardVo boardVo) throws Exception {
+	public int deleteBoard(BoardVo boardVo) throws Exception {
 		// TODO Auto-generated method stub
 		return sqlSession.delete("board.boardDelete", boardVo);
 	}
-	
-	
 }
