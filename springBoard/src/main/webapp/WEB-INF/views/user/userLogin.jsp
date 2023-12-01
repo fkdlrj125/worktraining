@@ -12,14 +12,14 @@
 		로그인 기능
 		1. 아이디 비밀번호 유효성 테스트
 			1-1. 아이디 비밀번호가 틀릴 시 알람창
+			
+		
 --%>
 
 	$j(document).ready(function() {
 		$j("#login").on("click", function() {
 			var $frm = $j(":input");
 			var param = $frm.serialize();
-			
-			console.log(param);
 			
 			$j.ajax({
 				url : "/user/userLogin.do",
@@ -50,9 +50,11 @@
 				beforeSend : function(xhr) {
 					if(!$j("#id").val()) {
 						alert("아이디를 입력해주세요.");
+						$j("#id").focus();
 						xhr.abort();
 					} else if(!$j("#pw").val()) {
 						alert("비밀번호를 입력해주세요.");
+						$j("#pw").focus();
 						xhr.abort();
 					}
 				}
@@ -61,8 +63,13 @@
 	})
 </script>
 <body>
-	<form class="userJoin">
+	<form class="userLogin">
 		<table  align="center">
+			<tr >
+				<td align="left">
+					<a href="/board/boardList.do">List</a>
+				</td>
+			</tr>
 			<tr>
 				<td>
 					<table id="boardTable" border = "1">

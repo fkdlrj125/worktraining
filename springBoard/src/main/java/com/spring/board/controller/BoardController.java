@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.spring.board.HomeController;
 import com.spring.board.service.boardService;
@@ -30,6 +29,7 @@ import com.spring.board.vo.BoardVo;
 import com.spring.board.vo.PageVo;
 import com.spring.common.CommonUtil;
 import com.spring.common.vo.TypeVo;
+import com.spring.user.vo.UserVo;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -44,13 +44,20 @@ public class BoardController {
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
 	@RequestMapping(value = "/board/boardList.do", method = RequestMethod.GET)
-	public String boardList(Locale locale, Model model, String pageNo) throws Exception{
+	public String boardList(Locale locale, Model model, String pageNo, HttpServletRequest request) throws Exception{
 		List<BoardVo> boardList = new ArrayList<BoardVo>();
 		List<TypeVo> typeList = new ArrayList<TypeVo>();
 		
 		int page = 1;
 		int totalCnt = 0;
 		PageVo pageVo = new PageVo();
+		
+		HttpSession session = request.getSession(false);
+		UserVo loginUser = new UserVo();
+		
+		if(session != null) {
+			loginUser = (UserVo)session.getAttribute("loginUser");
+		}
 		
 		pageVo.setPageNo(NumberUtils.toInt(pageNo));
 		
@@ -66,6 +73,7 @@ public class BoardController {
 		model.addAttribute("totalCnt", totalCnt);
 		model.addAttribute("pageNo", page);
 		model.addAttribute("typeList", typeList);
+		model.addAttribute("loginUser", loginUser);
 		
 		return "board/boardList";
 	}
@@ -129,9 +137,16 @@ public class BoardController {
 	}
 	
 	@RequestMapping(value = "/board/boardWrite.do", method = RequestMethod.GET)
-	public String boardWrite(Locale locale, Model model) throws Exception{
+	public String boardWrite(Locale locale, Model model, HttpServletRequest request) throws Exception{
+		HttpSession session = request.getSession(false);
+		UserVo loginUser = new UserVo();
+		
+		if(session != null) {
+			loginUser = (UserVo) session.getAttribute("loginUser");
+		}
 		
 		model.addAttribute("typeList", boardService.selectTypeList());
+		model.addAttribute("loginUser", loginUser);
 		
 		return "board/boardWrite";
 	}
@@ -144,19 +159,22 @@ public class BoardController {
 		int resultCnt = 0;
 		
 		JSONArray jsonArr = JSONArray.fromObject(jsonData);
+		JSONObject jsonWriter = (JSONObject)jsonArr.get(jsonArr.size()-1);
+		String writer = jsonWriter.getString("writer");
 		
-		for(int i=0; i<jsonArr.size(); i++){
+		for(int i=0; i<jsonArr.size()-1; i++){
 		   JSONObject jsonObj = (JSONObject)jsonArr.get(i);
 		   BoardVo board = new BoardVo();
 		   board.setBoardType(jsonObj.getString("boardType"));
 		   board.setBoardTitle(jsonObj.getString("boardTitle"));
 		   board.setBoardComment(jsonObj.getString("boardComment"));
-		        
+		   board.setCreator(writer);
 		   resultCnt = (boardService.insertBoard(board) > 0) ? ++resultCnt : resultCnt;
 		}
 		 
-		result.put("success", (resultCnt == jsonArr.size())?"Y":"N");
+		result.put("success", (resultCnt == jsonArr.size()-1)?"Y":"N");
 		
+		System.out.println(writer);
 		String callbackMsg = commonUtil.getJsonCallBackString(" ",result);
 		
 		System.out.println("callbackMsg::"+callbackMsg);

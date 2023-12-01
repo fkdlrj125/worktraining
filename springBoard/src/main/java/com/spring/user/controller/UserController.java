@@ -16,6 +16,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 
 import com.spring.board.HomeController;
 import com.spring.common.CommonUtil;
@@ -74,7 +76,7 @@ public class UserController {
 	
 	@RequestMapping(value="/user/userLogin.do", method=RequestMethod.POST)
 	@ResponseBody
-	public String userLoginAction(Locale locale, String loginId, String loginPw) throws Exception {
+	public String userLoginAction(Locale locale, String loginId, String loginPw, HttpServletRequest request) throws Exception {
 		UserVo userVo = new UserVo();
 		CommonUtil commonUtil = new CommonUtil();
 		Map<String, String> result = new HashMap<String, String>();
@@ -87,8 +89,27 @@ public class UserController {
 		
 		result.put("result",  loginResult);
 		
+		if(loginResult.isEmpty()) {
+			HttpSession session = request.getSession();
+			
+			String userName = userService.selectUserName(userVo);
+			userVo.setUserName(userName);
+			
+			session.setAttribute("loginUser", userVo);
+		}
+		
 		String callbackMsg = commonUtil.getJsonCallBackString(" ", result);
 		System.out.println("callbackMsg : " + callbackMsg);
 		return callbackMsg;
+	}
+	
+	@RequestMapping(value="/user/userLogout.do", method=RequestMethod.POST)
+	@ResponseBody
+	public String userLogoutAction(HttpServletRequest request) throws Exception {
+		HttpSession session = request.getSession(false);
+		session.invalidate();
+		System.out.println("로그아웃");
+		
+		return "";
 	}
 }

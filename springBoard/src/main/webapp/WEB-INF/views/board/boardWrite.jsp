@@ -32,14 +32,12 @@
 	
 	
 	$j(document).ready(function(){
-		$j.fn.serializeObject = function() {
+		$j.fn.serializeObject = function(writer) {
 			var result = [];
 			var obj = null;
 			
 			try {
 				var arr = this.serializeArray();
-				
-				console.log(arr);
 				
 				if(arr) {
 					obj = {};
@@ -49,6 +47,7 @@
 							result.push(Object.assign({}, obj));
 						}
 					});
+					result.push(Object.assign({}, writer));
 				}
 			} catch (e) {
 				alert(e.message);
@@ -58,10 +57,12 @@
 		
 		$j("#submit").on("click",function(){
 			var $frm = $j(".boardWrite :input");
-			var param = $frm.serializeObject();
+			var writer = {"writer" : $j("#writer").text().trim()};
+			var param = $frm.serializeObject(writer);
 			
+			console.log(param);
 			
-			for(var i=1; i < param.length; i++) {
+			for(var i=0; i < param.length-1; i++) {
 				if(!param[i]["boardTitle"]?.trim()) {
 					alert("제목을 입력해주세요");
 					return;
@@ -208,7 +209,8 @@
 						<td align="center">
 						Writer
 						</td>
-						<td>
+						<td id="writer">
+							${loginUser.userName}
 						</td>
 					</tr>
 				</table>

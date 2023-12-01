@@ -13,24 +13,28 @@
     	<result property="userAddr2" 	column="USER_ADDR2"/>
     	<result property="userCompany" 	column="USER_COMPANY"/>
     </resultMap>
-    
+   	<!-- 
+   		like는 검색할 때 
+   		비교는 등위연산자
+   	 -->
     <select id="selectUserId" parameterType="String" resultType="String">
     	SELECT 
     		USER_ID
 		FROM 
 			USER_INFO
     	WHERE
-    		USER_ID LIKE #{inputId}	
+    		USER_ID = #{inputId}	
     </select>
     
-    <select id="selectUserIdPw" parameterType="com.spring.user.vo.UserVo" resultMap="userVo">
+    <select id="selectUser" parameterType="com.spring.user.vo.UserVo" resultMap="userVo">
     	SELECT 
     		USER_ID
     		,USER_PW
+    		,USER_NAME
 		FROM 
 			USER_INFO
     	WHERE
-    		USER_ID LIKE #{userId}
+    		USER_ID = #{userId}
     </select>
     
     <select id="insertUser" parameterType="com.spring.user.vo.UserVo">

@@ -9,6 +9,10 @@
 </head>
 <script type="text/javascript">
 	
+	<%--
+		카테고리 체크박스에서 전체가 아닐 때 전체 체크박스 해제
+	--%>
+	
 	<%-- 
 	window.onpageshow = function() {
 			if(sessionStorage.getItem("html")){
@@ -59,7 +63,6 @@
 	}
 
 	$j(document).ready(function() {
-		
 		<%--
 		if(performance.navigation.type == 1) {
 			if(sessionStorage.getItem("checkedData")){
@@ -77,6 +80,29 @@
 			}
 		}
 		--%>
+		var loginUser = "${loginUser.userId}";
+		console.log(loginUser);
+		
+		if(!loginUser?.trim()) {
+			$j("#logout").css("display", "none");
+			$j("#userLoginDiv").css("display", "inline");
+			$j("#userNameDiv").css("display", "none");
+		} else {
+			$j("#logout").css("display", "inline");
+			$j("#userLoginDiv").css("display", "none");
+			$j("#userNameDiv").css("display", "inline");
+			$j("#logout").on("click", function(event){
+				event.preventDefault();
+				
+				$j.ajax({
+					url : "/user/userLogout.do",
+					type : "POST",
+					complete : function() {
+						location.reload();
+					}
+				})
+			})
+		}
 		
 		$j("#checkAll").on("click", function(){
 			if($j("#checkAll").is(":checked")) {
@@ -84,7 +110,13 @@
 			} else {
 				$j("input:not(#checkAll):checkbox").prop("checked", false);
 			}
-		})
+		});
+		
+		$j("input:not(#checkAll):checkbox").on("click", function() {
+			if($j("#checkAll").is(":checked")) {
+				$j("#checkAll").prop("checked", false);
+			} 
+		});
 		
 //		일반적으로 ajax로 받은 데이터는 jstl(jsp의 확장태그 ex.forEach등)에 다시 뿌리지 못함
 //		서버의 작업 순서가 JAVA > JSTL > HTML > JavaScript순으로 이루어지기 때문에 기본적으로는 불가능
@@ -122,9 +154,12 @@
 	<tr >
 		<td>
 			<div style="justify-content: space-between; display: flex;">
-				<div style="display: inline">
+				<div id="userLoginDiv" style="display: inline">
 					<a href="/user/userLogin.do">login</a>
 					<a href="/user/userJoin.do">join</a>
+				</div>
+				<div id="userNameDiv" style="display: inline">
+					${loginUser.userName}
 				</div>
 				<div style="display: inline" id="totalCnt">
 					total : ${totalCnt}
@@ -165,6 +200,7 @@
 	<tr>
 		<td align="right">
 			<a href ="/board/boardWrite.do">글쓰기</a>
+			<a href ="" id="logout">로그아웃</a>
 		</td>
 	</tr>
 	<tr align="left">

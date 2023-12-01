@@ -9,5 +9,5 @@ public interface UserDao {
 	
 	public Optional<String> selectUserId(String inputId) throws Exception;
 	
-	public Optional<Object> selectUserIdPw(UserVo userVo) throws Exception;
+	public Optional<Object> selectUser(UserVo userVo) throws Exception;
 }

@@ -33,8 +33,17 @@ public class UserServiceImpl implements UserService{
 	}
 	
 	@Override
+	public String selectUserName(UserVo userVo) throws Exception {
+		// TODO Auto-generated method stub
+		Optional<Object> result = userDao.selectUser(userVo);
+		UserVo user = (UserVo) result.get();
+		
+		return user.getUserName();
+	}
+	
+	@Override
 	public String loginUser(UserVo userVo) throws Exception {
-		Optional<Object> result = userDao.selectUserIdPw(userVo);
+		Optional<Object> result = userDao.selectUser(userVo);
 		UserVo searchResult;
 		
 		if(result.isEmpty()) {
@@ -54,4 +63,6 @@ public class UserServiceImpl implements UserService{
 	public List<TypeVo> selectTypeList() throws Exception {
 		return typeDao.selectPhoneType();
 	}
+
+
 }

@@ -10,7 +10,7 @@
 <script type="text/javascript">
 
 	$j(document).ready(function(){
-		var path = `/board/${boardType}/${boardNum}`;
+		var path = `/board/${board.boardType}/${board.boardNum}`;
 	
 		// 삭제
 		// ajax 하나 쓰고 삭제만으로 동시 삭제 해결
@@ -27,7 +27,7 @@
 						if(data.success == "Y") {
 							alert("삭제성공");
 						} else {
-							alert("삭제실패")
+							alert("삭제실패");
 						}
 						
 						location.href = "/board/boardList.do?pageNo=";
@@ -77,6 +77,7 @@
 					Writer
 					</td>
 					<td>
+					${board.creator}
 					</td>
 				</tr>
 			</table>

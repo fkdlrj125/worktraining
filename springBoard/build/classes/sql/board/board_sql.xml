@@ -7,10 +7,7 @@
     	<result property="boardNum" 	column="BOARD_NUM"/>
     	<result property="boardTitle" 	column="BOARD_TITLE"/>
     	<result property="boardComment" column="BOARD_COMMENT"/>
-    </resultMap>
-    
-    <resultMap type="com.spring.common.vo.TypeVo" id="typeVo">
-    	<result property="codeId" 	column="CODE_ID"/>
+    	<result property="creator" column="CREATOR"/>
     </resultMap>
     
     <select id="boardList" parameterType="com.spring.board.vo.PageVo" resultMap="boardVo">
@@ -67,16 +64,18 @@
 			,b.BOARD_NUM
 			,b.BOARD_TITLE
 			,b.BOARD_COMMENT
+			,b.CREATOR
 		FROM
     		BOARD b,
    			COM_CODE c
     	WHERE 
-    		b.BOARD_TYPE = c.CODE_ID 
-    		AND
-    		c.CODE_NAME like #{boardType}
-    		AND
-    		b.BOARD_NUM = #{boardNum} 
-    </select>	
+				b.BOARD_TYPE = c.CODE_ID 
+   			AND
+ 				c.CODE_NAME like #{boardType}
+   			AND
+  				b.BOARD_NUM = #{boardNum} 
+   				
+    </select>		
     
     <select id="boardInsert" parameterType="com.spring.board.vo.BoardVo">
         INSERT INTO 
@@ -97,7 +96,14 @@
 		    WHERE BOARD_TYPE = #{boardType})
 	        ,#{boardTitle}
 	        ,#{boardComment}
-	        ,'SYSTEM'
+	        <choose>
+	        	<when test="creator != ''">
+        			,#{creator}
+	        	</when>
+	        	<otherwise>
+	        		,'SYSTEM'
+	        	</otherwise>
+	        </choose>
 	        ,TO_CHAR(SYSDATE)
 	        ,'SYSTEM'
 	        ,TO_CHAR(SYSDATE)

@@ -44,11 +44,18 @@ public class boardServiceImpl implements boardService{
 	public BoardVo selectBoard(String boardType, int boardNum) throws Exception {
 		// TODO Auto-generated method stub
 		BoardVo boardVo = new BoardVo();
+		BoardVo resultBoard = new BoardVo();
 		
 		boardVo.setBoardType(boardType);
 		boardVo.setBoardNum(boardNum);
 		
-		return boardDao.selectBoard(boardVo);
+		resultBoard = boardDao.selectBoard(boardVo);
+		
+		if(resultBoard.getCreator().trim().equals("SYSTEM")) {
+			resultBoard.setCreator("");
+		}
+		
+		return resultBoard;
 	}
 	
 	@Override
@@ -60,14 +67,33 @@ public class boardServiceImpl implements boardService{
 	@Override
 	public int updateBoard(BoardVo boardVo) throws Exception {
 		// TODO Auto-generated method stub
+		List<TypeVo> typeList = typeDao.selectBoardType();
+		String result = "";
+		
+		for(TypeVo type : typeList) {
+			if(type.getCodeName().equals(boardVo.getBoardType())) {
+				result = type.getCodeId();
+			}
+		}
+		
+		boardVo.setBoardType(result);
+		
 		return boardDao.updateBoard(boardVo);
 	}
 
 	@Override
 	public int deleteBoard(String boardType, int boardNum) throws Exception{
 		BoardVo boardVo = new BoardVo();
+		List<TypeVo> typeList = typeDao.selectBoardType();
+		String result = "";
 		
-		boardVo.setBoardType(boardType);
+		for(TypeVo type : typeList) {
+			if(type.getCodeName().equals(boardType)) {
+				result = type.getCodeId();
+			}
+		}
+		
+		boardVo.setBoardType(result);
 		boardVo.setBoardNum(boardNum);
 		
 		return boardDao.deleteBoard(boardVo);

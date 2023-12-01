@@ -26,8 +26,8 @@ public class UserDaoImpl implements UserDao{
 	}
 
 	@Override
-	public Optional<Object> selectUserIdPw(UserVo userVo) throws Exception {
+	public Optional<Object> selectUser(UserVo userVo) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.selectList("user.selectUserIdPw", userVo).stream().findAny();
+		return sqlSession.selectList("user.selectUser", userVo).stream().findAny();
 	}
 }

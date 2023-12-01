@@ -16,66 +16,81 @@
 		2-2. 휴대폰과 우편번호 형식 확인
 			- 휴대폰 형식 : xxx-xxxx-xxxx
 			- 우편번호 형식 : xxx-xxx 
-		2-3. 비밀번호와 비밀번호 확인 일치 
---%>
-	function pwCheck() {
-		let inputPw = $j("#userPw").val();
-		let checkPw = $j("#pwCheck").val();
-		let result;
+		2-3. 비밀번호와 비밀번호 확인 일치
 		
-		if(inputPw == checkPw) {
-			alert("비밀번호가 일치합니다.");
+	사용자에게 형식을 제대로 지정해줄것
+	제한을 두고 싶을 땐 그냥 막아버릴것
+	알람을 어디에 사용할 지 잘 생각해볼것 
+	조건절안에 조건절 사용 안 하는 게 좋음
+	조건을 else if로 엮는게 좋은지 안 좋을지 생각해보기
+--%>
+	const pwCheckObj = {
+		pwInputCheck : function() {
+			const pwRegex = /^.{6,12}$/;
+			let inputPw = $j("#userPw").val();
+			let result = false;
+			
+			if(!inputPw) {
+				$j("#pwWarn2").css("display", "block");
+				$j("#pwWarn1").css("display", "none");
+				$j("#userPw").focus();
+				
+			} else if(!pwRegex.test($j("#userPw").val())) {
+				$j("#pwWarn1").css("display", "block");
+				$j("#pwWarn2").css("display", "none");
+				$j("#userPw").focus();
+				
+			} else {
+				$j("#pwWarn1").css("display", "none");
+				$j("#pwWarn2").css("display", "none");
+				result = true;
+			}
+			
+			return result;
+		},
+		
+		pwCheck : function() {
+			let inputPw = $j("#userPw").val();
+			let checkPw = $j("#pwCheck").val();
+			let result = false;
+			
+			if(pwCheckObj.pwInputCheck() && inputPw == checkPw) {
+				result = true;
+			}
+			
+			return result;
+		}
+			
+	};
+	
+	function phoneCheck() {
+		const phoneRegex = /^\d{4}$/;
+		let phone2 = $j("#userPhone2").val();
+		let phone3 = $j("input[name='userPhone3']").val()
+		let result = true;
+		
+		if(phone2 && !phoneRegex.test(phone2)) {
+			$j("#phone2Warn").css("display", "block");
+			result = false;
+		} else if(phone3 && !phoneRegex.test(phone3)) {
+			$j("#phone3Warn").css("display", "block");
 			result = false;
 		} else {
-			alert("비밀번호가 일치하지 않습니다.");
-			result = true;
+			$j("#phone2Warn").css("display", "none");
+			$j("#phone3Warn").css("display", "none");
 		}
 		
 		return result;
 	}
 	
-	
-
 	$j(document).ready(function(){
-		var idCheckResult = false;
-		const phoneRegex = /^\d{4}$/;
+		var idDuplCheckResult = false;
+		var pwCheckResult = false;
+		var nameCheckResult = false;
+		var phoneCheckResult = false;
+		var addrCheckResult = true;
+		
 		const addrRegex = /^\d{3}-\d{3}$/;
-		const pwRegex = /^.{6,12}$/;
-		
-		$j("#userPw").change(function() {
-			if($j(this).val() && !pwRegex.test($j(this).val())) {
-				alert("비밀번호를 6~12자리로 입력해주세요.");
-				$j(this).focus();
-			}
-		});
-		
-		$j("#pwCheck").change(function() {
-			if($j(this).val() && pwCheck()) {
-				$j(this).focus();
-			}
-		});
-		
-		$j("#userPhone2").change(function() {
-			if($j(this).val() && !phoneRegex.test($j(this).val())) {
-				alert("핸드번호 가운데 4자리를 입력해주세요.")
-				$j(this).focus();
-			}
-		});
-		
-		$j("input[name='userPhone3']").change(function() {
-			if($j(this).val() && !phoneRegex.test($j(this).val())) {
-				alert("핸드번호 마지막 4자리를 입력해주세요.")
-				$j(this).focus();
-			}
-		})
-		
-		$j("#userAddr1").change(function() {
-			console.log(addrRegex.test($j(this).val()));
-			if($j(this).val() && !addrRegex.test($j(this).val())){
-				alert("xxx-xxx형식으로 작생해주세요");
-				$j(this).focus();
-			}
-		});
 		
 		$j("#idCheck").on("click", function(){
 			let inputId = $j("#userId").val();
@@ -89,10 +104,10 @@
 					success : function(data) {
 						if(data.success == "Y") {
 							alert("사용 가능한 아이디 입니다.");
-							idCheckResult = true;
+							idDuplCheckResult = true;
 						} else {
 							alert("중복된 아이디 입니다.");
-							idCheckResult = false;
+							idDuplCheckResult = false;
 						}
 					},
 					error : function(thrownError) {
@@ -101,6 +116,68 @@
 				});
 			} else {
 				alert("아이디를 입력해주세요.");
+			}
+		});
+		
+		$j("#userPw").change(function() {
+			if(!pwCheckObj.pwCheck()) {
+				$j(this).focus();
+				pwCheckResult = false;
+			} else
+				pwCheckResult = true;
+		});
+		
+		$j("#pwCheck").change(function() {
+			if(!pwCheckObj.pwCheck()) {
+				$j(this).focus();
+				pwCheckResult = false;
+			} else
+				pwCheckResult = true;
+		});
+		
+		$j("#userName").change(function() {
+			if($j(this).val()?.trim()) {
+				nameCheckResult = true;
+			} else {
+				nameCheckResult = false;
+			}
+		})
+		
+		$j("#userPhone2").change(function() {
+			if(!phoneCheck()){
+				$j(this).focus();
+				phoneCheckResult = false;
+			} else if($j("input[name='userPhone3']").val().length != 4) {
+				phoneCheckResult = false;
+			} else {
+				phoneCheckResult = true;
+			}
+			
+		});
+		
+		$j("input[name='userPhone3']").change(function() {
+			if(!phoneCheck()){
+				$j(this).focus();
+				phoneCheckResult = false;
+			} else if($j("#userPhone2").val().length != 4) {
+				phoneCheckResult = false;
+			} else {
+				phoneCheckResult = true;
+			}
+		})
+		
+		$j("#userAddr1").change(function() {
+			if($j(this).val() && !addrRegex.test($j(this).val())){
+				$j("#addr1Warn").css("display", "block");
+				addrCheckResult = false;
+				$j(this).focus();
+			} else {
+				$j("#addr1Warn").css("display", "none");
+				addrCheckResult = true;
+			}
+		}).on("keypress", function() {
+			if($j(this).val().length == 3) {
+				$j(this).val($j(this).val().concat("-"));
 			}
 		});
 		
@@ -116,32 +193,76 @@
 				success : function(data) {
 					alert("가입완료");
 					alert("메세지:"+data.success);
+					location.href="/user/userLogin.do";
 				},
 				error : function(thrownError) {
 					console.log(thrownError);
 				},
 				beforeSend : function(xhr) {
-					if(idCheckResult) {
-						let info, inputId;
+					if(!idDuplCheckResult) {
 						
-						$j(":input").each(function(index) {
-							info = $j(this);
-							
-							if(info.prop("required")) {
-								if(!info.val()?.trim()) {
-									inputId = $j(`label[for=\${info.attr('id')}]`).text().trim();
-									
-									alert(`\${inputId} 값을 입력해주세요.`);
-									
-									xhr.abort();
-									return false; 
-								}
-							}
-						});
-					} else {
-						alert("아이디 중복확인을 해주세요.");
+						if(!$j("#userId").val()?.trim()) {
+							alert("아이디를 입력해주세요.");
+							$j("#userId").focus();
+							xhr.abort();
+							return;
+						} 
+						
+						alert("아이디 중복확인을 해주세요.")
+						$j("#userId").focus();
 						xhr.abort();
-					}
+						return;
+						
+					} 
+					
+					if(!pwCheckResult) {
+						
+						if(!$j("#userPw").val()?.trim()) {
+							$j("#userPw").focus();
+							alert("비밀번호를 입력해주세요.");
+							
+						} else if(!pwCheckObj.pwInputCheck()) {
+							$j("#userPw").focus();
+							alert("비밀번호를 확인해주세요.");
+							
+						} else {
+							$j("#pwCheck").focus();
+							alert("비밀번호가 일치하지 않습니다.")
+						}
+						
+						xhr.abort();
+						return;
+					} 
+					
+					if(!nameCheckResult) {
+						
+						alert("이름을 입력해주세요.");
+						$j("#userName").focus();
+						xhr.abort();
+						return;
+					} 
+					
+					if(!phoneCheckResult) {
+						
+						if($j("#userPhone2").val().length < 4) {
+							alert("휴대전화번호 가운데 4자리를 입력해주세요.");
+							$j("#userPhone2").focus();
+						} else {
+							alert("휴대전화번호 마지막 4자리를 입력해주세요.");
+							$j("input[name='userPhone3']").focus();
+						}
+						
+						xhr.abort();
+						return;
+					} 
+					
+					if(!addrCheckResult) {
+						
+						alert("우편번호를 확인해주세요.");
+						$j("#userAddr1").focus();
+						xhr.abort();
+						return;
+					} 
 				}
 			});
 		});
@@ -153,8 +274,8 @@
 		<table  align="center">
 			<tr >
 				<td align="left">
-				<a href="/board/boardList.do">List</a>
-			</td>
+					<a href="/board/boardList.do">List</a>
+				</td>
 			</tr>
 			<tr>
 				<td>
@@ -166,7 +287,9 @@
 								</label>
 							</td>
 							<td width="420" align="left">
-								<input type="text" id="userId" name="userId" style="width: 140px;" required>
+								<input type="text" id="userId" name="userId" maxlength="15" 
+								oninput="this.value = this.value.replace(/\W/g, '')"
+								style="width: 140px;" required>
 								<input type="button" id="idCheck" value="중복확인">
 							</td>
 						</tr>
@@ -178,6 +301,8 @@
 							</td>
 							<td align="left">
 								<input type="password" id="userPw" name="userPw" required>
+								<div id="pwWarn1" style="font-size:12px; display:none;">"비밀번호: 6~12자 이내로 사용해 주세요"</div>
+								<div id="pwWarn2" style="font-size:12px; display:none;">"비밀번호: 비밀번호를 입력해주세요."</div>
 							</td>
 						</tr>
 						<tr>
@@ -188,6 +313,7 @@
 							</td>
 							<td align="left">
 								<input type="password" id="pwCheck" required>
+								<div id="pwCheckWarn" style="font-size:12px; display:none;"></div>
 							</td>
 						</tr>
 						<tr>
@@ -197,7 +323,9 @@
 								</label>
 							</td>
 							<td align="left">
-								<input type="text" id="userName" name="userName" required>
+								<input type="text" id="userName" name="userName" maxlength="5" 
+								oninput="this.value = this.value.replace(/[^\uac00-\ud7a3]/, '')"
+								required>
 							</td>
 						</tr>
 						<tr>
@@ -216,9 +344,15 @@
 									</c:forEach>
 								</select>
 								-
-								<input type="text" id="userPhone2" name="userPhone2" style="width: 50px;" required>
+								<input type="text" id="userPhone2" name="userPhone2" maxlength="4"
+								oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+								style="width: 50px;" required>
 								-
-								<input type="text" id="userPhone2" name="userPhone3" style="width: 50px;" required>
+								<input type="text" name="userPhone3" maxlength="4"
+								oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+								style=" width: 50px;" required>
+								<div id="phone2Warn" style="font-size:12px; display:none;">휴대전화번호: 가운데 4자리를 입력해주세요.</div>
+								<div id="phone3Warn" style="font-size:12px; display:none;">휴대전화번호: 마지막 4자리를 입력해주세요.</div>
 							</td>
 						</tr>
 						<tr>
@@ -228,7 +362,9 @@
 								</label>
 							</td>
 							<td align="left">
-								<input type="text" id="userAddr1" name="userAddr1">
+								<input type="text" id="userAddr1" name="userAddr1" maxlength="7"
+								oninput="this.value = this.value.replace(/[^0-9-]/g, '')">
+								<div id="addr1Warn" style="font-size:12px; display:none;">우편번호: xxx-xxx형식으로 입력해주세요.</div>
 							</td>
 						</tr>
 						<tr>
@@ -238,7 +374,7 @@
 								</label>
 							</td>
 							<td align="left">
-								<input type="text" id="userAddr2" name="userAddr2">
+								<input type="text" id="userAddr2" name="userAddr2" maxlength="50">
 							</td>
 						</tr>
 						<tr>
@@ -248,7 +384,7 @@
 								</label>
 							</td>
 							<td align="left">
-								<input type="text" id="userCompany" name="userCompany">
+								<input type="text" id="userCompany" name="userCompany" maxlength="20">
 							</td>
 						</tr>
 					</table>
