@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -255,11 +256,16 @@ public class RecruitController {
 		if(!checkSeq.getEdu().isEmpty()) {
 			List<EduVo> eduList = new ArrayList<EduVo>();
 			EduVo eduVo = new EduVo();
-			checkSeq.getEdu().forEach((seq) -> {
-				eduVo.setEduSeq(seq);
-				eduVo.setRecSeq(userInfo.getRecSeq());
-				eduList.add(eduVo);
+			checkSeq.getEdu().forEach(new Consumer<String>() {
+				@Override
+				public void accept(String t) {
+					eduVo.setEduSeq(t);
+					eduVo.setRecSeq(userInfo.getRecSeq());
+					eduList.add(eduVo);
+				}
+				
 			});
+			
 			
 			recruitService.deleteEdu(eduList);
 		}
@@ -267,10 +273,13 @@ public class RecruitController {
 		if(!checkSeq.getCar().isEmpty()) {
 			List<CareerVo> carList = new ArrayList<CareerVo>();
 			CareerVo carVo = new CareerVo();
-			checkSeq.getEdu().forEach((seq) -> {
-				carVo.setCarSeq(seq);
-				carVo.setRecSeq(userInfo.getRecSeq());
-				carList.add(carVo);
+			checkSeq.getEdu().forEach(new Consumer<String>() {
+				@Override
+				public void accept(String t) {
+					carVo.setCarSeq(t);
+					carVo.setRecSeq(userInfo.getRecSeq());
+					carList.add(carVo);
+				}
 			});
 			
 			recruitService.deleteCareer(carList);
@@ -279,10 +288,13 @@ public class RecruitController {
 		if(!checkSeq.getCert().isEmpty()) {
 			List<CertVo> certList = new ArrayList<CertVo>();
 			CertVo certVo = new CertVo();
-			checkSeq.getCert().forEach((seq) -> {
-				certVo.setCertSeq(seq);
-				certVo.setRecSeq(userInfo.getRecSeq());
-				certList.add(certVo);
+			checkSeq.getCert().forEach(new Consumer<String>() {
+				@Override
+				public void accept(String t) {
+					certVo.setCertSeq(t);
+					certVo.setRecSeq(userInfo.getRecSeq());
+					certList.add(certVo);
+				}
 			});
 			System.out.println(certList);
 			result.put("success", recruitService.deleteCert(certList) == 0 ? "N" : "Y");
