@@ -654,7 +654,7 @@
 						<tbody>
 							<tr>
 								<td>
-									<input type="checkbox">
+									<input type="checkbox" value="${car.carSeq}">
 								</td>
 								<td>
 									<input type="text" id="carStart" name="carStart"  maxlength="7"
@@ -746,7 +746,7 @@
 						<tbody>
 							<tr>
 								<td>
-									<input type="checkbox">
+									<input type="checkbox" value="${cert.certSeq}">
 								</td>
 								<td>
 									<input type="text" id="certQualifi" name="certQualifi"  maxlength="30"

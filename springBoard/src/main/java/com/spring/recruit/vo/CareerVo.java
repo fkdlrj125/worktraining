@@ -37,14 +37,14 @@ public class CareerVo {
 	public String getCarStart() {
 		return carStart;
 	}
-	public void setCarStart(String carStartp) {
-		this.carStart = carStartp;
+	public void setCarStart(String carStart) {
+		this.carStart = carStart;
 	}
 	public String getCarEnd() {
 		return carEnd;
 	}
-	public void setCarEnd(String carEndp) {
-		this.carEnd = carEndp;
+	public void setCarEnd(String carEnd) {
+		this.carEnd = carEnd;
 	}
 	public String getCarTask() {
 		return carTask;

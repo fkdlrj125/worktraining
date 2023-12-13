@@ -25,6 +25,4 @@ public class DeleteRequestDto {
 	public void setCert(List<String> cert) {
 		this.cert = cert;
 	}
-	
-	
 }

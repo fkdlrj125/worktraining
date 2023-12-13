@@ -1,6 +1,8 @@
 package com.spring.recruit.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,12 +11,18 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.spring.common.CommonUtil;
+import com.spring.recruit.dto.DeleteRequestDto;
+import com.spring.recruit.dto.FormRequestDto;
 import com.spring.recruit.service.RecruitService;
+import com.spring.recruit.vo.CareerVo;
+import com.spring.recruit.vo.CertVo;
+import com.spring.recruit.vo.EduVo;
 import com.spring.recruit.vo.RecruitVo;
 
 @Controller
@@ -31,7 +39,6 @@ public class RecruitController {
 	@RequestMapping(value="/recruit/login", method = RequestMethod.POST)
 	@ResponseBody
 	public String recruitLoginAction(RecruitVo recruitVo, HttpServletRequest request)throws Exception {
-		System.out.println("Hello");
 		Map<String, Object> result = new HashMap<String, Object>();
 		HttpSession session = request.getSession();
 		RecruitVo search = recruitService.selectRecruit(recruitVo);
@@ -70,86 +77,88 @@ public class RecruitController {
 		return "recruit/main";
 	}
 	
-//	@RequestMapping(value="/recruit/save", method = RequestMethod.POST)
-//	@ResponseBody
-//	public String recruitSaveAction(HttpServletRequest request) throws Exception {
-//		Map<String, Object> result = new HashMap<String, Object>();
-//		HttpSession session = request.getSession(false);
-//		RecruitVo userInfo = (RecruitVo) session.getAttribute("userInfo");
+	@RequestMapping(value="/recruit/save", method = RequestMethod.POST)
+	@ResponseBody
+	public String recruitSaveAction(HttpServletRequest request, @RequestBody FormRequestDto data) throws Exception {
+		Map<String, Object> result = new HashMap<String, Object>();
+		HttpSession session = request.getSession(false);
+		RecruitVo userInfo = (RecruitVo) session.getAttribute("userInfo");
+		
+		System.out.println(data.getRecData());
+		
+//		RecruitVo recruitVo = new RecruitVo();
 //		
-////		RecruitVo recruitVo = new RecruitVo();
-////		
-////		JSONObject jsonObj = JSONObject.fromObject(data);
-////		List<EduVo> eduList = new ArrayList<>();
-////		List<CareerVo> carList = new ArrayList<>();
-////		List<CertVo> certList = new ArrayList<>();
-////		List<EduVo> selectEduList = recruitService.selectEdu(userInfo);
-////		List<CareerVo> selectCarList = recruitService.selectCareer(userInfo);
-////		List<CertVo> selectCertList = recruitService.selectCert(userInfo);
-////		Iterator<EduVo> selectEduItr = selectEduList.iterator();
-////		Iterator<CareerVo> selectCarItr = selectCarList.iterator();
-////		Iterator<CertVo> selectCertItr = selectCertList.iterator();
-////		
-////		for(Object key : jsonObj.keySet()) {
-////			for(Object values : jsonObj.getJSONArray((String)key)) {
-////				switch ((String) key) {
-////					case "recData": {
-////						recruitVo = (RecruitVo)JSONObject.toBean((JSONObject)values, RecruitVo.class);
-////						recruitVo.setRecSeq(userInfo.getRecSeq());
-////						recruitVo.setRecSubmit(userInfo.getRecSubmit());
-////						break;
-////					}
-////					case "eduData": {
-////						EduVo eduVo = (EduVo)JSONObject.toBean((JSONObject)values, EduVo.class);
-////						eduVo.setRecSeq(userInfo.getRecSeq());
-////						eduVo.setEduSeq(selectEduItr.next().getEduSeq());
-////						eduList.add(eduVo);
-////						break;
-////					}
-////					case "carData": {
-////						CareerVo carVo = (CareerVo)JSONObject.toBean((JSONObject)values, CareerVo.class);
-////						carVo.setRecSeq(userInfo.getRecSeq());
-////						carVo.setCarSeq(selectCarItr.next().getCarSeq());
-////						carList.add(carVo);
-////						break;
-////					}
-////					case "certData": {
-////						CertVo certVo = (CertVo)JSONObject.toBean((JSONObject)values, CertVo.class);
-////						certVo.setRecSeq(userInfo.getRecSeq());
-////						certVo.setCertSeq(selectCertItr.next().getCertSeq());
-////						certList.add(certVo);
-////						break;
-////					}
-////					default: {
-////						result.put("success", "N");
-////						return CommonUtil.getJsonCallBackString("", result);
-////					}
-////				}
-////			}
-////		}
-////		
-////		String callbackMsg = "";
-////		
-////		switch (recruitVo.getRecSubmit()) {
-////			case "save": {
-////				session.setAttribute("userInfo", recruitVo);
-////				callbackMsg = recruitService.updateRecruit(recruitVo) + recruitService.mergeEdu(eduList)
-////				 + recruitService.mergeCareer(carList) + recruitService.mergeCert(certList)
-////				 >= 4 ? "Y" : "N";
-////				break;
-////			}
-////			
-////			case "submit": {
-////				result.put("success", "S");
-////				return CommonUtil.getJsonCallBackString("", result);
-////			}
-////			
-////		}
-////		
-////		result.put("success", callbackMsg);
-////		return CommonUtil.getJsonCallBackString("", result);
-//		return null;
-//	}
+//		JSONObject jsonObj = JSONObject.fromObject(data);
+//		List<EduVo> eduList = new ArrayList<>();
+//		List<CareerVo> carList = new ArrayList<>();
+//		List<CertVo> certList = new ArrayList<>();
+//		List<EduVo> selectEduList = recruitService.selectEdu(userInfo);
+//		List<CareerVo> selectCarList = recruitService.selectCareer(userInfo);
+//		List<CertVo> selectCertList = recruitService.selectCert(userInfo);
+//		Iterator<EduVo> selectEduItr = selectEduList.iterator();
+//		Iterator<CareerVo> selectCarItr = selectCarList.iterator();
+//		Iterator<CertVo> selectCertItr = selectCertList.iterator();
+//		
+//		for(Object key : jsonObj.keySet()) {
+//			for(Object values : jsonObj.getJSONArray((String)key)) {
+//				switch ((String) key) {
+//					case "recData": {
+//						recruitVo = (RecruitVo)JSONObject.toBean((JSONObject)values, RecruitVo.class);
+//						recruitVo.setRecSeq(userInfo.getRecSeq());
+//						recruitVo.setRecSubmit(userInfo.getRecSubmit());
+//						break;
+//					}
+//					case "eduData": {
+//						EduVo eduVo = (EduVo)JSONObject.toBean((JSONObject)values, EduVo.class);
+//						eduVo.setRecSeq(userInfo.getRecSeq());
+//						eduVo.setEduSeq(selectEduItr.next().getEduSeq());
+//						eduList.add(eduVo);
+//						break;
+//					}
+//					case "carData": {
+//						CareerVo carVo = (CareerVo)JSONObject.toBean((JSONObject)values, CareerVo.class);
+//						carVo.setRecSeq(userInfo.getRecSeq());
+//						carVo.setCarSeq(selectCarItr.next().getCarSeq());
+//						carList.add(carVo);
+//						break;
+//					}
+//					case "certData": {
+//						CertVo certVo = (CertVo)JSONObject.toBean((JSONObject)values, CertVo.class);
+//						certVo.setRecSeq(userInfo.getRecSeq());
+//						certVo.setCertSeq(selectCertItr.next().getCertSeq());
+//						certList.add(certVo);
+//						break;
+//					}
+//					default: {
+//						result.put("success", "N");
+//						return CommonUtil.getJsonCallBackString("", result);
+//					}
+//				}
+//			}
+//		}
+//		
+//		String callbackMsg = "";
+//		
+//		switch (recruitVo.getRecSubmit()) {
+//			case "save": {
+//				session.setAttribute("userInfo", recruitVo);
+//				callbackMsg = recruitService.updateRecruit(recruitVo) + recruitService.mergeEdu(eduList)
+//				 + recruitService.mergeCareer(carList) + recruitService.mergeCert(certList)
+//				 >= 4 ? "Y" : "N";
+//				break;
+//			}
+//			
+//			case "submit": {
+//				result.put("success", "S");
+//				return CommonUtil.getJsonCallBackString("", result);
+//			}
+//			
+//		}
+//		
+//		result.put("success", callbackMsg);
+//		return CommonUtil.getJsonCallBackString("", result);
+		return null;
+	}
 
 //	@RequestMapping(value="/recruit/submit", method = RequestMethod.POST)
 //	@ResponseBody
@@ -230,52 +239,58 @@ public class RecruitController {
 //		return CommonUtil.getJsonCallBackString("", result);
 //	}
 	
-//	@RequestMapping(value = "/recruit/delete", method = RequestMethod.POST)
-//	@ResponseBody
-//	public String deleteInfoAction(HttpServletRequest request, @RequestBody DeleteRequestDto checkSeq) throws Exception {
-//		Map<String, String> result = new HashMap<>();
-//		HttpSession session = request.getSession(false);
-//		RecruitVo userInfo = (RecruitVo)session.getAttribute("userInfo");
-//		
-//		if(!checkSeq.getEdu().isEmpty()) {
-//			List<EduVo> eduList = new ArrayList<>();
-//			EduVo eduVo = new EduVo();
-//			checkSeq.getEdu().forEach((seq) -> {
-//				eduVo.setEduSeq(seq);
-//				eduVo.setRecSeq(userInfo.getRecSeq());
-//				eduList.add(eduVo);
-//			});
-//			
-//			recruitService.deleteEdu(eduList);
-//		}
-//		
-//		if(!checkSeq.getCar().isEmpty()) {
-//			List<CareerVo> carList = new ArrayList<>();
-//			CareerVo carVo = new CareerVo();
-//			checkSeq.getEdu().forEach((seq) -> {
-//				carVo.setCarSeq(seq);
-//				carVo.setRecSeq(userInfo.getRecSeq());
-//				carList.add(carVo);
-//			});
-//			
-//			recruitService.deleteCareer(carList);
-//		}
-//		
-//		if(!checkSeq.getCert().isEmpty()) {
-//			List<CertVo> certList = new ArrayList<>();
-//			CertVo certVo = new CertVo();
-//			checkSeq.getCert().forEach((seq) -> {
-//				certVo.setCertSeq(seq);
-//				certVo.setRecSeq(userInfo.getRecSeq());
-//				certList.add(certVo);
-//			});
-//			
-//			result.put("success", recruitService.deleteCert(certList) == 0 ? "N" : "Y");
-//		}
-//		
-//		result.put("success", "N");
-//		return CommonUtil.getJsonCallBackString("", result);
-//	}
+	@RequestMapping(value = "/recruit/delete", method = RequestMethod.POST)
+	@ResponseBody
+	public String deleteInfoAction(HttpServletRequest request, @RequestBody DeleteRequestDto checkSeq) throws Exception {
+		Map<String, String> result = new HashMap<String, String>();
+		HttpSession session = request.getSession(false);
+		RecruitVo userInfo = (RecruitVo)session.getAttribute("userInfo");
+		
+		System.out.println("시작");
+		System.out.println(userInfo.getRecName());
+		System.out.println(checkSeq.getEdu());
+		System.out.println(checkSeq.getCar());
+		System.out.println(checkSeq.getCert());
+		
+		if(!checkSeq.getEdu().isEmpty()) {
+			List<EduVo> eduList = new ArrayList<EduVo>();
+			EduVo eduVo = new EduVo();
+			checkSeq.getEdu().forEach((seq) -> {
+				eduVo.setEduSeq(seq);
+				eduVo.setRecSeq(userInfo.getRecSeq());
+				eduList.add(eduVo);
+			});
+			
+			recruitService.deleteEdu(eduList);
+		}
+		
+		if(!checkSeq.getCar().isEmpty()) {
+			List<CareerVo> carList = new ArrayList<CareerVo>();
+			CareerVo carVo = new CareerVo();
+			checkSeq.getEdu().forEach((seq) -> {
+				carVo.setCarSeq(seq);
+				carVo.setRecSeq(userInfo.getRecSeq());
+				carList.add(carVo);
+			});
+			
+			recruitService.deleteCareer(carList);
+		}
+		
+		if(!checkSeq.getCert().isEmpty()) {
+			List<CertVo> certList = new ArrayList<CertVo>();
+			CertVo certVo = new CertVo();
+			checkSeq.getCert().forEach((seq) -> {
+				certVo.setCertSeq(seq);
+				certVo.setRecSeq(userInfo.getRecSeq());
+				certList.add(certVo);
+			});
+			System.out.println(certList);
+			result.put("success", recruitService.deleteCert(certList) == 0 ? "N" : "Y");
+		}
+		
+		result.put("success", "N");
+		return CommonUtil.getJsonCallBackString("", result);
+	}
 }
 
 	
