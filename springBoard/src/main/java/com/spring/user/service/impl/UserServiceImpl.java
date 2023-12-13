@@ -61,7 +61,9 @@ public class UserServiceImpl implements UserService{
 	
 	@Override
 	public List<TypeVo> selectTypeList() throws Exception {
-		return typeDao.selectPhoneType();
+		TypeVo typeVo = new TypeVo();
+		typeVo.setCodeType("phone");
+		return typeDao.selectType(typeVo);
 	}
 
 

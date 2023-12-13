@@ -1,0 +1,66 @@
+@charset "EUC-KR";
+
+div.container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+td.submitBtn {
+	text-align: center;
+}
+
+h1 {
+	text-align:center;
+}
+
+div.tableBox {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width:85%;
+	border:solid 2px grey; 
+	margin:10px auto; 
+}
+
+input:text {
+	display: block;
+}
+
+table {
+	margin : 10px 0;
+}
+
+div.tableBox table:nth-of-type(1) {
+	width: auto;
+	margin-bottom: 0;
+}
+
+div.tableBox table:nth-of-type(2) {
+	display:none;
+	margin-top: 0;
+}
+
+div.tableBox table:nth-of-type(3), div.tableBox table:nth-of-type(4){
+	margin : 10px 10px;
+}
+
+div.tableBox table:nth-of-type(5) {
+	width: 98%;
+}
+
+h2.category {
+	align-self: start;
+}
+
+div#eduBtn, div#carBtn, div#certBtn {
+	align-self: end;
+}
+
+div#svsbBtn {
+	text-align: center;
+}
+
+label.hiddenLabel {
+	display: none;
+}

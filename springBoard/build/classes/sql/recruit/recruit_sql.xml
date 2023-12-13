@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="recruit">
+    
+    <resultMap type="com.spring.recruit.vo.RecruitVo" id="recruitVo">
+    	<result property="recSeq" 	column="SEQ"/>
+    	<result property="recName" 	column="NAME"/>
+    	<result property="recBirth" 	column="BIRTH"/>
+    	<result property="recGender" 	column="GENDER"/>
+    	<result property="recPhone" 	column="PHONE"/>
+    	<result property="recEmail" 	column="EMAIL"/>
+    	<result property="recAddr" 	column="ADDR"/>
+    	<result property="recLoc" 	column="LOCATION"/>
+    	<result property="recWt" 	column="WORK_TYPE"/>
+    	<result property="recSubmit" 	column="SUBMIT"/>
+    </resultMap>
+    
+    <resultMap type="com.spring.recruit.vo.EduVo" id="eduVo">
+    	<result property="eduSeq" 	column="EDU_SEQ"/>
+    	<result property="recSeq" 	column="SEQ"/>
+    	<result property="eduSchool" 	column="SCHOOL_NAME"/>
+    	<result property="eduDiv" 	column="DIVISION"/>
+    	<result property="eduStart" 	column="START_PERIOD"/>
+    	<result property="eduEnd" 	column="END_PERIOD"/>
+    	<result property="eduMajor" 	column="MAJOR"/>
+    	<result property="eduGrade" 	column="GRADE"/>
+    	<result property="eduLoc" 	column="LOCATION"/>
+    </resultMap>
+    
+    <resultMap type="com.spring.recruit.vo.CertVo" id="certVo">
+    	<result property="certSeq" 	column="CERT_SEQ"/>
+    	<result property="recSeq" 	column="SEQ"/>
+    	<result property="certQualifi" 	column="QUALIFI_NAME"/>
+    	<result property="certAcqu" 	column="ACQU_DATE"/>
+    	<result property="certOrganize" 	column="ORGANIZE_NAME"/>
+    </resultMap>
+    
+    <resultMap type="com.spring.recruit.vo.CareerVo" id="careerVo">
+    	<result property="carSeq" 	column="CAR_SEQ"/>
+    	<result property="recSeq" 	column="SEQ"/>
+    	<result property="carCompany" 	column="COMP_NAME"/>
+    	<result property="carLoc" 	column="LOCATION"/>
+    	<result property="carStart" 	column="START_PERIOD"/>
+    	<result property="carEnd" 	column="END_PERIOD"/>
+    	<result property="carTask" 	column="TASK"/>
+    	<result property="carSalary" 	column="SALARY"/>
+    </resultMap>
+    
+    <!-- 
+    	myBatis에서 null을 넣을 땐 타입을 지정해줘야 함
+    	-> JDBC driver에서 타입 입력을 요구하는 메소드 때문
+    	참조 : https://velog.io/@dailylifecoding/mybatis-null-parameter-and-jdbc-type-for-null-configuration
+     -->
+    <insert id="insertRecruit" parameterType="com.spring.recruit.vo.RecruitVo">
+    <selectKey order="BEFORE" keyProperty="recSeq" resultType="string">
+    	SELECT CAST(RECRUIT_SEQ.NEXTVAL AS VARCHAR2(255)) FROM DUAL
+    </selectKey>
+    	INSERT INTO
+    		RECRUIT(
+    			SEQ
+				,NAME
+				,BIRTH
+				,GENDER
+				,PHONE
+				,EMAIL
+				,ADDR
+				,LOCATION
+				,WORK_TYPE
+				,SUBMIT
+    		)
+    	VALUES
+    		(
+    			#{recSeq, jdbcType=VARCHAR}
+    			,#{recName, jdbcType=VARCHAR}
+    			,#{recBirth, jdbcType=VARCHAR}
+    			,#{recGender, jdbcType=VARCHAR}
+    			,#{recPhone, jdbcType=VARCHAR}
+    			,#{recEmail, jdbcType=VARCHAR}
+    			,#{recAddr, jdbcType=VARCHAR}
+    			,#{recLoc, jdbcType=VARCHAR}
+    			,#{recWt, jdbcType=VARCHAR}
+				,#{recSubmit, jdbcType=VARCHAR}
+    		)
+    </insert>
+
+    <update id="mergeEdu" parameterType="java.util.List">
+    	MERGE INTO 
+    		EDUCATION edu
+    	USING (
+    		<foreach collection="list" item="item">
+    			SELECT
+    				#{item.eduSeq, jdbcType=VARCHAR} as eduSeq
+    				,#{item.recSeq, jdbcType=VARCHAR} as recSeq
+    				,#{item.eduSchool, jdbcType=VARCHAR} as eduSchool
+    				,#{item.eduDiv, jdbcType=VARCHAR} as eduDiv
+    				,#{item.eduLoc, jdbcType=VARCHAR} as eduLoc
+    				,#{item.eduStart, jdbcType=VARCHAR} as eduStart
+    				,#{item.eduEnd, jdbcType=VARCHAR} as eduEnd
+    				,#{item.eduMajor, jdbcType=VARCHAR} as eduMajor
+    				,#{item.eduGrade, jdbcType=VARCHAR} as eduGrade
+    			FROM
+		    		DUAL
+    		</foreach>
+   		) du
+   		ON
+   			(edu.EDU_SEQ = du.eduSeq AND edu.SEQ = du.recSeq)
+   			
+		WHEN MATCHED THEN 
+			UPDATE 
+ 			SET
+				edu.SCHOOL_NAME = du.eduSchool
+				,edu.DIVISION = du.eduDiv
+				,edu.START_PERIOD = du.eduStart
+				,edu.END_PERIOD = du.eduEnd
+				,edu.MAJOR = du.eduMajor
+				,edu.GRADE = du.eduGrade
+				,edu.LOCATION = du.eduLoc
+				
+    	WHEN NOT MATCHED THEN
+	    	INSERT (
+	    			EDU_SEQ
+					,SEQ
+					,SCHOOL_NAME
+					,DIVISION
+					,START_PERIOD
+					,END_PERIOD
+					,MAJOR
+					,GRADE
+					,LOCATION
+	    		)
+	    		VALUES(
+	    			du.eduSeq
+	    			,du.recSeq
+	    			,du.eduSchool
+					,du.eduDiv
+					,du.eduStart
+					,du.eduEnd
+					,du.eduMajor
+					,du.eduGrade
+					,du.eduLoc
+	    		)
+    </update>
+    
+    <update id="mergeCar" parameterType="java.util.List">
+    INSERT INTO 
+    		(
+    			CAR_SEQ
+				,SEQ
+				,COMP_NAME
+				,LOCATION
+				,START_PERIOD
+				,END_PERIOD
+				,TASK
+				,SALARY
+    		)
+   		SELECT CAST(CAREER_SEQ.NEXTVAL AS VARCHAR2(255)), S.* 
+		FROM(
+		
+		) S
+    	MERGE INTO 
+    		CAREER car
+    	USING (
+    		<foreach collection="list" item="item">
+	    		SELECT 
+	    			#{item.recSeq, jdbcType=VARCHAR}
+	    			,#{item.carCompany, jdbcType=VARCHAR}
+	    			,#{item.carLoc, jdbcType=VARCHAR}
+	    			,#{item.carStart, jdbcType=VARCHAR}
+	    			,#{item.carEnd, jdbcType=VARCHAR}
+	    			,#{item.carTask, jdbcType=VARCHAR}
+	    			,#{item.carSalary, jdbcType=VARCHAR}
+	    		FROM DUAL
+    		</foreach>
+   		) du
+   		ON
+   			(edu.EDU_SEQ = du.eduSeq AND edu.SEQ = du.recSeq)
+   			
+		WHEN MATCHED THEN 
+			UPDATE 
+ 			SET
+				edu.SCHOOL_NAME = du.eduSchool
+				,edu.DIVISION = du.eduDiv
+				,edu.START_PERIOD = du.eduStart
+				,edu.END_PERIOD = du.eduEnd
+				,edu.MAJOR = du.eduMajor
+				,edu.GRADE = du.eduGrade
+				,edu.LOCATION = du.eduLoc
+				
+    	WHEN NOT MATCHED THEN
+	    	INSERT (
+	    			EDU_SEQ
+					,SEQ
+					,SCHOOL_NAME
+					,DIVISION
+					,START_PERIOD
+					,END_PERIOD
+					,MAJOR
+					,GRADE
+					,LOCATION
+	    		)
+	    		VALUES(
+	    			du.eduSeq
+	    			,du.recSeq
+	    			,du.eduSchool
+					,du.eduDiv
+					,du.eduStart
+					,du.eduEnd
+					,du.eduMajor
+					,du.eduGrade
+					,du.eduLoc
+	    		)
+    </update>
+    
+    <update id="mergeCert" parameterType="java.util.List">
+    	MERGE INTO 
+    		C edu
+    	USING (
+    		<foreach collection="list" item="edu">
+    			SELECT
+    				#{edu.eduSeq, jdbcType=VARCHAR} as eduSeq
+    				,#{edu.recSeq, jdbcType=VARCHAR} as recSeq
+    				,#{edu.eduSchool, jdbcType=VARCHAR} as eduSchool
+    				,#{edu.eduDiv, jdbcType=VARCHAR} as eduDiv
+    				,#{edu.eduLoc, jdbcType=VARCHAR} as eduLoc
+    				,#{edu.eduStart, jdbcType=VARCHAR} as eduStart
+    				,#{edu.eduEnd, jdbcType=VARCHAR} as eduEnd
+    				,#{edu.eduMajor, jdbcType=VARCHAR} as eduMajor
+    				,#{edu.eduGrade, jdbcType=VARCHAR} as eduGrade
+    			FROM
+		    		DUAL
+    		</foreach>
+   		) du
+   		ON
+   			(edu.EDU_SEQ = du.eduSeq AND edu.SEQ = du.recSeq)
+   			
+		WHEN MATCHED THEN 
+			UPDATE 
+ 			SET
+				edu.SCHOOL_NAME = du.eduSchool
+				,edu.DIVISION = du.eduDiv
+				,edu.START_PERIOD = du.eduStart
+				,edu.END_PERIOD = du.eduEnd
+				,edu.MAJOR = du.eduMajor
+				,edu.GRADE = du.eduGrade
+				,edu.LOCATION = du.eduLoc
+				
+    	WHEN NOT MATCHED THEN
+	    	INSERT (
+	    			EDU_SEQ
+					,SEQ
+					,SCHOOL_NAME
+					,DIVISION
+					,START_PERIOD
+					,END_PERIOD
+					,MAJOR
+					,GRADE
+					,LOCATION
+	    		)
+	    		VALUES(
+	    			du.eduSeq
+	    			,du.recSeq
+	    			,du.eduSchool
+					,du.eduDiv
+					,du.eduStart
+					,du.eduEnd
+					,du.eduMajor
+					,du.eduGrade
+					,du.eduLoc
+	    		)
+    </update>
+    
+    
+    <insert id="insertCareer" parameterType="java.util.List">
+    	
+    </insert>
+    
+    <insert id="insertCert" parameterType="java.util.List">
+    	INSERT INTO 
+    		CERTIFICATE(
+    			CERT_SEQ
+				,SEQ
+				,QUALIFI_NAME
+				,ACQU_DATE
+				,ORGANIZE_NAME
+    		)
+   		SELECT CAST(CERT_SEQ.NEXTVAL AS VARCHAR2(255)), S.*
+   		FROM (
+   		<foreach collection="list" item="item" index="index" separator="UNION ALL ">
+    		SELECT 
+    			#{item.recSeq, jdbcType=VARCHAR}
+    			,#{item.certQualifi, jdbcType=VARCHAR}
+    			,#{item.certAcqu, jdbcType=VARCHAR}
+    			,#{item.certOrganize, jdbcType=VARCHAR}
+    		FROM DUAL
+    	</foreach>
+   		) S
+    </insert>
+    
+    <update id="updateRec" parameterType="com.spring.recruit.vo.RecruitVo">
+   	 	UPDATE 
+   	 		RECRUIT 
+   	 	SET
+			NAME = #{recName, jdbcType=VARCHAR}
+			,BIRTH = #{recBirth, jdbcType=VARCHAR}
+			,GENDER = #{recGender, jdbcType=VARCHAR}
+			,PHONE = #{recPhone, jdbcType=VARCHAR}
+			,EMAIL = #{recEmail, jdbcType=VARCHAR}
+			,ADDR = #{recAddr, jdbcType=VARCHAR}
+			,LOCATION = #{recLoc, jdbcType=VARCHAR}
+			,WORK_TYPE = #{recWt, jdbcType=VARCHAR}
+			,SUBMIT = #{recSubmit, jdbcType=VARCHAR}
+	    WHERE
+	     	SEQ = #{recSeq, jdbcType=VARCHAR}
+    </update>
+    
+    <update id="updateEdu" parameterType="java.util.List">
+    	<foreach collection="list" item="item" separator=";" open="DECLARE BEGIN" close="; END;">
+    	
+     	</foreach>
+    </update>
+    
+    <update id="updateCareer" parameterType="java.util.List">
+    <foreach collection="list" item="item" separator=";" open="DECLARE BEGIN" close="; END;">	
+    	UPDATE 
+   	 		CAREER 
+   	 	SET
+			COMP_NAME = #{item.carCompany, jdbcType=VARCHAR}
+			,LOCATION = #{item.carLoc, jdbcType=VARCHAR}
+			,START_PERIOD = #{item.carStart, jdbcType=VARCHAR}
+			,END_PERIOD = #{item.carEnd, jdbcType=VARCHAR}
+			,TASK = #{item.carTask, jdbcType=VARCHAR}
+			,SALARY = #{item.carSalary, jdbcType=VARCHAR}
+	    WHERE
+	     	CAR_SEQ = #{item.carSeq, jdbcType=VARCHAR} AND SEQ = #{item.recSeq, jdbcType=VARCHAR}
+	</foreach>
+   	</update>
+    
+    <update id="updateCert" parameterType="java.util.List">
+    	<foreach collection="list" item="item" separator=";" open="DECLARE BEGIN" close="; END;">
+    	UPDATE 
+   	 		CERTIFICATE 
+   	 	SET
+			QUALIFI_NAME = #{item.certQualifi, jdbcType=VARCHAR}
+			,ACQU_DATE = #{item.certAcqu, jdbcType=VARCHAR}
+			,ORGANIZE_NAME = #{item.certOrganize, jdbcType=VARCHAR}
+	    WHERE
+	     	CERT_SEQ = #{item.certSeq, jdbcType=VARCHAR} AND SEQ = #{item.recSeq, jdbcType=VARCHAR}
+     	</foreach>
+    </update>
+    
+    <delete id="deleteEdu" parameterType="java.util.List">
+    <foreach collection="eduList" item="item">
+    	DELETE
+    		EDUCATION
+    	WHERE 
+    		EDU_SEQ = #{item.eduSeq, jdbcType=VARCHAR} AND SEQ = #{item.recSeq, jdbcType=VARCHAR}
+   	</foreach>
+    </delete>
+    
+    <delete id="deleteCareer" parameterType="java.util.List">
+    <foreach collection="carList" item="item">
+    	DELETE
+    		Career
+    	WHERE 
+    		CAR_SEQ = #{item.carSeq, jdbcType=VARCHAR} AND SEQ = #{item.recSeq, jdbcType=VARCHAR}
+   	</foreach>
+    </delete>
+    
+    <delete id="deleteCert" parameterType="java.util.List">
+    <foreach collection="certList" item="item">
+    	DELETE
+    		CERTIFICATE
+    	WHERE 
+    		CERT_SEQ = #{item.certSeq, jdbcType=VARCHAR} AND SEQ = #{item.recSeq, jdbcType=VARCHAR}
+   	</foreach>
+    </delete>
+    
+    <select id="selectRecruit" parameterType="com.spring.recruit.vo.RecruitVo" resultMap="recruitVo">
+    	SELECT 
+    		*
+    	FROM
+    		RECRUIT
+    	WHERE 
+    		NAME = #{recName, jdbcType=VARCHAR} AND PHONE = #{recPhone, jdbcType=VARCHAR}
+    </select>
+    
+    <select id="selectEdu" parameterType="com.spring.recruit.vo.EduVo" resultMap="eduVo">
+    	SELECT 
+    		*
+    	FROM
+    		EDUCATION
+    	WHERE 
+    		SEQ = #{recSeq, jdbcType=VARCHAR}
+    </select>
+    
+    <select id="selectCareer" parameterType="com.spring.recruit.vo.CareerVo" resultMap="careerVo">
+    	SELECT 
+    		*
+    	FROM
+    		CAREER
+    	WHERE 
+    		SEQ = #{recSeq, jdbcType=VARCHAR}
+    </select>
+    
+    <select id="selectCert" parameterType="com.spring.recruit.vo.CertVo" resultMap="certVo">
+    	SELECT 
+    		*
+    	FROM
+    		CERTIFICATE
+    	WHERE 
+    		SEQ = #{recSeq, jdbcType=VARCHAR}
+    </select>
+</mapper>

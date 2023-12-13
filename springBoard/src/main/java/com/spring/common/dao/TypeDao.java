@@ -6,8 +6,6 @@ import com.spring.common.vo.TypeVo;
 
 public interface TypeDao {
 
-	public List<TypeVo> selectBoardType() throws Exception;
+	public List<TypeVo> selectType(TypeVo typeVo) throws Exception;
 	
-	public List<TypeVo> selectPhoneType() throws Exception;
-
 }

@@ -41,7 +41,7 @@
 				
 				if(arr) {
 					obj = {};
-					$j.each(arr, function(index, data) {
+					$j.each(arr, function(index) {
 						obj[this.name] = this.value;
 						if((index+1)%3==0) {
 							result.push(Object.assign({}, obj));

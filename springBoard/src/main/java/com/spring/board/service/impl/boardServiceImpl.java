@@ -67,7 +67,7 @@ public class boardServiceImpl implements boardService{
 	@Override
 	public int updateBoard(BoardVo boardVo) throws Exception {
 		// TODO Auto-generated method stub
-		List<TypeVo> typeList = typeDao.selectBoardType();
+		List<TypeVo> typeList = selectTypeList();
 		String result = "";
 		
 		for(TypeVo type : typeList) {
@@ -84,7 +84,7 @@ public class boardServiceImpl implements boardService{
 	@Override
 	public int deleteBoard(String boardType, int boardNum) throws Exception{
 		BoardVo boardVo = new BoardVo();
-		List<TypeVo> typeList = typeDao.selectBoardType();
+		List<TypeVo> typeList = selectTypeList();
 		String result = "";
 		
 		for(TypeVo type : typeList) {
@@ -102,7 +102,9 @@ public class boardServiceImpl implements boardService{
 	@Override
 	public List<TypeVo> selectTypeList() throws Exception {
 		// TODO Auto-generated method stub
-		return typeDao.selectBoardType();
+		TypeVo typeVo = new TypeVo();
+		typeVo.setCodeType("menu");
+		return typeDao.selectType(typeVo);
 	}
 	
 	

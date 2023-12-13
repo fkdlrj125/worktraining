@@ -16,20 +16,9 @@ public class TypeDaoImpl implements TypeDao{
 	private SqlSession sqlSession;
 	
 	@Override
-	public List<TypeVo> selectBoardType() throws Exception {
+	public List<TypeVo> selectType(TypeVo typeVo) throws Exception {
 		// TODO Auto-generated method stub
-		TypeVo typeVo = new TypeVo();
-		typeVo.setCodeType("menu");
 		return sqlSession.selectList("type.typeList", typeVo);
 	}
-
-	@Override
-	public List<TypeVo> selectPhoneType() throws Exception {
-		// TODO Auto-generated method stub
-		TypeVo typeVo = new TypeVo();
-		typeVo.setCodeType("phone");
-		return sqlSession.selectList("type.typeList", typeVo);
-	}
-	
 	
 }

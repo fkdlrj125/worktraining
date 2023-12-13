@@ -28,7 +28,6 @@
 		pwInputCheck : function() {
 			const pwRegex = /^.{6,12}$/;
 			let inputPw = $j("#userPw").val();
-			let result = false;
 			
 			if(!inputPw) {
 				$j("#pwWarn2").css("display", "block");
@@ -43,22 +42,17 @@
 			} else {
 				$j("#pwWarn1").css("display", "none");
 				$j("#pwWarn2").css("display", "none");
-				result = true;
+				return true;
 			}
 			
-			return result;
+			return false;
 		},
 		
 		pwCheck : function() {
 			let inputPw = $j("#userPw").val();
 			let checkPw = $j("#pwCheck").val();
-			let result = false;
 			
-			if(pwCheckObj.pwInputCheck() && inputPw == checkPw) {
-				result = true;
-			}
-			
-			return result;
+			return (pwCheckObj.pwInputCheck() && inputPw == checkPw) ? true : false;
 		}
 			
 	};
@@ -67,20 +61,18 @@
 		const phoneRegex = /^\d{4}$/;
 		let phone2 = $j("#userPhone2").val();
 		let phone3 = $j("input[name='userPhone3']").val()
-		let result = true;
 		
 		if(phone2 && !phoneRegex.test(phone2)) {
 			$j("#phone2Warn").css("display", "block");
-			result = false;
 		} else if(phone3 && !phoneRegex.test(phone3)) {
 			$j("#phone3Warn").css("display", "block");
-			result = false;
 		} else {
 			$j("#phone2Warn").css("display", "none");
 			$j("#phone3Warn").css("display", "none");
+			return true;
 		}
 		
-		return result;
+		return false;
 	}
 	
 	$j(document).ready(function(){
@@ -136,12 +128,16 @@
 		});
 		
 		$j("#userName").change(function() {
-			if($j(this).val()?.trim()) {
-				nameCheckResult = true;
-			} else {
+			$j(this).val(($j(this).val().length > 5) ? $j(this).val().slice(0,5) : $j(this).val());
+			
+			if(/[^\uac00-\ud7a3]/.test($j(this).val())) {
+				$j("#nameWarn").css("display", "block");
 				nameCheckResult = false;
+			} else {
+				$j("#nameWarn").css("display", "none");
+				nameCheckResult = true;
 			}
-		})
+		});
 		
 		$j("#userPhone2").change(function() {
 			if(!phoneCheck()){
@@ -225,9 +221,12 @@
 							$j("#userPw").focus();
 							alert("비밀번호를 확인해주세요.");
 							
+						} else if(!$j("#pwCheck").val()?.trim()) {
+							$j("#pwCheck").focus();
+							alert("비밀번호확인을 입력해주세요.");
 						} else {
 							$j("#pwCheck").focus();
-							alert("비밀번호가 일치하지 않습니다.")
+							alert("비밀번호가 일치하지 않습니다.");
 						}
 						
 						xhr.abort();
@@ -278,8 +277,8 @@
 				</td>
 			</tr>
 			<tr>
-				<td>
-					<table id="boardTable" border = "1">
+				<td style="height:285px; vertical-align: top;">
+					<table id="boardTable" border = "1" >
 						<tr>
 							<td width="120" align="center">
 								<label for="userId">
@@ -301,8 +300,8 @@
 							</td>
 							<td align="left">
 								<input type="password" id="userPw" name="userPw" required>
-								<div id="pwWarn1" style="font-size:12px; display:none;">"비밀번호: 6~12자 이내로 사용해 주세요"</div>
-								<div id="pwWarn2" style="font-size:12px; display:none;">"비밀번호: 비밀번호를 입력해주세요."</div>
+								<div id="pwWarn1" style="font-size:12px; display:none;">비밀번호: 6~12자 이내로 사용해 주세요</div>
+								<div id="pwWarn2" style="font-size:12px; display:none;">비밀번호: 비밀번호를 입력해주세요.</div>
 							</td>
 						</tr>
 						<tr>
@@ -323,9 +322,10 @@
 								</label>
 							</td>
 							<td align="left">
-								<input type="text" id="userName" name="userName" maxlength="5" 
-								oninput="this.value = this.value.replace(/[^\uac00-\ud7a3]/, '')"
+								<input type="text" id="userName" name="userName"
+								oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3]/, '')"
 								required>
+								<div id="nameWarn" style="font-size:12px; display:none;">이름: 이름을 입력해주세요.</div>
 							</td>
 						</tr>
 						<tr>
