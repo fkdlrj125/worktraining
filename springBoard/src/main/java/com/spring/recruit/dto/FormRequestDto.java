@@ -8,15 +8,15 @@ import com.spring.recruit.vo.EduVo;
 import com.spring.recruit.vo.RecruitVo;
 
 public class FormRequestDto {
-	public RecruitVo recData;
+	public List<RecruitVo> recData;
 	public List<EduVo> eduData;
 	public List<CareerVo> carData;
 	public List<CertVo> certData;
 	
-	public RecruitVo getRecData() {
+	public List<RecruitVo> getRecData() {
 		return recData;
 	}
-	public void setRecData(RecruitVo recData) {
+	public void setRecData(List<RecruitVo> recData) {
 		this.recData = recData;
 	}
 	public List<EduVo> getEduData() {

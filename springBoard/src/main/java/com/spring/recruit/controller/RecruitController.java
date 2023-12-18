@@ -85,160 +85,58 @@ public class RecruitController {
 		HttpSession session = request.getSession(false);
 		RecruitVo userInfo = (RecruitVo) session.getAttribute("userInfo");
 		
-		System.out.println(data.getRecData());
+		String callbackMsg = "";
 		
-//		RecruitVo recruitVo = new RecruitVo();
-//		
-//		JSONObject jsonObj = JSONObject.fromObject(data);
-//		List<EduVo> eduList = new ArrayList<>();
-//		List<CareerVo> carList = new ArrayList<>();
-//		List<CertVo> certList = new ArrayList<>();
-//		List<EduVo> selectEduList = recruitService.selectEdu(userInfo);
-//		List<CareerVo> selectCarList = recruitService.selectCareer(userInfo);
-//		List<CertVo> selectCertList = recruitService.selectCert(userInfo);
-//		Iterator<EduVo> selectEduItr = selectEduList.iterator();
-//		Iterator<CareerVo> selectCarItr = selectCarList.iterator();
-//		Iterator<CertVo> selectCertItr = selectCertList.iterator();
-//		
-//		for(Object key : jsonObj.keySet()) {
-//			for(Object values : jsonObj.getJSONArray((String)key)) {
-//				switch ((String) key) {
-//					case "recData": {
-//						recruitVo = (RecruitVo)JSONObject.toBean((JSONObject)values, RecruitVo.class);
-//						recruitVo.setRecSeq(userInfo.getRecSeq());
-//						recruitVo.setRecSubmit(userInfo.getRecSubmit());
-//						break;
-//					}
-//					case "eduData": {
-//						EduVo eduVo = (EduVo)JSONObject.toBean((JSONObject)values, EduVo.class);
-//						eduVo.setRecSeq(userInfo.getRecSeq());
-//						eduVo.setEduSeq(selectEduItr.next().getEduSeq());
-//						eduList.add(eduVo);
-//						break;
-//					}
-//					case "carData": {
-//						CareerVo carVo = (CareerVo)JSONObject.toBean((JSONObject)values, CareerVo.class);
-//						carVo.setRecSeq(userInfo.getRecSeq());
-//						carVo.setCarSeq(selectCarItr.next().getCarSeq());
-//						carList.add(carVo);
-//						break;
-//					}
-//					case "certData": {
-//						CertVo certVo = (CertVo)JSONObject.toBean((JSONObject)values, CertVo.class);
-//						certVo.setRecSeq(userInfo.getRecSeq());
-//						certVo.setCertSeq(selectCertItr.next().getCertSeq());
-//						certList.add(certVo);
-//						break;
-//					}
-//					default: {
-//						result.put("success", "N");
-//						return CommonUtil.getJsonCallBackString("", result);
-//					}
-//				}
-//			}
-//		}
-//		
-//		String callbackMsg = "";
-//		
-//		switch (recruitVo.getRecSubmit()) {
-//			case "save": {
-//				session.setAttribute("userInfo", recruitVo);
-//				callbackMsg = recruitService.updateRecruit(recruitVo) + recruitService.mergeEdu(eduList)
-//				 + recruitService.mergeCareer(carList) + recruitService.mergeCert(certList)
-//				 >= 4 ? "Y" : "N";
-//				break;
-//			}
-//			
-//			case "submit": {
-//				result.put("success", "S");
-//				return CommonUtil.getJsonCallBackString("", result);
-//			}
-//			
-//		}
-//		
-//		result.put("success", callbackMsg);
-//		return CommonUtil.getJsonCallBackString("", result);
-		return null;
+		
+		
+		switch (userInfo.getRecSubmit()) {
+			case "N": {
+				callbackMsg = recruitService.updateRecruit(data.getRecData().get(0)) + recruitService.mergeEdu(data.getEduData())
+				 + recruitService.mergeCareer(data.getCarData()) + recruitService.mergeCert(data.getCertData())
+				 >= 4 ? "Y" : "N";
+				break;
+			}
+			
+			case "Y": {
+				result.put("success", "S");
+				return CommonUtil.getJsonCallBackString("", result);
+			}
+			
+		}
+		
+		result.put("success", callbackMsg);
+		return CommonUtil.getJsonCallBackString("", result);
 	}
 
-//	@RequestMapping(value="/recruit/submit", method = RequestMethod.POST)
-//	@ResponseBody
-//	public String recruitSubmitAction(HttpServletRequest request, String data) throws Exception {
-//		Map<String, Object> result = new HashMap<String, Object>();
-//		HttpSession session = request.getSession(false);
-//		RecruitVo userInfo = (RecruitVo) session.getAttribute("userInfo");
-//		
-//		JSONObject jsonObj = JSONObject.fromObject(data);
-//		RecruitVo recruitVo = new RecruitVo();
-//		List<EduVo> eduList = new ArrayList<>();
-//		List<CareerVo> carList = new ArrayList<>();
-//		List<CertVo> certList = new ArrayList<>();
-//		List<EduVo> selectEduList = recruitService.selectEdu(userInfo);
-//		List<CareerVo> selectCarList = recruitService.selectCareer(userInfo);
-//		List<CertVo> selectCertList = recruitService.selectCert(userInfo);
-//		Iterator<EduVo> selectEduItr = recruitService.selectEdu(userInfo).iterator();
-//		Iterator<CareerVo> selectCarItr = recruitService.selectCareer(userInfo).iterator();
-//		Iterator<CertVo> selectCertItr = recruitService.selectCert(userInfo).iterator();
-//		
-//		for(Object key : jsonObj.keySet()) {
-//			for(Object values : jsonObj.getJSONArray((String)key)) {
-//				switch ((String) key) {
-//					case "recData": {
-//						recruitVo = (RecruitVo)JSONObject.toBean((JSONObject)values, RecruitVo.class);
-//						recruitVo.setRecSeq(userInfo.getRecSeq());
-//						recruitVo.setRecSubmit(userInfo.getRecSubmit());
-//						break;
-//					}
-//					case "eduData": {
-//						EduVo eduVo = (EduVo)JSONObject.toBean((JSONObject)values, EduVo.class);
-//						eduVo.setRecSeq(userInfo.getRecSeq());
-//						eduVo.setEduSeq(selectEduItr.next().getEduSeq());
-//						eduList.add(eduVo);
-//						break;
-//					}
-//					case "carData": {
-//						CareerVo carVo = (CareerVo)JSONObject.toBean((JSONObject)values, CareerVo.class);
-//						carVo.setRecSeq(userInfo.getRecSeq());
-//						carVo.setCarSeq(selectCarItr.next().getCarSeq());
-//						carList.add(carVo);
-//						break;
-//					}
-//					case "certData": {
-//						CertVo certVo = (CertVo)JSONObject.toBean((JSONObject)values, CertVo.class);
-//						certVo.setRecSeq(userInfo.getRecSeq());
-//						certVo.setCertSeq(selectCertItr.next().getCertSeq());
-//						certList.add(certVo);
-//						break;
-//					}
-//					default: {
-//						result.put("success", "N");
-//						return CommonUtil.getJsonCallBackString("", result);
-//					}
-//				}
-//			}
-//		}
-//		
-//		String callbackMsg = "";
-//		
-//		switch (recruitVo.getRecSubmit()) {
-//			case "N": {
-//				recruitVo.setRecSubmit("Y");
-//				session.setAttribute("userInfo", recruitVo);
-//				 callbackMsg = recruitService.updateRecruit(recruitVo) + recruitService.mergeEdu(eduList)
-//				 + recruitService.mergeCareer(carList) + recruitService.mergeCert(certList)
-//				 >= 4 ? "Y" : "N";
-//				break;
-//			}
-//			
-//			case "Y": {
-//				result.put("success", "S");
-//				return CommonUtil.getJsonCallBackString("", result);
-//			}
-//		}
-//		
-//		result.put("success", callbackMsg);
-//		return CommonUtil.getJsonCallBackString("", result);
-//	}
+	@RequestMapping(value="/recruit/submit", method = RequestMethod.POST)
+	@ResponseBody
+	public String recruitSubmitAction(HttpServletRequest request, @RequestBody FormRequestDto data) throws Exception {
+		Map<String, Object> result = new HashMap<String, Object>();
+		HttpSession session = request.getSession(false);
+		RecruitVo userInfo = (RecruitVo) session.getAttribute("userInfo");
+		
+		String callbackMsg = "";
+		
+		switch (userInfo.getRecSubmit()) {
+			case "N": {
+				userInfo.setRecSubmit("Y");
+				session.setAttribute("userInfo", userInfo);
+				callbackMsg = recruitService.updateRecruit(data.getRecData().get(0)) + recruitService.mergeEdu(data.getEduData())
+				 + recruitService.mergeCareer(data.getCarData()) + recruitService.mergeCert(data.getCertData())
+				 >= 4 ? "Y" : "N";
+				break;
+			}
+			
+			case "Y": {
+				result.put("success", "S");
+				return CommonUtil.getJsonCallBackString("", result);
+			}
+			
+		}
+		
+		result.put("success", callbackMsg);
+		return CommonUtil.getJsonCallBackString("", result);
+	}
 	
 	@RequestMapping(value = "/recruit/delete", method = RequestMethod.POST)
 	@ResponseBody
@@ -246,12 +144,6 @@ public class RecruitController {
 		Map<String, String> result = new HashMap<String, String>();
 		HttpSession session = request.getSession(false);
 		RecruitVo userInfo = (RecruitVo)session.getAttribute("userInfo");
-		
-		System.out.println("시작");
-		System.out.println(userInfo.getRecName());
-		System.out.println(checkSeq.getEdu());
-		System.out.println(checkSeq.getCar());
-		System.out.println(checkSeq.getCert());
 		
 		if(!checkSeq.getEdu().isEmpty()) {
 			List<EduVo> eduList = new ArrayList<EduVo>();
@@ -303,6 +195,77 @@ public class RecruitController {
 		result.put("success", "N");
 		return CommonUtil.getJsonCallBackString("", result);
 	}
+	
+	@RequestMapping(value= "/pill", method = RequestMethod.GET)
+	public String pillIndex() {
+		return "pill/main";
+	}
+	
+	@RequestMapping(value= "/pill/analysis", method = RequestMethod.GET)
+	public String pillAnalysis() {
+		return "pill/analysis/select";
+	}
+	
+	@RequestMapping(value= "/pill/analysis/result", method = RequestMethod.GET)
+	public String pillAnalysisResult() {
+		return "pill/analysis/result";
+	}
+	
+	@RequestMapping(value= "/pill/recommend", method = RequestMethod.GET)
+	public String pillRecommend() {
+		return "pill/recommend/select";
+	}
+	
+	@RequestMapping(value= "/pill/recommend/result", method = RequestMethod.GET)
+	public String pillRecommendResult() {
+		return "pill/recommend/result";
+	}
+	
+	@RequestMapping(value="/pill/ranking", method=RequestMethod.GET)
+	public String pillRanking() {
+		return "pill/ranking/ranking";
+	}
+	
+	public void setSeq(FormRequestDto data, RecruitVo userInfo) {
+		List<EduVo> eduList = data.getEduData();
+		List<CareerVo> carList = data.getCarData();
+		List<CertVo> certList = data.getCertData();
+		
+//		if(!eduList.isEmpty()) {
+//			List<EduVo> selectEduList = 
+//			eduList.forEach(new Consumer<EduVo>() {
+//				@Override
+//				public void accept(EduVo edu) {
+//					edu.set
+//				};
+//			});
+//		}
+	}
+	
+//	@RequestMapping(value= "/pill/analysis/result", method = RequestMethod.GET)
+//	public String pillAnalysisResult() {
+//		return "pill/analysis-result";
+//	}
+//	
+//	@RequestMapping(value= "/pill/recommend", method = RequestMethod.GET)
+//	public String pillRecommend() {
+//		return "pill/recommend";
+//	}
+//	
+//	@RequestMapping(value= "/pill/recommend/result", method = RequestMethod.GET)
+//	public String pillRecommendResult() {
+//		return "pill/recommend-result";
+//	}
+//	
+//	@RequestMapping(value= "/pill/ranking", method = RequestMethod.GET)
+//	public String pillRanking() {
+//		return "pill/ranking";
+//	}
+//	
+//	@RequestMapping(value= "/pill/qa", method = RequestMethod.GET)
+//	public String pillQa() {
+//		return "pill/qa";
+//	}
 }
 
 	

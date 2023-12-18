@@ -1,0 +1,38 @@
+@charset "EUC-KR";
+
+.rakning-title {
+  color:#233;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+#userInfo {
+  display:inline;
+  color: #6c2ef1;
+}
+
+.ranking-type {
+  position:relative;
+  display: flex;
+	justify-content: left;
+  gap: 1.2rem;
+}
+
+.ranking-type a {
+	color: #233;
+  transition: all 0.5s;
+}
+
+.selected {
+  color:#6c2ef1 !important;
+}
+
+#horizontal-underline {
+	position:absolute;
+	width:32px;
+	height: 2px;
+	left:0;
+	bottom:0;
+	background-color: #6c2ef1;
+	transition: all 0.5s;
+}
