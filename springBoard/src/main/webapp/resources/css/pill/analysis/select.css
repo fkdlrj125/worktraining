@@ -116,7 +116,6 @@ button.search-btn {
   color : #bbb;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: normal;
   text-align: center;
   word-break: keep-all;
   display: -webkit-box;
@@ -130,7 +129,6 @@ button.search-btn {
   color : #233;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: normal;
   text-align: center;
   word-break: keep-all;
   display: -webkit-box;

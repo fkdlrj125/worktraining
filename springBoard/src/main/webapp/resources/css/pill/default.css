@@ -28,5 +28,17 @@ body {
 }
 
 a {
+  color: #233;
   text-decoration: none;
+}
+
+em {
+	color: #6c2ef1;
+	font-style: normal;
+}
+
+button {
+	padding: 0;
+	border: none;
+	background-color: transparent; 
 }

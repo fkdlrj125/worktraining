@@ -226,6 +226,16 @@ public class RecruitController {
 		return "pill/ranking/ranking";
 	}
 	
+	@RequestMapping(value="/pill/qna", method=RequestMethod.GET)
+	public String pillQna() {
+		return "pill/qna/qna";
+	}
+	
+	@RequestMapping(value="/pill/search", method=RequestMethod.GET)
+	public String pillSearch() {
+		return "pill/search/search";
+	}
+	
 	public void setSeq(FormRequestDto data, RecruitVo userInfo) {
 		List<EduVo> eduList = data.getEduData();
 		List<CareerVo> carList = data.getCarData();

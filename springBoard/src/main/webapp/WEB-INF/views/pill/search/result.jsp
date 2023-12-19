@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="<c:url value="/resources/css/pill/bootstrap.min.css"/>">
 <link rel="stylesheet" href="<c:url value="/resources/css/pill/default.css"/>">
 <link rel="stylesheet" href="<c:url value="/resources/css/pill/ranking/ranking.css"/>">
-<title>Ranking</title>
+<title>Q&A</title>
 </head>
 <script type="text/javascript">
 	$j(document).ready(function() {
@@ -34,50 +34,50 @@
 
 		<div class="container">
 			<div class="ranking-title">
-				<strong id="userInfo">20´ë ³²¼º</strong> À¯ÀúµéÀÌ »ÌÀº º£½ºÆ® ·©Å·
+				<strong id="userInfo">20ëŒ€ ë‚¨ì„±</strong> ìœ ì €ë“¤ì´ ë½‘ì€ ë² ìŠ¤íŠ¸ ëž­í‚¹
 			</div>
 			<div class="ranking">
 				<div class="ranking-type">
 					<div id="horizontal-underline"></div>
-					<button class="selected">ÀüÃ¼</button>
-					<button>¸ÖÆ¼ºñÅ¸¹Î</button>
-					<button>ÀÏ¹Ý</button>
+					<button class="selected">ì „ì²´</button>
+					<button>ë©€í‹°ë¹„íƒ€ë¯¼</button>
+					<button>ì¼ë°˜</button>
 				</div>
 				<div class="ranking-list">
 					<div class="ranking-product">
-						<img src="/resources/img/rankingIcon/ranking1.png" alt="·©Å·¾ÆÀÌÄÜ">
-						<img src="/resources/img/nutriImg/thorneSAT.jpg" alt="Á¦Ç°ÀÌ¹ÌÁö">
+						<img src="/resources/img/rankingIcon/ranking1.png" alt="ëž­í‚¹ì•„ì´ì½˜">
+						<img src="/resources/img/nutriImg/thorneSAT.jpg" alt="ì œí’ˆì´ë¯¸ì§€">
 						<div class="product-info">
-							<div class="product-company">½ð¸®¼­Ä¡</div>
+							<div class="product-company">ìœë¦¬ì„œì¹˜</div>
 							<div class="product-name">SAT</div>
 							<div class="product-rating">
-								<img src="/resources/img/rankingIcon/star-icon.png" alt="º°Á¡¾ÆÀÌÄÜ">
+								<img src="/resources/img/rankingIcon/star-icon.png" alt="ë³„ì ì•„ì´ì½˜">
 								<div class="rating">4.59</div>
 								<div class="comment-cnt">(296)</div>
 							</div>
 						</div>
 					</div>
 					<div class="ranking-product">
-						<img src="/resources/img/rankingIcon/ranking2.png" alt="·©Å·¾ÆÀÌÄÜ">
-						<img src="/resources/img/nutriImg/omega3fishoil.jpg" alt="Á¦Ç°ÀÌ¹ÌÁö">
+						<img src="/resources/img/rankingIcon/ranking2.png" alt="ëž­í‚¹ì•„ì´ì½˜">
+						<img src="/resources/img/nutriImg/omega3fishoil.jpg" alt="ì œí’ˆì´ë¯¸ì§€">
 						<div class="product-info">
-							<div class="product-company">½ºÆ÷Ã÷¸®¼­Ä¡</div>
-							<div class="product-name">Æ®¸®ÇÃ ½ºÆ®·À½º ¿À¸Þ°¡3 ÇÇ½¬¿ÀÀÏ</div>
+							<div class="product-company">ìŠ¤í¬ì¸ ë¦¬ì„œì¹˜</div>
+							<div class="product-name">íŠ¸ë¦¬í”Œ ìŠ¤íŠ¸ë ìŠ¤ ì˜¤ë©”ê°€3 í”¼ì‰¬ì˜¤ì¼</div>
 							<div class="product-rating">
-								<img src="/resources/img/rankingIcon/star-icon.png" alt="º°Á¡¾ÆÀÌÄÜ">
+								<img src="/resources/img/rankingIcon/star-icon.png" alt="ë³„ì ì•„ì´ì½˜">
 								<div class="rating">4.79</div>
 								<div class="comment-cnt">(999)</div>
 							</div>
 						</div>
 					</div>
 					<div class="ranking-product">
-						<img src="/resources/img/rankingIcon/ranking3.png" alt="·©Å·¾ÆÀÌÄÜ">
-						<img src="/resources/img/nutriImg/gorueVitamin.jpg" alt="Á¦Ç°ÀÌ¹ÌÁö">
+						<img src="/resources/img/rankingIcon/ranking3.png" alt="ëž­í‚¹ì•„ì´ì½˜">
+						<img src="/resources/img/nutriImg/gorueVitamin.jpg" alt="ì œí’ˆì´ë¯¸ì§€">
 						<div class="product-info">
-							<div class="product-company">°í·ÁÀº´Ü</div>
-							<div class="product-name">ºñÅ¸¹ÎC 1000</div>
+							<div class="product-company">ê³ ë ¤ì€ë‹¨</div>
+							<div class="product-name">ë¹„íƒ€ë¯¼C 1000</div>
 							<div class="product-rating">
-								<img src="/resources/img/rankingIcon/star-icon.png" alt="º°Á¡¾ÆÀÌÄÜ">
+								<img src="/resources/img/rankingIcon/star-icon.png" alt="ë³„ì ì•„ì´ì½˜">
 								<div class="rating">4.57</div>
 								<div class="comment-cnt">(1,364)</div>
 							</div>
@@ -85,7 +85,7 @@
 					</div>
 					
 					<a href="" class="move-ranking">
-						<em>¼ºº°/¿¬·Éº°</em> ·©Å· ÀüÃ¼ º¸±â
+						<em>ì„±ë³„/ì—°ë ¹ë³„</em> ëž­í‚¹ ì „ì²´ ë³´ê¸°
 						<i class="fa-solid fa-chevron-right fa-lg" style="color: #2a2a2a;"></i>
 					</a>
 				</div>

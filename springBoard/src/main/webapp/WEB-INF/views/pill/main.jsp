@@ -66,7 +66,7 @@
           <img src="/resources/img/menuIcon/ranking.png" alt="랭킹">
         </a>
 
-        <a class="card">
+        <a href="/pill/qna" class="card">
           <p class="card-header">약사님과 1:1상담</p>
           <div class="card-body">
             <h2 class="card-title">건강 Q&A</h2>
@@ -76,12 +76,10 @@
       </div>
 
       <div class="search-nutri">
-        <div class="search-header">
+        <a href="pill/search" class="search-header">
           <h2 class="search-title">성분으로 영양제 검색</h2>
-          <div>
-            <a class="fa-solid fa-chevron-right fa-lg" style="color: #c8c8c8;"></a>
-          </div>
-        </div>
+          <i class="fa-solid fa-chevron-right fa-lg" style="color: #c8c8c8;"></i>
+        </a>
         <div class="search-nutribar">
           <form class="search-bar">
 		        <input class="form-control" type="search" placeholder="칼슘, 비타민D 들어있는 영양제">
