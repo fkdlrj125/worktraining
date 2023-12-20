@@ -9,26 +9,70 @@
 <link rel="stylesheet" href="<c:url value="/resources/css/pill/bootstrap.min.css"/>">
 <link rel="stylesheet" href="<c:url value="/resources/css/pill/default.css"/>">
 <link rel="stylesheet" href="<c:url value="/resources/css/pill/search/search.css"/>">
-<title>Analysis</title>
+<title>Search</title>
 </head>
 <script type="text/javascript">
 	$j(document).ready(function() {
 		var selectCnt = 0;
+		let itemName = "";
+		let itemId = "";
+		let html = `<div class="item">
+	          <div class="item-name"></div>
+	          <i class="fa-solid fa-x" style="color: #ffffff;"></i>
+	        </div>`;
+	    
 		
 		$j(".ingredient-item").on("click", function() {
+			itemName = $j(this).text().trim();
+			itemId = $j(this).attr("id");
+			
 			if($j(this).find("i").attr("style") == "color: #56e166;") {
 				$j(this).find("i").attr("style", "color: #c8c8c8;");
+				$j(`.\${itemId}`).remove();
 				selectCnt--;
 				if(selectCnt == 0) {
 					$j(".fixed-search-btn").css("display", "none");
 					$j(".fixed-search-btn").css("pointer-events", "none");
+					$j(".selected-ingredient").css("display", "none");
 				}				
 				return;
 			}
 			selectCnt++;
+			$j(".selected-ingredient").append(html);
+			$j(".selected-ingredient").css("display","flex");
+			$j(".item").last().addClass(itemId);
+			$j(".item").last().find(".item-name").text(itemName);
 			$j(this).find("i").attr("style", "color: #56e166;");
 			$j(".fixed-search-btn").css("display", "block");
 			$j(".fixed-search-btn").css("pointer-events", "auto");
+		});
+		
+		$j(document).on("click", ".item",function() {
+			let className = $j(this).attr("class").split(" ")[1];
+			$j(this).remove();
+			$j(`#\${className}`).find("i").attr("style", "color: #c8c8c8;");
+			selectCnt--;
+			
+			if(selectCnt === 0) {
+				$j(".fixed-search-btn").css("display", "none");
+				$j(".fixed-search-btn").css("pointer-events", "none");
+				$j(".selected-ingredient").css("display", "none");
+			}
+		});
+		
+		$j(".x-btn").on("click", function() {
+			$j(".form-control").val("");
+			$j(this).removeClass("fa-circle-xmark");
+		});
+		
+		$j(".form-control").on("keyup", function() {
+			if($j(this).val()) {
+				$j(".x-btn").css("display", "inline-block");
+				$j(".x-btn").addClass("fa-circle-xmark");
+				return;
+			}
+			
+			$j(".x-btn").removeClass("fa-circle-xmark");
 		});
 	});
 	
@@ -38,30 +82,18 @@
 	<div class="wrap">
 		<nav class="navbar navbar-expand-lg">
 		  <div class="container-fluid">
-        <form class="d-flex search-bar">
-          <input class="form-control" type="search" placeholder="성분 이름을 입력해주세요">
+        <form class="d-flex search-bar" action="/pill/search/result">
+          <input class="form-control" type="text" placeholder="성분 이름을 입력해주세요">
           <a href="/pill" class="back-btn fa-solid fa-chevron-left fa-lg" style="color: #2a2a2a;"></a>
-          <button class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>
+          <button type="button" class="x-btn fa-solid fa-lg" style="color: #ccc;"></button>
+          <button type="submit" class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>
         </form>
 		  </div>
 		</nav>
 
     <div class="selected-ingredient-box">
       <div class="selected-ingredient">
-        <div class="item">
-          <div class="item-name">비타민C&nbsp;&nbsp;</div>
-          <i class="fa-solid fa-x" style="color: #ffffff;"></i>
-        </div>
-        <div class="item">
-          <div class="item-name">프로바이오틱스(유산균)&nbsp;&nbsp;</div>
-          <i class="fa-solid fa-x" style="color: #ffffff;"></i>
-        </div>
-        <div class="item">
-          <div class="item-name">오메가3&nbsp;&nbsp;</div>
-          <i class="fa-solid fa-x" style="color: #ffffff;"></i>
-        </div>
       </div>
-      <div id="selectedCnt"></div>
     </div>
     
 		<div class="container">
@@ -70,34 +102,34 @@
           인기 성분이에요
         </div>
         <div class="ingredient-list">
-          <div class="ingredient-item">
+          <div id="omega3" class="ingredient-item">
             <i class="ingredient-check fa-solid fa-circle-check fa-lg" style="color: #c8c8c8;"></i>
             <div class="ingredient-name">오메가3</div>
           </div>
-          <div class="ingredient-item">
+          <div id="probiotics" class="ingredient-item">
             <i class="ingredient-check fa-solid fa-circle-check fa-lg" style="color: #c8c8c8;"></i>
             <div class="ingredient-name">프로바이오틱스(유산균)</div>
           </div>
-          <div class="ingredient-item">
+          <div id="vitaminC" class="ingredient-item">
             <i class="ingredient-check fa-solid fa-circle-check fa-lg" style="color: #c8c8c8;"></i>
             <div class="ingredient-name">비타민C</div>
           </div>
-          <div class="ingredient-item">
+          <div id="coenzymeQ10" class="ingredient-item">
             <i class="ingredient-check fa-solid fa-circle-check fa-lg" style="color: #c8c8c8;"></i>
-            <div class="ingredient-name">오메가3</div>
+            <div class="ingredient-name">코엔자임Q10</div>
           </div>
-          <div class="ingredient-item">
+          <div id="vitaminB1" class="ingredient-item">
             <i class="ingredient-check fa-solid fa-circle-check fa-lg" style="color: #c8c8c8;"></i>
-            <div class="ingredient-name">프로바이오틱스(유산균)</div>
+            <div class="ingredient-name">비타민B1</div>
           </div>
-          <div class="ingredient-item">
+          <div id="garcinia" class="ingredient-item">
             <i class="ingredient-check fa-solid fa-circle-check fa-lg" style="color: #c8c8c8;"></i>
-            <div class="ingredient-name">비타민C</div>
+            <div class="ingredient-name">가르시니아캄보지아</div>
           </div>
         </div>
       </div>
 
-      <button class="fixed-search-btn">검색</button>
+      <button type="button" class="fixed-search-btn" onclick="location.href='/pill/search/result'">검색</button>
     </div>
   </div>
 </body>

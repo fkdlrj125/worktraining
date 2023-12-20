@@ -11,6 +11,12 @@ body {
   margin-bottom: 1rem;
 }
 
+input {
+	font-size: 18px !important;
+    font-weight: bold !important;
+    color: #233 !important;
+}
+
 .back-btn {
 	position: absolute;
 	background-color : transparent;

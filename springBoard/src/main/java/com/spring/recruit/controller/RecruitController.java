@@ -236,6 +236,26 @@ public class RecruitController {
 		return "pill/search/search";
 	}
 	
+	@RequestMapping(value="/pill/search/result", method=RequestMethod.GET)
+	public String pillSearchResult() {
+		return "pill/search/result";
+	}
+	
+	@RequestMapping(value="/pill/login", method=RequestMethod.GET)
+	public String pillLogin() {
+		return "pill/user/login";
+	}
+	
+	@RequestMapping(value="/pill/join-select", method=RequestMethod.GET)
+	public String pillJoinSelect() {
+		return "pill/user/join-select";
+	}
+	
+	@RequestMapping(value="/pill/join", method=RequestMethod.GET)
+	public String pillJoin() {
+		return "pill/user/join";
+	}
+	
 	public void setSeq(FormRequestDto data, RecruitVo userInfo) {
 		List<EduVo> eduList = data.getEduData();
 		List<CareerVo> carList = data.getCarData();

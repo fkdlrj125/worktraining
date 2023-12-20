@@ -12,16 +12,32 @@
 <title>Main</title>
 </head>
 <script type="text/javascript">
-
+	$j(document).ready(function() {
+		$j(".x-btn").on("click", function() {
+			$j(".form-control").val("");
+			$j(this).removeClass("fa-circle-xmark");
+		});
+		
+		$j(".form-control").on("keyup", function() {
+			if($j(this).val()) {
+				$j(".x-btn").css("display", "inline-block");
+				$j(".x-btn").addClass("fa-circle-xmark");
+				return;
+			}
+			
+			$j(".x-btn").removeClass("fa-circle-xmark");
+		});
+	});
 </script>
 <body>
 	<div class="wrap">
 		<nav class="navbar navbar-expand-lg">
 		  <div class="container-fluid">
 		    <a class="navbar-brand" href="#"></a>
-		     <form class="d-flex search-bar">
-		        <input class="form-control me-sm-2" type="search" placeholder="어떤 영양제 찾으세요?">
-		        <button class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>
+		     <form class="d-flex search-bar" action="/pill/search/result">
+		        <input class="form-control me-sm-2" type="text" placeholder="어떤 영양제 찾으세요?">
+		        <button type="button" class="x-btn fa-solid fa-lg" style="color: #ccc;"></button>
+		         <button type="submit" class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>
 		      </form>
 		    <div class="collapse navbar-collapse" id="navbarColor04">
 		      <ul class="navbar-nav me-auto">
@@ -31,7 +47,7 @@
 		          </a>
 		        </li>
 		        <li class="nav-item">
-		          <a class="nav-link" href="#">
+		          <a class="nav-link" href="/pill/login">
 		          	<i class="fa-solid fa-user" style="color: #ffffff;"></i>
 		          </a>
 		        </li>
@@ -76,15 +92,16 @@
       </div>
 
       <div class="search-nutri">
-        <a href="pill/search" class="search-header">
+        <div class="search-header">
           <h2 class="search-title">성분으로 영양제 검색</h2>
-          <i class="fa-solid fa-chevron-right fa-lg" style="color: #c8c8c8;"></i>
-        </a>
+          <a href="pill/search" class="fa-solid fa-chevron-right fa-lg" style="color: #c8c8c8;"></a>
+        </div>
         <div class="search-nutribar">
-          <form class="search-bar">
-		        <input class="form-control" type="search" placeholder="칼슘, 비타민D 들어있는 영양제">
+          <form class="search-bar" action="/pill/search/result">
+		        <input class="form-control" type="text" placeholder="칼슘, 비타민D 들어있는 영양제">
+		        <button type="button" class="x-btn fa-solid fa-lg" style="color: #ccc;"></button>
 		        <button class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>
-		      </form>
+	      </form>
         </div>
       </div>
 	  </div>

@@ -30,6 +30,21 @@
 			$j(".next-btn").css("background-color", "#6c2ef1");
 			$j(".next-btn").css("pointer-events", "auto");
 		});
+		
+		$j(".x-btn").on("click", function() {
+			$j(".form-control").val("");
+			$j(this).removeClass("fa-circle-xmark");
+		});
+		
+		$j(".form-control").on("keyup", function() {
+			if($j(this).val()) {
+				$j(".x-btn").css("display", "inline-block");
+				$j(".x-btn").addClass("fa-circle-xmark");
+				return;
+			}
+			
+			$j(".x-btn").removeClass("fa-circle-xmark");
+		});
 	});
 	
 	
@@ -39,8 +54,9 @@
 		<nav class="navbar navbar-expand-lg">
 		  <div class="container-fluid">
         <form class="d-flex search-bar">
-          <input class="form-control" type="search" placeholder="제품명이나 브랜드명으로 검색">
+          <input class="form-control" type="text" placeholder="제품명이나 브랜드명으로 검색">
           <a href="/pill" class="back-btn fa-solid fa-chevron-left fa-lg" style="color: #2a2a2a;"></a>
+          <button type="button" class="x-btn fa-solid fa-lg" style="color: #ccc;"></button>
           <button class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>
         </form>
 		  </div>

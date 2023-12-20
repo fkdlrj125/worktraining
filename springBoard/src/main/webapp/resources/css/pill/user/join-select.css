@@ -34,7 +34,7 @@
 	box-shadow: 0px 2px 10px rgba(70, 56, 147, 0.2);
 }
 
-.form-box {
+.join-select-box {
 	display: flex;
 	position: relative;
 	width: 100%;
@@ -42,32 +42,14 @@
 	align-self: start;
 }
 
-.user-email, .user-pw, .user-pw-check{
+.join-select-list{
 	display: flex;
-	width: 100%;
-	justify-content: space-between;
+	flex-direction: column;
+	gap: 10px;
 	align-items: center;
-	margin-bottom: 10px;
 }
 
-label {
-	font-weight: normal;
-	color: #233;
+.join-select-item {
+	border-radius: 12px;
 }
 
-.form-control {
-	width: 70%;
-}
-
-.submit-btn {
-    width: 15rem;
-    height: 2rem;
-    margin-top: 30px;
-    align-self: center;
-    background-color: #6c2ef1;
-    color: #fff;
-    font-weight: bold;
-    font-size: 18px;
-    border-radius: 15px;
-    box-shadow: 0px 2px 10px rgba(70, 56, 147, 0.2);
-}

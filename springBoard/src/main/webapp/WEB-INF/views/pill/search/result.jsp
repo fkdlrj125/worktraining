@@ -8,89 +8,100 @@
 <script src="https://kit.fontawesome.com/b7d831082a.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="<c:url value="/resources/css/pill/bootstrap.min.css"/>">
 <link rel="stylesheet" href="<c:url value="/resources/css/pill/default.css"/>">
-<link rel="stylesheet" href="<c:url value="/resources/css/pill/ranking/ranking.css"/>">
-<title>Q&A</title>
+<link rel="stylesheet" href="<c:url value="/resources/css/pill/search/result.css"/>">
+<title>Search Result</title>
 </head>
 <script type="text/javascript">
 	$j(document).ready(function() {
-		var horizontalUnderLine = $j("#horizontal-underline");
+		let searchValue = $j(".form-control").val();
+		let searchReg = new RegExp(searchValue, 'g');
 		
-		var horizontalIndicator = (e) => {
-			horizontalUnderLine.css("left", e.currentTarget.offsetLeft + "px");
-			horizontalUnderLine.css("width", e.currentTarget.offsetWidth + "px");
-
-			$j(".ranking-type button").removeClass("selected");
-			$j(e.currentTarget).addClass("selected");
-		}
+		$j(".item-name").each(function() {
+			$j(this).html( $j(this).text().replace(searchReg, `<em>\${searchValue}</em>`) );
+		});
 		
-		$j(".ranking-type button").on("click", function(e) {
-			horizontalIndicator(e);
+		$j(".x-btn").on("click", function() {
+			$j(".form-control").val("");
+			$j(this).removeClass("fa-circle-xmark");
+		});
+		
+		$j(".form-control").on("keyup", function() {
+			if($j(this).val()) {
+				$j(".x-btn").addClass("fa-circle-xmark");
+				return;
+			}
+			
+			$j(".x-btn").removeClass("fa-circle-xmark");
 		});
 	});
+	
+	
 </script>
 <body>
 	<div class="wrap">
-		<%@include file="/WEB-INF/views/pill/fix/header.jsp" %>
+		<nav class="navbar navbar-expand-lg">
+		  <div class="container-fluid">
+        <form class="d-flex search-bar">
+          <input class="form-control" type="text" placeholder="¼ººĞ ÀÌ¸§À» ÀÔ·ÂÇØÁÖ¼¼¿ä" value="ºñÅ¸¹Î">
+          <a href="/pill" class="back-btn fa-solid fa-chevron-left fa-lg" style="color: #2a2a2a;"></a>
+          <button type="button" class="x-btn fa-solid fa-circle-xmark fa-lg" style="color: #ccc;"></button>
+					<button type="submit" class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>
+        </form>
+		  </div>
+		</nav>
 
 		<div class="container">
-			<div class="ranking-title">
-				<strong id="userInfo">20ëŒ€ ë‚¨ì„±</strong> ìœ ì €ë“¤ì´ ë½‘ì€ ë² ìŠ¤íŠ¸ ë­í‚¹
-			</div>
-			<div class="ranking">
-				<div class="ranking-type">
-					<div id="horizontal-underline"></div>
-					<button class="selected">ì „ì²´</button>
-					<button>ë©€í‹°ë¹„íƒ€ë¯¼</button>
-					<button>ì¼ë°˜</button>
-				</div>
-				<div class="ranking-list">
-					<div class="ranking-product">
-						<img src="/resources/img/rankingIcon/ranking1.png" alt="ë­í‚¹ì•„ì´ì½˜">
-						<img src="/resources/img/nutriImg/thorneSAT.jpg" alt="ì œí’ˆì´ë¯¸ì§€">
-						<div class="product-info">
-							<div class="product-company">ìœë¦¬ì„œì¹˜</div>
-							<div class="product-name">SAT</div>
-							<div class="product-rating">
-								<img src="/resources/img/rankingIcon/star-icon.png" alt="ë³„ì ì•„ì´ì½˜">
-								<div class="rating">4.59</div>
-								<div class="comment-cnt">(296)</div>
-							</div>
+      <div class="search-result-box">
+        <div class="search-list">
+					<div class="search-item">
+						<img class="item-img" src="/resources/img/nutriImg/twoperdayvitamin.jpg" alt="Á¦Ç°ÀÌ¹ÌÁö">
+						<div class="item-info">
+							<div class="item-company">¶óÀÌÇÁÀÍ½ºÅÙ¼Ç</div>
+							<div class="item-name">ÅõÆÛµ¥ÀÌ ¸ÖÆ¼ºñÅ¸¹Î</div>
 						</div>
 					</div>
-					<div class="ranking-product">
-						<img src="/resources/img/rankingIcon/ranking2.png" alt="ë­í‚¹ì•„ì´ì½˜">
-						<img src="/resources/img/nutriImg/omega3fishoil.jpg" alt="ì œí’ˆì´ë¯¸ì§€">
-						<div class="product-info">
-							<div class="product-company">ìŠ¤í¬ì¸ ë¦¬ì„œì¹˜</div>
-							<div class="product-name">íŠ¸ë¦¬í”Œ ìŠ¤íŠ¸ë ìŠ¤ ì˜¤ë©”ê°€3 í”¼ì‰¬ì˜¤ì¼</div>
-							<div class="product-rating">
-								<img src="/resources/img/rankingIcon/star-icon.png" alt="ë³„ì ì•„ì´ì½˜">
-								<div class="rating">4.79</div>
-								<div class="comment-cnt">(999)</div>
-							</div>
+					<div class="search-item">
+						<img class="item-img" src="/resources/img/nutriImg/jongvitamin.jpg" alt="Á¦Ç°ÀÌ¹ÌÁö">
+						<div class="item-info">
+							<div class="item-company">Á¾±Ù´ç</div>
+							<div class="item-name">È°·ÂºñÅ¸¹ÎB ÇÃ·¯½º</div>
 						</div>
 					</div>
-					<div class="ranking-product">
-						<img src="/resources/img/rankingIcon/ranking3.png" alt="ë­í‚¹ì•„ì´ì½˜">
-						<img src="/resources/img/nutriImg/gorueVitamin.jpg" alt="ì œí’ˆì´ë¯¸ì§€">
-						<div class="product-info">
-							<div class="product-company">ê³ ë ¤ì€ë‹¨</div>
-							<div class="product-name">ë¹„íƒ€ë¯¼C 1000</div>
-							<div class="product-rating">
-								<img src="/resources/img/rankingIcon/star-icon.png" alt="ë³„ì ì•„ì´ì½˜">
-								<div class="rating">4.57</div>
-								<div class="comment-cnt">(1,364)</div>
-							</div>
+					<div class="search-item">
+						<img class="item-img" src="/resources/img/nutriImg/gorueVitaminC1000.jpg" alt="Á¦Ç°ÀÌ¹ÌÁö">
+						<div class="item-info">
+							<div class="item-company">°í·ÁÀº´Ü</div>
+							<div class="item-name">ºñÅ¸¹ÎC 1000 ÀÌÁö + ºñÅ¸¹ÎD</div>
 						</div>
 					</div>
-					
-					<a href="" class="move-ranking">
-						<em>ì„±ë³„/ì—°ë ¹ë³„</em> ë­í‚¹ ì „ì²´ ë³´ê¸°
-						<i class="fa-solid fa-chevron-right fa-lg" style="color: #2a2a2a;"></i>
-					</a>
-				</div>
-			</div>
-		</div>
+					<div class="search-item">
+						<img class="item-img" src="/resources/img/nutriImg/gorueVitamin.jpg" alt="Á¦Ç°ÀÌ¹ÌÁö">
+						<div class="item-info">
+							<div class="item-company">°í·ÁÀº´Ü</div>
+							<div class="item-name">ºñÅ¸¹ÎC 1000</div>
+						</div>
+					</div>
+					<div class="search-item">
+						<img class="item-img" src="/resources/img/nutriImg/aliveMultiVitamin.jpg" alt="Á¦Ç°ÀÌ¹ÌÁö">
+						<div class="item-info">
+							<div class="item-company">³×ÀÌÃ³½º¿şÀÌ</div>
+							<div class="item-name">¾ó¶óÀÌºê ¿ø½ºµ¥ÀÏ¸® ¸ÖÆ¼ºñÅ¸¹Î</div>
+						</div>
+					</div>
+					<div class="search-item">
+						<img class="item-img" src="/resources/img/nutriImg/gorueMultiVitamin.jpg" alt="Á¦Ç°ÀÌ¹ÌÁö">
+						<div class="item-info">
+							<div class="item-company">°í·ÁÀº´Ü</div>
+							<div class="item-name">¸ÖÆ¼ºñÅ¸¹Î ¿ÃÀÎ¿ø</div>
+						</div>
+					</div>
+        </div>
+      </div>
+
+    </div>
+		<button class="fixed-btn">
+			<i class="fas fa-regular fa-flask fa-xl" style="color: #6c2ef1;"></i>
+		</button>
   </div>
 </body>
 </html>

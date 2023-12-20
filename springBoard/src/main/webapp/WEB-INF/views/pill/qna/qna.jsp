@@ -7,8 +7,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
 <script src="https://kit.fontawesome.com/b7d831082a.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="<c:url value="/resources/css/pill/bootstrap.min.css"/>">
-<link rel="stylesheet" href="<c:url value="/resources/css/pill/default.css"/>">
 <link rel="stylesheet" href="<c:url value="/resources/css/pill/qna/qna.css"/>">
+<link rel="stylesheet" href="<c:url value="/resources/css/pill/default.css"/>">
 <title>Q&A</title>
 </head>
 <script type="text/javascript">
@@ -42,6 +42,21 @@
 			
 			$j(".current-page").text(parseInt($j(".current-page").text())+1);
 		});
+		
+		$j(".x-btn").on("click", function() {
+			$j(".form-control").val("");
+			$j(this).removeClass("fa-circle-xmark");
+		});
+		
+		$j(".form-control").on("keyup", function() {
+			if($j(this).val()) {
+				$j(".x-btn").css("display", "inline-block");
+				$j(".x-btn").addClass("fa-circle-xmark");
+				return;
+			}
+			
+			$j(".x-btn").removeClass("fa-circle-xmark");
+		});
 	});
 </script>
 <body>
@@ -50,7 +65,8 @@
 
 		<div class="container">
       <form class="d-flex search-bar">
-        <input class="form-control" type="search" placeholder="xxx님,무엇이 궁금하신가요?">
+        <input class="form-control" type="text" placeholder="xxx님,무엇이 궁금하신가요?">
+        <button type="button" class="x-btn fa-solid fa-lg" style="color: #ccc;"></button>
         <button class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>
       </form>
       
