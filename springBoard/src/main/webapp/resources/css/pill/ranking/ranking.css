@@ -18,7 +18,7 @@
 	justify-content: left;
   gap: 1.2rem;
   font-size: 24px;
-  margin-bottom: 10px;
+  margin-bottom: 25px;
 }
 
 .ranking-type button {
@@ -45,7 +45,7 @@
 	flex-direction: column;
 	align-items: center;
 	border-radius: 3%;
-	box-shadow: 0px 2px 10px rgba(70, 56, 147, 0.1);
+	box-shadow: 0px 2px 10px rgba(70, 56, 147, 0.2);
 	margin-bottom: 30px;
 }
 

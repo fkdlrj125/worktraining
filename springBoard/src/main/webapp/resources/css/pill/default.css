@@ -11,7 +11,7 @@ body {
   margin-bottom: 1rem;
 }
 
-input {
+input[type='text'] {
 	font-size: 18px !important;
     font-weight: bold !important;
     color: #233 !important;

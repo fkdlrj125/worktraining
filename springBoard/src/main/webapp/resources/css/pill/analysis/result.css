@@ -15,24 +15,28 @@
   max-width: 100%;
 	width: 100%;
 	padding: 2% 2%;
-	position: absolute;
+	position: absoluate;
 	top: 3rem;
 	left: 50%;
   transform: translate(-50%, 0);
   border-top-left-radius: 30px;
 	border-top-right-radius: 30px;
-	background-color: #f8f8f8;
+	background-color: #fff;
 }
 
 .user-rating {
+	max-width: 900px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	margin: 0 auto;
 }
 
 .rating-graph {
+	display: flex;
 	width: 80%;
 	margin-bottom: 1.5rem;
+	flex-direction: column;
 }
 
 .rating-header {
@@ -47,7 +51,6 @@
 .graph-score {
 	display: flex;
 	align-items: center;
-	color: #777;
 }
 
 .score {
@@ -62,9 +65,9 @@
 
 .rating-share {
 	width: 12.5rem;
-    height: 1.7rem;
+    height: 2rem;
     border-radius: 15px;
-	line-height: 1.7rem;
+	line-height: 2rem;
     text-align: center;
 	background-color : #f2f2f2;
 	color: #6c2ef1;
@@ -79,7 +82,7 @@
 }
 
 .analysis-btn {
-	width: 100%;
+	width: 40%;
 	height: 3rem;
 	margin-top: 0.5rem;
 	background-color: #6c2ef1;

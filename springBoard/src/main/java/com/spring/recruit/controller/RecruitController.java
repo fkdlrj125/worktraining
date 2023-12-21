@@ -256,6 +256,11 @@ public class RecruitController {
 		return "pill/user/join";
 	}
 	
+	@RequestMapping(value="/pill/admin", method=RequestMethod.GET)
+	public String pillAdmin() {
+		return "pill/user/admin";
+	}
+	
 	public void setSeq(FormRequestDto data, RecruitVo userInfo) {
 		List<EduVo> eduList = data.getEduData();
 		List<CareerVo> carList = data.getCarData();
@@ -272,30 +277,6 @@ public class RecruitController {
 //		}
 	}
 	
-//	@RequestMapping(value= "/pill/analysis/result", method = RequestMethod.GET)
-//	public String pillAnalysisResult() {
-//		return "pill/analysis-result";
-//	}
-//	
-//	@RequestMapping(value= "/pill/recommend", method = RequestMethod.GET)
-//	public String pillRecommend() {
-//		return "pill/recommend";
-//	}
-//	
-//	@RequestMapping(value= "/pill/recommend/result", method = RequestMethod.GET)
-//	public String pillRecommendResult() {
-//		return "pill/recommend-result";
-//	}
-//	
-//	@RequestMapping(value= "/pill/ranking", method = RequestMethod.GET)
-//	public String pillRanking() {
-//		return "pill/ranking";
-//	}
-//	
-//	@RequestMapping(value= "/pill/qa", method = RequestMethod.GET)
-//	public String pillQa() {
-//		return "pill/qa";
-//	}
 }
 
 	

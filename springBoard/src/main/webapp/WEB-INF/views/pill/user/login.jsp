@@ -19,17 +19,30 @@
 		if(id) $j("#userId").val(id);
 		if(saveCheck) $j("#saveId").prop("checked", true);
 		
-		$j(".submit-btn").on("click", function() {
-			if($j("#saveId").is(":checked")) {
-				localStorage.setItem("saveCheck", true);
-				localStorage.setItem("id", $j("#userId").val());
+		$j("#loginBtn").on("click", function() {
+			if(!$j("#userId").val()?.trim()) {
+				alert("아이디를 입력해주세요.");
+				$j("#userId").focus();
+				return;
+			}
+			if(!$j("#userPw").val()?.trim()) {
+				alert("비밀번호를 입력해주세요.");
+				$j("#userPw").focus();
 				return;
 			}
 			
-			if(localStorage.saveId) {
-				localStorage.removeItem("saveCheck");
-				localStorage.removeItem("id");
+			if(localStorage.id) {
+				if(!($j("#saveId").is(":checked"))) {
+					localStorage.removeItem("saveCheck");
+					localStorage.removeItem("id");
+					location.href = "/pill";
+					return;
+				}
 			}
+			
+			localStorage.setItem("saveCheck", true);
+			localStorage.setItem("id", $j("#userId").val());
+			location.href = "/pill";
 		});
 	});
 </script>
@@ -52,7 +65,7 @@
 						oninput="this.value = this.value.replace(/[\W]/g, '')"
 						>
 					</div>
-					<button type="button" class="submit-btn">로그인</button>
+					<button type="button" id="loginBtn">로그인</button>
 					<div class="save-id">
 						<input type="checkbox" name="saveId" id="saveId">
 						<label for="saveId">아이디 저장</label>
@@ -66,7 +79,7 @@
 					</div>
 					<div class="user-option">
 						<a href="">아이디/비밀번호 찾기</a>
-						<a href="/pill/join">회원가입</a>
+						<a href="/pill/join-select">회원가입</a>
 					</div>
 				</div>
 			</div>

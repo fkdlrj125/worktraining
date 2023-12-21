@@ -13,6 +13,38 @@
 </head>
 <script type="text/javascript">
 	$j(document).ready(function() {
+		
+		$j(".submit-btn").on("click", function() {
+			const emailRegex = /^\w+@\w+\.\w+$/;
+			let inputPw = $j("#userPw").val();
+			let checkPw = $j("#pwCheck").val();
+			
+			if(!emailRegex.test($j("#userEmail").val())) {
+				alert("이메일을 입력해주세요.");
+				$j("userEmail").focus();
+				return;
+			}
+			
+			if(!inputPw) {
+				alert("비밀번호를 입력해주세요.");
+				$j("#userPw").focus();
+				return;
+			}
+			
+			if(!checkPw) {
+				alert("비밀번호 확인을 입력해주세요.");
+				$j("#pwCheck").focus();
+				return;
+			}
+			
+			if(inputPw != checkPw) { 
+				alert("비밀번호가 다릅니다.");
+				return;
+			}
+			
+			alert("회원가입 성공");
+			location.href = "/pill";
+		});
 	});
 </script>
 <body>

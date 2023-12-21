@@ -14,24 +14,29 @@
 <script type="text/javascript">
 	$j(document).ready(function() {
 		var selectCnt = 0;
+		var maxCnt = 8;
+		
+		$j("#selectCnt").text(`\${selectCnt}/\${maxCnt}`);
 		
 		$j(".list-item").on("click", function() {
+			
 			if($j(this).find("img").css("background-color") == "rgb(254, 254, 254)") {
 				$j(this).find("img").css("background-color", "#e0e0ff");
 				selectCnt++;
 				$j(".submit-btn").css("background-color", "#6c2ef1");
 				$j(".submit-btn").css("pointer-events", "auto");
-				$j("#selectCnt").text(`\${selectCnt}/8`);
+				$j("#selectCnt").text(`\${selectCnt}/\${maxCnt}`);
 				return;
 			}
+			
 			$j(this).find("img").css("background-color", "#fefefe");
 			selectCnt--;
+			$j("#selectCnt").text(`\${selectCnt}/\${maxCnt}`);
+			
 			if(selectCnt == 0) {
 				$j(".submit-btn").css("background-color", "#e0e0ff");
 				$j(".submit-btn").css("pointer-events", "none");
 			}
-			
-			$j("#selectCnt").text(`\${selectCnt}/8`);
 		});
 	});
 	
@@ -166,7 +171,7 @@
           </div>
         </div>
         <div class="submit-btn-box">
-          <button class="submit-btn" onclick="location.href='/pill/recommend/result'">확인<div id="selectCnt">0/8</div></button>
+          <button class="submit-btn" onclick="location.href='/pill/recommend/result'">확인<div id="selectCnt"></div></button>
         </div>
       </div>
     </div>

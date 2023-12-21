@@ -12,7 +12,7 @@
 <title>Search</title>
 </head>
 <script type="text/javascript">
-	$j(document).ready(function() {
+		$j(document).ready(function() {
 		var selectCnt = 0;
 		let itemName = "";
 		let itemId = "";
@@ -26,6 +26,7 @@
 			itemName = $j(this).text().trim();
 			itemId = $j(this).attr("id");
 			
+			// 해제할 때
 			if($j(this).find("i").attr("style") == "color: #56e166;") {
 				$j(this).find("i").attr("style", "color: #c8c8c8;");
 				$j(`.\${itemId}`).remove();
@@ -33,30 +34,33 @@
 				if(selectCnt == 0) {
 					$j(".fixed-search-btn").css("display", "none");
 					$j(".fixed-search-btn").css("pointer-events", "none");
-					$j(".selected-ingredient").css("display", "none");
+					$j(".selected-ingredient").addClass("remove");
 				}				
 				return;
 			}
+
+			// 선택할 때
 			selectCnt++;
 			$j(".selected-ingredient").append(html);
-			$j(".selected-ingredient").css("display","flex");
+			$j(".selected-ingredient").removeClass("remove");
 			$j(".item").last().addClass(itemId);
 			$j(".item").last().find(".item-name").text(itemName);
 			$j(this).find("i").attr("style", "color: #56e166;");
 			$j(".fixed-search-btn").css("display", "block");
-			$j(".fixed-search-btn").css("pointer-events", "auto");
 		});
 		
+		// selected-ingredient에서 클릭할 때
 		$j(document).on("click", ".item",function() {
 			let className = $j(this).attr("class").split(" ")[1];
 			$j(this).remove();
 			$j(`#\${className}`).find("i").attr("style", "color: #c8c8c8;");
 			selectCnt--;
 			
+			// 선택된 게 없을 때
 			if(selectCnt === 0) {
 				$j(".fixed-search-btn").css("display", "none");
 				$j(".fixed-search-btn").css("pointer-events", "none");
-				$j(".selected-ingredient").css("display", "none");
+				$j(".selected-ingredient").addClass("remove");
 			}
 		});
 		
@@ -92,7 +96,7 @@
 		</nav>
 
     <div class="selected-ingredient-box">
-      <div class="selected-ingredient">
+      <div class="selected-ingredient remove">
       </div>
     </div>
     
@@ -126,6 +130,7 @@
             <i class="ingredient-check fa-solid fa-circle-check fa-lg" style="color: #c8c8c8;"></i>
             <div class="ingredient-name">가르시니아캄보지아</div>
           </div>
+          
         </div>
       </div>
 

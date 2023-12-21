@@ -122,10 +122,18 @@ button.search-btn {
 }
 
 .selected-ingredient {
-  display: none;
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   padding: 1rem 2rem;
   background-color: #eee;
+  transition: all 0.3s;
+}
+
+.remove {
+  padding: 0;
+  visibility: hidden;
+  opacity: 0;
 }
 
 .item {
