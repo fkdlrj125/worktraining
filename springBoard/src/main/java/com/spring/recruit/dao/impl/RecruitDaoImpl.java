@@ -63,7 +63,7 @@ public class RecruitDaoImpl implements RecruitDao{
 	@Override
 	public int mergeCareer(List<CareerVo> careerList) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.update("mergeCareer", careerList);
+		return sqlSession.update("mergeCar", careerList);
 	}
 	
 	@Override

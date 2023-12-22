@@ -53,8 +53,8 @@
 	<div class="wrap">
 		<nav class="navbar navbar-expand-lg">
 		  <div class="container-fluid">
-        <form class="d-flex search-bar">
-          <input class="form-control" type="text" placeholder="제품명이나 브랜드명으로 검색">
+        <form class="d-flex search-bar" accept-charset="UTF-8">
+          <input name="search" class="form-control" type="text" placeholder="제품명이나 브랜드명으로 검색">
           <a href="/pill" class="back-btn fa-solid fa-chevron-left fa-lg" style="color: #2a2a2a;"></a>
           <button type="button" class="x-btn fa-solid fa-lg" style="color: #ccc;"></button>
           <button class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>

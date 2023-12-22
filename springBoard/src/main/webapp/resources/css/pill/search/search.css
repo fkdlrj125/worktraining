@@ -84,10 +84,14 @@ button.search-btn {
     justify-content: center;
     align-items: center;
     border-radius: 15px;
+    box-shadow: 2px 2px 10px rgba(70, 56, 147, 0.2); 
+    transition: all 0.2s;
 }
 
 .ingredient-item:hover {
 	cursor: pointer;
+	scale: 1.1;
+	box-shadow: 2px 2px 8px rgba(70, 56, 147, 0.4); 
 }
  
 .ingredient-check {

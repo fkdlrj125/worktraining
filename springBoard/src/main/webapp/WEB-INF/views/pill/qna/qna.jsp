@@ -78,8 +78,8 @@
 
 		<div class="container">
       <div class="qna-box">
-      	<form class="d-flex search-bar">
-	        <input class="form-control" type="text" placeholder="xxx´Ô,¹«¾ùÀÌ ±Ã±ÝÇÏ½Å°¡¿ä?">
+      	<form class="d-flex search-bar" accept-charset="UTF-8">
+	        <input name="search" class="form-control" type="text" placeholder="xxx´Ô,¹«¾ùÀÌ ±Ã±ÝÇÏ½Å°¡¿ä?">
 	        <button type="button" class="x-btn fa-solid fa-lg" style="color: #ccc;"></button>
 	        <button class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>
 	      </form>

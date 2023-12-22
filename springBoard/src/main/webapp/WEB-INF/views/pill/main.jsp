@@ -34,8 +34,8 @@
 		<nav class="navbar navbar-expand-lg">
 		  <div class="container-fluid">
 		    <a class="navbar-brand" href="#"></a>
-		     <form class="d-flex search-bar" action="/pill/search/result">
-		        <input class="form-control me-sm-2" type="text" placeholder="어떤 영양제 찾으세요?">
+		     <form class="d-flex search-bar" action="/pill/search/result" accept-charset="UTF-8">
+		        <input name="search" class="form-control me-sm-2" type="text" placeholder="어떤 영양제 찾으세요?">
 		        <button type="button" class="x-btn fa-solid fa-lg" style="color: #ccc;"></button>
 		         <button type="submit" class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>
 		      </form>
@@ -97,8 +97,8 @@
           <a href="pill/search" class="fa-solid fa-chevron-right fa-lg" style="color: #c8c8c8;"></a>
         </div>
         <div class="search-nutribar">
-          <form class="search-bar" action="/pill/search/result">
-		        <input class="form-control" type="text" placeholder="칼슘, 비타민D 들어있는 영양제">
+          <form class="search-bar" action="/pill/search/result" accept-charset="UTF-8">
+		        <input name="search" class="form-control" type="text" placeholder="칼슘, 비타민D 들어있는 영양제">
 		        <button type="button" class="x-btn fa-solid fa-lg" style="color: #ccc;"></button>
 		        <button class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>
 	      </form>

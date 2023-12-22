@@ -82,12 +82,32 @@
 				,#{recSubmit, jdbcType=VARCHAR}
     		)
     </insert>
+    
+    <update id="updateRec" parameterType="com.spring.recruit.vo.RecruitVo">
+   	 	UPDATE 
+   	 		RECRUIT 
+   	 	SET
+			NAME = #{recName, jdbcType=VARCHAR}
+			,BIRTH = #{recBirth, jdbcType=VARCHAR}
+			,GENDER = #{recGender, jdbcType=VARCHAR}
+			,PHONE = #{recPhone, jdbcType=VARCHAR}
+			,EMAIL = #{recEmail, jdbcType=VARCHAR}
+			,ADDR = #{recAddr, jdbcType=VARCHAR}
+			,LOCATION = #{recLoc, jdbcType=VARCHAR}
+			,WORK_TYPE = #{recWt, jdbcType=VARCHAR}
+			,SUBMIT = #{recSubmit, jdbcType=VARCHAR}
+	    WHERE
+	     	SEQ = #{recSeq, jdbcType=VARCHAR}
+    </update>
 
     <update id="mergeEdu" parameterType="java.util.List">
+    <selectKey order="BEFORE" keyProperty="eduSeq" resultType="string">
+    	SELECT CAST(EDU_SEQ.NEXTVAL AS VARCHAR2(255)) FROM DUAL
+    </selectKey>
     	MERGE INTO 
     		EDUCATION edu
     	USING (
-    		<foreach collection="list" item="item">
+    		<foreach collection="list" item="item" separator="UNION">
     			SELECT
     				#{item.eduSeq, jdbcType=VARCHAR} as eduSeq
     				,#{item.recSeq, jdbcType=VARCHAR} as recSeq
@@ -129,7 +149,7 @@
 					,LOCATION
 	    		)
 	    		VALUES(
-	    			du.eduSeq
+	    			#{eduSeq}
 	    			,du.recSeq
 	    			,du.eduSchool
 					,du.eduDiv
@@ -142,214 +162,108 @@
     </update>
     
     <update id="mergeCar" parameterType="java.util.List">
-    INSERT INTO 
-    		(
-    			CAR_SEQ
-				,SEQ
-				,COMP_NAME
-				,LOCATION
-				,START_PERIOD
-				,END_PERIOD
-				,TASK
-				,SALARY
-    		)
-   		SELECT CAST(CAREER_SEQ.NEXTVAL AS VARCHAR2(255)), S.* 
-		FROM(
-		
-		) S
+    <selectKey keyProperty="carSeq" resultType="String" order="BEFORE">
+    	SELECT CAST(CAREER_SEQ.NEXTVAL AS VARCHAR2(255)) FROM DUAL
+    </selectKey>
     	MERGE INTO 
     		CAREER car
     	USING (
-    		<foreach collection="list" item="item">
+    		<foreach collection="list" item="item" separator="UNION">
 	    		SELECT 
-	    			#{item.recSeq, jdbcType=VARCHAR}
-	    			,#{item.carCompany, jdbcType=VARCHAR}
-	    			,#{item.carLoc, jdbcType=VARCHAR}
-	    			,#{item.carStart, jdbcType=VARCHAR}
-	    			,#{item.carEnd, jdbcType=VARCHAR}
-	    			,#{item.carTask, jdbcType=VARCHAR}
-	    			,#{item.carSalary, jdbcType=VARCHAR}
+	    			#{item.carSeq, jdbcType=VARCHAR} as carSeq
+	    			,#{item.recSeq, jdbcType=VARCHAR} as recSeq
+	    			,#{item.carCompany, jdbcType=VARCHAR} as carCompany
+	    			,#{item.carLoc, jdbcType=VARCHAR} as carLoc
+	    			,#{item.carStart, jdbcType=VARCHAR} as carStart
+	    			,#{item.carEnd, jdbcType=VARCHAR} as carEnd
+	    			,#{item.carTask, jdbcType=VARCHAR} as carTask
+	    			,#{item.carSalary, jdbcType=VARCHAR} as carSalary
 	    		FROM DUAL
     		</foreach>
    		) du
    		ON
-   			(edu.EDU_SEQ = du.eduSeq AND edu.SEQ = du.recSeq)
+   			(car.CAR_SEQ = du.carSeq AND car.SEQ = du.recSeq)
    			
 		WHEN MATCHED THEN 
 			UPDATE 
  			SET
-				edu.SCHOOL_NAME = du.eduSchool
-				,edu.DIVISION = du.eduDiv
-				,edu.START_PERIOD = du.eduStart
-				,edu.END_PERIOD = du.eduEnd
-				,edu.MAJOR = du.eduMajor
-				,edu.GRADE = du.eduGrade
-				,edu.LOCATION = du.eduLoc
+				car.COMP_NAME = du.carCompany
+				,car.LOCATION = du.carLoc
+				,car.START_PERIOD = du.carStart
+				,car.END_PERIOD = du.carEnd
+				,car.TASK = du.carTask
+				,car.SALARY = du.carSalary
 				
     	WHEN NOT MATCHED THEN
 	    	INSERT (
-	    			EDU_SEQ
+	    			CAR_SEQ
 					,SEQ
-					,SCHOOL_NAME
-					,DIVISION
+					,COMP_NAME
+					,LOCATION
 					,START_PERIOD
 					,END_PERIOD
-					,MAJOR
-					,GRADE
-					,LOCATION
+					,TASK
+					,SALARY
 	    		)
 	    		VALUES(
-	    			du.eduSeq
+	    			#{carSeq}
 	    			,du.recSeq
-	    			,du.eduSchool
-					,du.eduDiv
-					,du.eduStart
-					,du.eduEnd
-					,du.eduMajor
-					,du.eduGrade
-					,du.eduLoc
+					,du.carCompany
+	    			,du.carLoc
+					,du.carStart
+					,du.carEnd
+					,du.carTask
+					,du.carSalary
 	    		)
     </update>
     
     <update id="mergeCert" parameterType="java.util.List">
+    <selectKey order="BEFORE" keyProperty="certSeq" resultType="string">
+    	SELECT CAST(CERT_SEQ.NEXTVAL AS VARCHAR2(255)) FROM DUAL
+    </selectKey>
     	MERGE INTO 
-    		C edu
+    		CERTIFICATE cert
     	USING (
-    		<foreach collection="list" item="edu">
+    		<foreach collection="list" item="item" separator="UNION">
     			SELECT
-    				#{edu.eduSeq, jdbcType=VARCHAR} as eduSeq
-    				,#{edu.recSeq, jdbcType=VARCHAR} as recSeq
-    				,#{edu.eduSchool, jdbcType=VARCHAR} as eduSchool
-    				,#{edu.eduDiv, jdbcType=VARCHAR} as eduDiv
-    				,#{edu.eduLoc, jdbcType=VARCHAR} as eduLoc
-    				,#{edu.eduStart, jdbcType=VARCHAR} as eduStart
-    				,#{edu.eduEnd, jdbcType=VARCHAR} as eduEnd
-    				,#{edu.eduMajor, jdbcType=VARCHAR} as eduMajor
-    				,#{edu.eduGrade, jdbcType=VARCHAR} as eduGrade
+    				#{item.certSeq, jdbcType=VARCHAR} as certSeq
+    				,#{item.recSeq, jdbcType=VARCHAR} as recSeq
+    				,#{item.certQualifi, jdbcType=VARCHAR} as certQualifi
+    				,#{item.certAcqu, jdbcType=VARCHAR} as certAcqu
+    				,#{item.certOrganize, jdbcType=VARCHAR} as certOrganize
     			FROM
 		    		DUAL
     		</foreach>
    		) du
    		ON
-   			(edu.EDU_SEQ = du.eduSeq AND edu.SEQ = du.recSeq)
+   			(cert.CERT_SEQ = du.certSeq AND cert.SEQ = du.recSeq)
    			
 		WHEN MATCHED THEN 
 			UPDATE 
  			SET
-				edu.SCHOOL_NAME = du.eduSchool
-				,edu.DIVISION = du.eduDiv
-				,edu.START_PERIOD = du.eduStart
-				,edu.END_PERIOD = du.eduEnd
-				,edu.MAJOR = du.eduMajor
-				,edu.GRADE = du.eduGrade
-				,edu.LOCATION = du.eduLoc
+				cert.QUALIFI_NAME = du.certQualifi
+				,cert.ACQU_DATE = du.certAcqu
+				,cert.ORGANIZE_NAME = du.certOrganize
 				
     	WHEN NOT MATCHED THEN
 	    	INSERT (
-	    			EDU_SEQ
+	    			CERT_SEQ
 					,SEQ
-					,SCHOOL_NAME
-					,DIVISION
-					,START_PERIOD
-					,END_PERIOD
-					,MAJOR
-					,GRADE
-					,LOCATION
+					,QUALIFI_NAME
+					,ACQU_DATE
+					,ORGANIZE_NAME
 	    		)
 	    		VALUES(
-	    			du.eduSeq
+	    			#{certSeq}
 	    			,du.recSeq
-	    			,du.eduSchool
-					,du.eduDiv
-					,du.eduStart
-					,du.eduEnd
-					,du.eduMajor
-					,du.eduGrade
-					,du.eduLoc
+	    			,du.certQualifi
+					,du.certAcqu
+					,du.certOrganize
 	    		)
-    </update>
-    
-    
-    <insert id="insertCareer" parameterType="java.util.List">
-    	
-    </insert>
-    
-    <insert id="insertCert" parameterType="java.util.List">
-    	INSERT INTO 
-    		CERTIFICATE(
-    			CERT_SEQ
-				,SEQ
-				,QUALIFI_NAME
-				,ACQU_DATE
-				,ORGANIZE_NAME
-    		)
-   		SELECT CAST(CERT_SEQ.NEXTVAL AS VARCHAR2(255)), S.*
-   		FROM (
-   		<foreach collection="list" item="item" index="index" separator="UNION ALL ">
-    		SELECT 
-    			#{item.recSeq, jdbcType=VARCHAR}
-    			,#{item.certQualifi, jdbcType=VARCHAR}
-    			,#{item.certAcqu, jdbcType=VARCHAR}
-    			,#{item.certOrganize, jdbcType=VARCHAR}
-    		FROM DUAL
-    	</foreach>
-   		) S
-    </insert>
-    
-    <update id="updateRec" parameterType="com.spring.recruit.vo.RecruitVo">
-   	 	UPDATE 
-   	 		RECRUIT 
-   	 	SET
-			NAME = #{recName, jdbcType=VARCHAR}
-			,BIRTH = #{recBirth, jdbcType=VARCHAR}
-			,GENDER = #{recGender, jdbcType=VARCHAR}
-			,PHONE = #{recPhone, jdbcType=VARCHAR}
-			,EMAIL = #{recEmail, jdbcType=VARCHAR}
-			,ADDR = #{recAddr, jdbcType=VARCHAR}
-			,LOCATION = #{recLoc, jdbcType=VARCHAR}
-			,WORK_TYPE = #{recWt, jdbcType=VARCHAR}
-			,SUBMIT = #{recSubmit, jdbcType=VARCHAR}
-	    WHERE
-	     	SEQ = #{recSeq, jdbcType=VARCHAR}
-    </update>
-    
-    <update id="updateEdu" parameterType="java.util.List">
-    	<foreach collection="list" item="item" separator=";" open="DECLARE BEGIN" close="; END;">
-    	
-     	</foreach>
-    </update>
-    
-    <update id="updateCareer" parameterType="java.util.List">
-    <foreach collection="list" item="item" separator=";" open="DECLARE BEGIN" close="; END;">	
-    	UPDATE 
-   	 		CAREER 
-   	 	SET
-			COMP_NAME = #{item.carCompany, jdbcType=VARCHAR}
-			,LOCATION = #{item.carLoc, jdbcType=VARCHAR}
-			,START_PERIOD = #{item.carStart, jdbcType=VARCHAR}
-			,END_PERIOD = #{item.carEnd, jdbcType=VARCHAR}
-			,TASK = #{item.carTask, jdbcType=VARCHAR}
-			,SALARY = #{item.carSalary, jdbcType=VARCHAR}
-	    WHERE
-	     	CAR_SEQ = #{item.carSeq, jdbcType=VARCHAR} AND SEQ = #{item.recSeq, jdbcType=VARCHAR}
-	</foreach>
-   	</update>
-    
-    <update id="updateCert" parameterType="java.util.List">
-    	<foreach collection="list" item="item" separator=";" open="DECLARE BEGIN" close="; END;">
-    	UPDATE 
-   	 		CERTIFICATE 
-   	 	SET
-			QUALIFI_NAME = #{item.certQualifi, jdbcType=VARCHAR}
-			,ACQU_DATE = #{item.certAcqu, jdbcType=VARCHAR}
-			,ORGANIZE_NAME = #{item.certOrganize, jdbcType=VARCHAR}
-	    WHERE
-	     	CERT_SEQ = #{item.certSeq, jdbcType=VARCHAR} AND SEQ = #{item.recSeq, jdbcType=VARCHAR}
-     	</foreach>
     </update>
     
     <delete id="deleteEdu" parameterType="java.util.List">
-    <foreach collection="eduList" item="item">
+    <foreach collection="list" item="item">
     	DELETE
     		EDUCATION
     	WHERE 
@@ -367,7 +281,7 @@
     </delete>
     
     <delete id="deleteCert" parameterType="java.util.List">
-    <foreach collection="certList" item="item">
+    <foreach collection="list" item="item">
     	DELETE
     		CERTIFICATE
     	WHERE 

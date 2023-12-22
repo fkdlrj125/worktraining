@@ -13,6 +13,8 @@
 </head>
 <script type="text/javascript">
 	$j(document).ready(function() {
+		const searchParams = new URLSearchParams(location.search);
+		$j(".form-control").val(searchParams.get("search"))
 		let searchValue = $j(".form-control").val();
 		let searchReg = new RegExp(searchValue, 'g');
 		
@@ -41,8 +43,8 @@
 	<div class="wrap">
 		<nav class="navbar navbar-expand-lg">
 		  <div class="container-fluid">
-        <form class="d-flex search-bar">
-          <input class="form-control" type="text" placeholder="성분 이름을 입력해주세요" value="비타민">
+        <form class="d-flex search-bar" accept-charset="UTF-8">
+          <input name="search" class="form-control" type="text" placeholder="성분 이름을 입력해주세요" value="비타민">
           <a href="/pill" class="back-btn fa-solid fa-chevron-left fa-lg" style="color: #2a2a2a;"></a>
           <button type="button" class="x-btn fa-solid fa-circle-xmark fa-lg" style="color: #ccc;"></button>
 					<button type="submit" class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>

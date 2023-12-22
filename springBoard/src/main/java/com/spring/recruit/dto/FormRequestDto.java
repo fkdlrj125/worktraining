@@ -1,6 +1,7 @@
 package com.spring.recruit.dto;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.spring.recruit.vo.CareerVo;
 import com.spring.recruit.vo.CertVo;
@@ -38,5 +39,26 @@ public class FormRequestDto {
 		this.certData = certData;
 	}
 	
-	
+	public void setSeq(RecruitVo userInfo) {
+		eduData.forEach(new Consumer<EduVo>() {
+			@Override
+			public void accept(EduVo eduVo) {
+				eduVo.setRecSeq(userInfo.getRecSeq());
+			}
+		});
+		
+		carData.forEach(new Consumer<CareerVo>() {
+			@Override
+			public void accept(CareerVo carVo) {
+				carVo.setRecSeq(userInfo.getRecSeq());
+			}
+		});
+		
+		certData.forEach(new Consumer<CertVo>() {
+			@Override
+			public void accept(CertVo certVo) {
+				certVo.setRecSeq(userInfo.getRecSeq());
+			}
+		});
+	}
 }

@@ -47,6 +47,7 @@
 			$j(".item").last().find(".item-name").text(itemName);
 			$j(this).find("i").attr("style", "color: #56e166;");
 			$j(".fixed-search-btn").css("display", "block");
+			$j(".fixed-search-btn").css("pointer-events", "all");
 		});
 		
 		// selected-ingredient에서 클릭할 때
@@ -86,8 +87,8 @@
 	<div class="wrap">
 		<nav class="navbar navbar-expand-lg">
 		  <div class="container-fluid">
-        <form class="d-flex search-bar" action="/pill/search/result">
-          <input class="form-control" type="text" placeholder="성분 이름을 입력해주세요">
+        <form class="d-flex search-bar" action="/pill/search/result" accept-charset="UTF-8">
+          <input name="search" class="form-control" type="text" placeholder="성분 이름을 입력해주세요">
           <a href="/pill" class="back-btn fa-solid fa-chevron-left fa-lg" style="color: #2a2a2a;"></a>
           <button type="button" class="x-btn fa-solid fa-lg" style="color: #ccc;"></button>
           <button type="submit" class="search-btn fas fa-regular fa-magnifying-glass fa-lg" style="color: #6c2ef1;"></button>

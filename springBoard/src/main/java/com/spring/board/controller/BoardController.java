@@ -289,4 +289,68 @@ public class BoardController {
 		return callbackMsg;
 	}
 	
+	@RequestMapping(value= "/pill", method = RequestMethod.GET)
+	public String pillIndex() {
+		return "pill/main";
+	}
+	
+	@RequestMapping(value= "/pill/analysis", method = RequestMethod.GET)
+	public String pillAnalysis() {
+		return "pill/analysis/select";
+	}
+	
+	@RequestMapping(value= "/pill/analysis/result", method = RequestMethod.GET)
+	public String pillAnalysisResult() {
+		return "pill/analysis/result";
+	}
+	
+	@RequestMapping(value= "/pill/recommend", method = RequestMethod.GET)
+	public String pillRecommend() {
+		return "pill/recommend/select";
+	}
+	
+	@RequestMapping(value= "/pill/recommend/result", method = RequestMethod.GET)
+	public String pillRecommendResult() {
+		return "pill/recommend/result";
+	}
+	
+	@RequestMapping(value="/pill/ranking", method=RequestMethod.GET)
+	public String pillRanking() {
+		return "pill/ranking/ranking";
+	}
+	
+	@RequestMapping(value="/pill/qna", method=RequestMethod.GET)
+	public String pillQna() {
+		return "pill/qna/qna";
+	}
+	
+	@RequestMapping(value="/pill/search", method=RequestMethod.GET)
+	public String pillSearch() {
+		return "pill/search/search";
+	}
+	
+	@RequestMapping(value="/pill/search/result", method=RequestMethod.GET)
+	public String pillSearchResult() {
+		return "pill/search/result";
+	}
+	
+	@RequestMapping(value="/pill/login", method=RequestMethod.GET)
+	public String pillLogin() {
+		return "pill/user/login";
+	}
+	
+	@RequestMapping(value="/pill/join-select", method=RequestMethod.GET)
+	public String pillJoinSelect() {
+		return "pill/user/join-select";
+	}
+	
+	@RequestMapping(value="/pill/join", method=RequestMethod.GET)
+	public String pillJoin() {
+		return "pill/user/join";
+	}
+	
+	@RequestMapping(value="/pill/admin", method=RequestMethod.GET)
+	public String pillAdmin() {
+		return "pill/user/admin";
+	}
 }

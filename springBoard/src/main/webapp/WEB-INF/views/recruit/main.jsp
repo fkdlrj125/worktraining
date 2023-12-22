@@ -13,15 +13,21 @@
 		var result = [];
 		var obj = null;
 		
+		var objInit = function(obj) {
+			result.push(Object.assign({}, obj));
+			return {};
+		}
+		
 		try {
 			var arr = this.serializeArray();
 			
 			if(arr) {
 				obj = {};
 				$j.each(arr, function(index) {
+					obj.hasOwnProperty(this.name) ? obj = objInit(obj) : "";
 					obj[this.name] = this.value;
 				});
-				result.push(Object.assign({}, obj));
+				result.push(Object.assign({}, obj))
 			}
 		} catch (e) {
 			alert(e.message);
@@ -30,23 +36,22 @@
 	}
 
 	var rowAdd = function(category) {
-		let rowHTML = $j(`#\${category}Table tbody tr:first`).clone();
-		$j(rowHTML).find(`input[name^=\${category}]`).each(function() {
+		let copyRow = $j(`#\${category}Table tbody`).children("tr:eq(0)").clone();
+		console.log(copyRow);
+		$j(copyRow).find(`input[name^=\${category}]`).each(function() {
 			$j(this).removeAttr("value");
 		});
 		
-		$j(rowHTML).find(`input:checkbox`).removeAttr("value");
+		$j(copyRow).find(`input:checkbox`).removeAttr("value");
 		
-		$j(`#\${category}Table tbody`).append("<tr>"+$j(rowHTML).html()+"</tr>");
+		$j(`#\${category}Table tbody`).append("<tr>"+$j(copyRow).html()+"</tr>");
 	}
 	
 	var rowSub = function(category) {
 		let checkBox = $j(`#\${category}Table tbody input:checkbox`);
-		let checkSeq = {
-							"edu" : []
-							,"car" : []
-							,"cert" : []};
+		let checkSeq = {};
 		let removeList = [];
+		checkSeq[category] = [];
 		
 		checkBox.each(function() {
 			if($j(this).is(":checked")) {
@@ -65,7 +70,7 @@
 				$j(this).remove();
 			});
 			
-			console.log(checkSeq[category]);
+			// 데이터가 들어있지 않은 행을 걸러내는 코드
 			if(checkSeq[category].includes("on")) return;
 			
 			$j.ajax({
@@ -238,11 +243,9 @@
 					result = false;
 					break;
 				default :
-					console.log(testList[index]);
-					result = false;
 			}
 			
-			if(result == false) return false;
+			if(!result) return result;
 			
 		});
 		
@@ -254,17 +257,23 @@
 		
 		if(!validation(requiredData)) return;
 		
-		
 		var recData = $j("input[name^='rec'], select[name^='rec']").serializeObject();
 		var eduData = $j("input[name^='edu'], select[name^='edu']").serializeObject();
 		var carData = $j("input[name^='car']").serializeObject();
 		var certData = $j("input[name^='cert']").serializeObject();
 		
-		if(Object.values(carData[0]).find((el) => !!el?.trim()))
+		console.log(Object.values(carData));
+		Object.values(carData).find((el) => console.log(el));
+		console.log(Object.values(carData).find((el) => !!el?.trim()));
+		
+		if(Object.values(carData).find((el) => !!el?.trim()))
 			if(!validation($j("input[name^='car']"))) return
 			
 		if(Object.values(certData[0]).find((el) => !!el?.trim()))
 			if(!validation($j("input[name^='cert']"))) return
+			
+		console.log(Object.values(carData));
+		return;
 			
 		$j.ajax({
 			url : `/recruit/\${type}`,
@@ -310,12 +319,15 @@
 	$j(document).ready(function() {
 		
 		$j("#save").on("click", function() {
+			$j("input[type=checkbox]").prop("checked", true);
 			sendData("save");
 		});
 		
 		$j("#submit").on("click", function() {
-			if(confirm("제출 후 수정이 불가능합니다. 제출하시겠습니까?"))
+			if(confirm("제출 후 수정이 불가능합니다. 제출하시겠습니까?")) {
+				$j("input[type=checkbox]").prop("checked", true);
 				sendData("submit");
+			}
 		});
 		
 		$j("#addEdu").on("click", function() {
@@ -508,13 +520,13 @@
 							</th>
 						</tr>
 					</thead>
+					<tbody>
 					<c:choose>
 					<c:when test="${not empty eduList}">
 						<c:forEach items="${eduList}" var="edu">
-						<tbody>
 							<tr>
 								<td>
-									<input type="checkbox" value="${edu.eduSeq}">
+									<input type="checkbox" id="eduSeq" name="eduSeq" value="${edu.eduSeq}">
 								</td>
 								<td>
 									<input type="text" id="eduStart" name="eduStart"  maxlength="7"
@@ -564,14 +576,12 @@
 									>
 								</td>
 							</tr>
-						</tbody>
 					</c:forEach>
 					</c:when>
 					<c:otherwise>
-						<tbody>
 							<tr>
 								<td>
-									<input type="checkbox">
+									<input type="checkbox" name="eduSeq">
 								</td>
 								<td>
 									<input type="text" id="eduStart" name="eduStart"  maxlength="7"
@@ -618,9 +628,9 @@
 									>
 								</td>
 							</tr>
-						</tbody>
 					</c:otherwise>
 					</c:choose>
+						</tbody>
 					
 				</table>
 				
@@ -648,13 +658,13 @@
 							</th>
 						</tr>
 					</thead>
+					<tbody>
 					<c:choose>
 					<c:when test="${not empty carList}">
 					<c:forEach items="${carList}" var="car">
-						<tbody>
 							<tr>
 								<td>
-									<input type="checkbox" value="${car.carSeq}">
+									<input type="checkbox"  id="carSeq" name="carSeq" value="${car.carSeq}">
 								</td>
 								<td>
 									<input type="text" id="carStart" name="carStart"  maxlength="7"
@@ -681,14 +691,12 @@
 									value="${car.carLoc}">
 								</td>
 							</tr>
-						</tbody>
 					</c:forEach>
 					</c:when>
 					<c:otherwise>
-						<tbody>
 							<tr>
 								<td>
-									<input type="checkbox">
+									<input type="checkbox" name="carSeq">
 								</td>
 								<td>
 									<input type="text" id="carStart" name="carStart"  maxlength="7"
@@ -715,9 +723,9 @@
 									>
 								</td>
 							</tr>
-						</tbody>
 					</c:otherwise>
 					</c:choose>
+					</tbody>
 				</table>
 				
 				<h2 class="category">자격증</h2>
@@ -740,13 +748,13 @@
 							</th>
 						</tr>
 					</thead>
+					<tbody>
 					<c:choose>
 					<c:when test="${not empty certList}">
 					<c:forEach items="${certList}" var="cert">
-						<tbody>
 							<tr>
 								<td>
-									<input type="checkbox" value="${cert.certSeq}">
+									<input type="checkbox" id="certSeq" name="certSeq" value="${cert.certSeq}" >
 								</td>
 								<td>
 									<input type="text" id="certQualifi" name="certQualifi"  maxlength="30"
@@ -764,14 +772,12 @@
 									 value="${cert.certOrganize}">
 								</td>
 							</tr>
-						</tbody>
 					</c:forEach>
 					</c:when>
 					<c:otherwise>
-						<tbody>
 							<tr>
 								<td>
-									<input type="checkbox">
+									<input type="checkbox" name="certSeq">
 								</td>
 								<td>
 									<input type="text" id="certQualifi" name="certQualifi"  maxlength="30"
@@ -789,9 +795,9 @@
 									>
 								</td>
 							</tr>
-						</tbody>
 					</c:otherwise>
 					</c:choose>
+					</tbody>
 				</table>
 			</div>
 			<div id="svsbBtn">

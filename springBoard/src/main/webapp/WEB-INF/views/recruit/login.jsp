@@ -34,13 +34,11 @@
 
 	$j(document).ready(function() {
 		
-		
 		$j("#login").on("click", function() {
 			
 			if(nameCheck()) return;
 			
 			if(phoneCheck()) return;
-			
 			
 			var param = $j(":input");
 			

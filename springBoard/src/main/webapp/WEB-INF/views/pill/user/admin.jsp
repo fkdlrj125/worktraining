@@ -32,27 +32,30 @@
         <td></td>
       </tr>`;
 
-	var addRow = function() {
-		if($j("tbody").children(":last").attr("class") == "table-active") {
-			$j("tbody").append(tableNormal);
-			return;
+	var addRow = function(cnt) {
+		console.log(cnt);
+		for(let i = 0; i < cnt; i++) {
+			$j("tbody").children(":last").attr("class") == "table-active" ? 
+					$j("tbody").append(tableNormal) : $j("tbody").append(tableActive);
 		}
-		$j("tbody").append(tableActive);
 	}
 
 	$j(document).ready(function() {
 		let nowDate = new Date();
 		let rangeDate = new Date(nowDate);
+		let endPage = 10;
 		rangeDate.setMonth(nowDate.getMonth() - 1);
 		
 		$j("input[type=date]:eq(0)").val(rangeDate.toISOString().substring(0, 10));
 		$j("input[type=date]:eq(1)").val(nowDate.toISOString().substring(0, 10));
 		
+		// 탭 조작
 		$j(".nav-item").on("click", function(e) {
 			$j("button.active").removeClass("active").addClass("disabled");
 			$j(this).find("button").removeClass("disabled").addClass("active");
 		});
 		
+		// 페이징
 		$j(".start-btn").on("click", function() {
 			$j(".current-page").text(1);
 		});
@@ -67,7 +70,7 @@
 		});
 		
 		$j(".next-btn").on("click", function() {
-			if(parseInt($j(".current-page").text())+1 > parseInt($j(".total-page").text())) {
+			if(parseInt($j(".current-page").text())+1 > endPage) {
 				alert("마지막 페이지입니다.");
 				return;
 			}
@@ -76,18 +79,32 @@
 		});
 		
 		$j(".end-btn").on("click", function() {
-			$j(".current-page").text(10);
+			$j(".current-page").text(endPage);
+		});
+		
+		// 행 조작
+		$j("#checkAll").on("click", function() {
+			$j("#checkAll").is(":checked") ? 
+					$j("input:not(#checkAll):checkbox").prop("checked", true)
+					: $j("input:not(#checkAll):checkbox").prop("checked", false);
+		});
+		
+		$j("input:not(#checkAll):checkbox").on("click", function() {
+			if($j("#checkAll").is(":checked")) 
+				$j("#checkAll").prop("checked", false);
 		});
 		
 		$j("#submitBtn").on("click", function() {
+			let submitCnt = $j("tbody").find("input:checked").length;
 			$j("tbody").find("input:checked").closest("tr").remove();
-			addRow();
+			addRow(submitCnt);
 			
 		});
 		
 		$j("#deleteBtn").on("click", function() {
+			let deleteCnt = $j("tbody").find("input:checked").length;
 			$j("tbody").find("input:checked").closest("tr").remove();
-			addRow();
+			addRow(deleteCnt);
 		});
 	});
 </script>
@@ -112,16 +129,17 @@
          	 </div>
         </div>
         <div id="myTabContent" class="tab-content">
-        <div class="date-box">
-        	<input type="date">
+        <form class="date-form date-box" action="/pill/admin">
+        	<input type="date" name="sd">
         	~
-        	<input type="date">
-        	<button type="submit" class="search-btn fas fa-regular fa-magnifying-glass " style="color: #6c2ef1;"></button>        </div>
+        	<input type="date" name="ed">
+        	<button type="submit" class="search-btn fas fa-regular fa-magnifying-glass " style="color: #6c2ef1;"></button>
+        </form>
         <table class="table table-hover">
           <thead>
             <tr class="table-primary">
               <th scope="col">
-                <input type="checkbox" name="" id="">
+                <input type="checkbox" name="" id="checkAll">
               </th>
               <th scope="col">아이디</th>
               <th scope="col">이름</th>
