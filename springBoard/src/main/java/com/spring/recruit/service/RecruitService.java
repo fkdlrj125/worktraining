@@ -7,6 +7,7 @@ import com.spring.recruit.vo.CareerVo;
 import com.spring.recruit.vo.CertVo;
 import com.spring.recruit.vo.EduVo;
 import com.spring.recruit.vo.RecruitVo;
+import com.spring.recruit.vo.UserBoxVo;
 
 public interface RecruitService {
 	public RecruitVo selectRecruit(RecruitVo recruitVo) throws Exception;
@@ -34,4 +35,6 @@ public interface RecruitService {
 	public int deleteEdu(List<EduVo> eduVo) throws Exception;
 	
 	public List<TypeVo> selectTypeList() throws Exception;
+	
+	public UserBoxVo makeUserBoxVo(RecruitVo userInfo) throws Exception;
 }

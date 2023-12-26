@@ -2,6 +2,8 @@ package com.spring.common;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -59,23 +61,5 @@ public class CommonUtil {
 			logger.debug("toJson parsing Error",e);
 		}
         return rtnStr;
-	}
-	
-	public static FormRequestDto setSeq(FormRequestDto data, RecruitVo userInfo) {
-		List<EduVo> eduList = data.getEduData();
-		List<CareerVo> carList = data.getCarData();
-		List<CertVo> certList = data.getCertData();
-		
-//		if(!eduList.isEmpty()) {
-//			List<EduVo> selectEduList = 
-//			eduList.forEach(new Consumer<EduVo>() {
-//				@Override
-//				public void accept(EduVo edu) {
-//					edu.setEduSeq(null);
-//				};
-//			});
-//		}
-		
-		return data;
 	}
 }

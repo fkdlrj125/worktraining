@@ -92,7 +92,7 @@ public class RecruitController {
 			case "N": {
 				callbackMsg = recruitService.updateRecruit(data.getRecData().get(0)) + recruitService.mergeEdu(data.getEduData())
 				 + recruitService.mergeCareer(data.getCarData()) + recruitService.mergeCert(data.getCertData())
-				 == 1 ? "Y" : "N";
+				 >= 4 ? "Y" : "N";
 				break;
 			}
 			
@@ -160,7 +160,7 @@ public class RecruitController {
 		if(checkSeq.getCar() != null) {
 			List<CareerVo> carList = new ArrayList<CareerVo>();
 			CareerVo carVo = new CareerVo();
-			checkSeq.getEdu().forEach(new Consumer<String>() {
+			checkSeq.getCar().forEach(new Consumer<String>() {
 				@Override
 				public void accept(String t) {
 					carVo.setCarSeq(t);

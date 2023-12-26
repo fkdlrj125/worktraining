@@ -168,7 +168,7 @@ button.search-btn {
 	display: flex;
 	position: fixed;
 	flex-direction: column;
-	width: 90%;
+	width: 80%;
 	bottom: 2rem;
 	gap: 10px;
 	align-items: center;
