@@ -11,6 +11,7 @@ import com.spring.recruit.vo.CareerVo;
 import com.spring.recruit.vo.CertVo;
 import com.spring.recruit.vo.EduVo;
 import com.spring.recruit.vo.RecruitVo;
+import com.spring.recruit.vo.UserInfoVo;
 
 @Repository
 public class RecruitDaoImpl implements RecruitDao{
@@ -21,72 +22,78 @@ public class RecruitDaoImpl implements RecruitDao{
 	@Override
 	public RecruitVo selectRecruit(RecruitVo recruitVo) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.selectOne("selectRecruit", recruitVo);
+		return sqlSession.selectOne("recruit.selectRecruit", recruitVo);
 	}
 	
 	@Override
 	public List<EduVo> selectEdu(RecruitVo recruitVo) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.selectList("selectEdu", recruitVo);
+		return sqlSession.selectList("recruit.selectEdu", recruitVo);
 	}
 
 	@Override
 	public List<CareerVo> selectCareer(RecruitVo recruitVo) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.selectList("selectCareer", recruitVo);
+		return sqlSession.selectList("recruit.selectCareer", recruitVo);
 	}
 
 	@Override
 	public List<CertVo> selectCert(RecruitVo recruitVo) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.selectList("selectCert", recruitVo);
+		return sqlSession.selectList("recruit.selectCert", recruitVo);
 	}
 	
 	@Override
 	public int insertRecruit(RecruitVo recruitVo) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.insert("insertRecruit", recruitVo);
+		return sqlSession.insert("recruit.insertRecruit", recruitVo);
+	}
+	
+	@Override
+	public UserInfoVo selectUserInfo(RecruitVo recruitVo) throws Exception {
+		// TODO Auto-generated method stub
+		return sqlSession.selectOne("recruit.selectUserInfo", recruitVo);
 	}
 	
 	@Override
 	public int updateRecruit(RecruitVo recruitVo) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.update("updateRec", recruitVo);
+		return sqlSession.update("recruit.updateRec", recruitVo);
 	}
 
 	@Override
 	public int mergeEdu(List<EduVo> eduList) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.update("mergeEdu", eduList);
+		return sqlSession.update("recruit.mergeEdu", eduList);
 	}
 	
 	@Override
 	public int mergeCareer(List<CareerVo> careerList) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.update("mergeCar", careerList);
+		return sqlSession.update("recruit.mergeCar", careerList);
 	}
 	
 	@Override
 	public int mergeCert(List<CertVo> certList) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.update("mergeCert", certList);
+		return sqlSession.update("recruit.mergeCert", certList);
 	}
 
 	@Override
 	public int deleteEdu(List<EduVo> eduList) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.delete("deleteEdu", eduList);
+		return sqlSession.delete("recruit.deleteEdu", eduList);
 	}
 
 	@Override
 	public int deleteCareer(List<CareerVo> carList) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.delete("deleteCareer", carList);
+		return sqlSession.delete("recruit.deleteCareer", carList);
 	}
 
 	@Override
 	public int deleteCert(List<CertVo> certList) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.delete("deleteCert", certList);
+		return sqlSession.delete("recruit.deleteCert", certList);
 	}
 }

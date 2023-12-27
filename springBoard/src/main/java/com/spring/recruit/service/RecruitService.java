@@ -7,7 +7,7 @@ import com.spring.recruit.vo.CareerVo;
 import com.spring.recruit.vo.CertVo;
 import com.spring.recruit.vo.EduVo;
 import com.spring.recruit.vo.RecruitVo;
-import com.spring.recruit.vo.UserBoxVo;
+import com.spring.recruit.vo.UserInfoVo;
 
 public interface RecruitService {
 	public RecruitVo selectRecruit(RecruitVo recruitVo) throws Exception;
@@ -36,5 +36,5 @@ public interface RecruitService {
 	
 	public List<TypeVo> selectTypeList() throws Exception;
 	
-	public UserBoxVo makeUserBoxVo(RecruitVo userInfo) throws Exception;
+	public UserInfoVo selectUserBox(RecruitVo recruitVo) throws Exception;
 }

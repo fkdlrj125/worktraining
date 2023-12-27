@@ -46,6 +46,14 @@
     	<result property="carSalary" 	column="SALARY"/>
     </resultMap>
     
+    <resultMap type="com.spring.recruit.vo.UserInfoVo" id="userInfoVo">
+    	<result property="school" column="school"/>
+    	<result property="division" column="division"/>
+    	<result property="carPeriod" column="car_period"/>
+    	<result property="workLoc" column="work_loc"/>
+    	<result property="workType" column="work_type"/>
+    </resultMap>
+    
     <!-- 
     	myBatis에서 null을 넣을 땐 타입을 지정해줘야 함
     	-> JDBC driver에서 타입 입력을 요구하는 메소드 때문
@@ -263,28 +271,28 @@
     </update>
     
     <delete id="deleteEdu" parameterType="java.util.List">
-    <foreach collection="list" item="item">
     	DELETE
     		EDUCATION
     	WHERE 
+    <foreach collection="list" item="item" separator="OR">
     		EDU_SEQ = #{item.eduSeq, jdbcType=VARCHAR} AND SEQ = #{item.recSeq, jdbcType=VARCHAR}
    	</foreach>
     </delete>
     
     <delete id="deleteCareer" parameterType="java.util.List">
-    <foreach collection="carList" item="item">
     	DELETE
     		Career
     	WHERE 
+    <foreach collection="list" item="item" separator="OR">
     		CAR_SEQ = #{item.carSeq, jdbcType=VARCHAR} AND SEQ = #{item.recSeq, jdbcType=VARCHAR}
    	</foreach>
     </delete>
     
     <delete id="deleteCert" parameterType="java.util.List">
-    <foreach collection="list" item="item">
     	DELETE
     		CERTIFICATE
     	WHERE 
+    <foreach collection="list" item="item" separator="OR">
     		CERT_SEQ = #{item.certSeq, jdbcType=VARCHAR} AND SEQ = #{item.recSeq, jdbcType=VARCHAR}
    	</foreach>
     </delete>
@@ -323,5 +331,35 @@
     		CERTIFICATE
     	WHERE 
     		SEQ = #{recSeq, jdbcType=VARCHAR}
+    </select>
+    
+    <select id="selectUserInfo" parameterType="com.spring.recruit.vo.RecruitVo" resultMap="userInfoVo">
+    	SELECT 
+    		e.SCHOOL_NAME school
+    		,e.DIVISION division
+    		,
+    		(
+	            SELECT 
+	                SUM(MONTHS_BETWEEN(TO_DATE(END_PERIOD,'YYYY.MM'), TO_DATE(START_PERIOD, 'YYYY.MM'))) car_period
+	            FROM 
+	                CAREER
+	            WHERE
+	               SEQ = 22
+            ) car_period
+    		,r.LOCATION work_loc
+    		,r.WORK_TYPE work_type
+    	FROM
+    		RECRUIT r
+    		,(
+   			    SELECT 
+			        SCHOOL_NAME
+			        ,DIVISION
+			        ,SEQ
+			        ,ROW_NUMBER() OVER(ORDER BY TO_DATE(START_PERIOD, 'YYYY.MM') DESC) period
+			    FROM 
+			        EDUCATION
+    		) e
+    	WHERE
+    		e.SEQ = 22 AND r.SEQ = 22 AND e.period = 1
     </select>
 </mapper>

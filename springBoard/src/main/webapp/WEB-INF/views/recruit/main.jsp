@@ -60,7 +60,7 @@
 		let checkSeq = {};
 		let removeList = [];
 		checkSeq[category] = [];
-		
+
 		checkBox.each(function() {
 			if($j(this).is(":checked")) {
 				removeList.push($j(this).closest("tr"));
@@ -74,7 +74,12 @@
 		}
 		
 		if(confirm("삭제하시겠습니까?")) {
+			
 			if(removeList.length == checkBox.length) {
+				if(category == "edu") {
+					alert("최소 한 개의 행을 남겨주세요");
+					return;
+				}
 				rowAdd(category);
 			}
 			
@@ -216,32 +221,32 @@
 	
 	var sendData = function(type, ...args) {
 		var requiredData = $j("input[required]");
+		let data = {};
 		
 		if(!validation(requiredData)) return;
 		
-		var recData = $j("input[name^='rec'], select[name^='rec']").serializeObject("rec");
-		var eduData = $j("input[name^='edu'], select[name^='edu']").serializeObject();
+		data["recData"]= $j("input[name^='rec'], select[name^='rec']").serializeObject("rec");
+		data["eduData"] = $j("input[name^='edu'], select[name^='edu']").serializeObject();
 		var carData = $j("input[name^='car']").serializeObject();
 		var certData = $j("input[name^='cert']").serializeObject();
-
-		if(Object.values(carData[0]).find((el) => !!el?.trim()))
-			if(!validation($j("input[name^='car']"))) return
-			
-		if(Object.values(certData[0]).find((el) => !!el?.trim()))
-			if(!validation($j("input[name^='cert']"))) return
 		
-		return;
+		if(carData.length != 0) {
+			if(!validation($j("input[name^='car']"))) return
+			data["carData"] = carData;
+		}
+		
+		if(certData.length != 0) {
+			if(!validation($j("input[name^='car']"))) return
+			data["certData"] = certData;
+		}
+		
+		console.log(data);
+		
 		$j.ajax({
 			url : `/recruit/\${type}`,
 			type : "POST",
 			contentType : "application/json",
-			data : JSON.stringify({
-					"recData" : recData,
-					"eduData" : eduData,
-					"carData" : carData,
-					"certData" : certData
-				})
-			,
+			data : JSON.stringify(data),
 			dataType : "json",
 			success : function(data) {
 				console.log(data.success);
@@ -442,15 +447,22 @@
 					<tbody>
 						<tr>
 							<td>
-								<div id="edu"></div>
+								<div id="edu">
+								${userBoxInfo.school}<c:if test="${userBoxInfo.school eq '대학교'}">(4년제)</c:if>
+								${userBoxInfo.division}
+								</div>
 							</td>
 							<td>
-								<div id="career"></div>
+								<div id="career">${userBoxInfo.carPeriod}</div>
 							</td>
 							<td>회사내규에 따름</td>
 							<td>
-								<div id="workLoc"></div>
-								<div id="workType"></div>
+								<c:forEach items="${location}" var="loc">
+									<div id="workLoc">
+										<c:if test="${userBoxInfo.workLoc eq loc.codeId}">${loc.codeName} 전체</c:if>
+									</div>
+								</c:forEach>
+								<div id="workType">${userBoxInfo.workType}</div>
 							</td>
 						</tr>
 					</tbody>

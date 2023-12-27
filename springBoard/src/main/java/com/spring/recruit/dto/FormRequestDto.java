@@ -47,6 +47,7 @@ public class FormRequestDto {
 			}
 		});
 		
+		if(carData != null)
 		carData.forEach(new Consumer<CareerVo>() {
 			@Override
 			public void accept(CareerVo carVo) {
@@ -54,6 +55,7 @@ public class FormRequestDto {
 			}
 		});
 		
+		if(certData != null)
 		certData.forEach(new Consumer<CertVo>() {
 			@Override
 			public void accept(CertVo certVo) {

@@ -53,9 +53,6 @@ public class RecruitController {
 		
 		result.put("success", "Y");
 		session.setAttribute("userInfo", search);
-		System.out.println(search.getRecSeq());
-		System.out.println(search.getRecSubmit());
-		
 		return CommonUtil.getJsonCallBackString("", result);
 	}
 	
@@ -67,6 +64,10 @@ public class RecruitController {
 			model.addAttribute("userInfo", userInfo);
 			model.addAttribute("location", recruitService.selectTypeList());
 			return "recruit/main";
+		}
+		
+		if(userInfo.getRecBirth() != null) {
+			model.addAttribute("userBoxInfo", recruitService.selectUserBox(userInfo));
 		}
 		
 		model.addAttribute("userInfo", userInfo);
@@ -85,14 +86,37 @@ public class RecruitController {
 		HttpSession session = request.getSession(false);
 		RecruitVo userInfo = (RecruitVo) session.getAttribute("userInfo");
 		String callbackMsg = "";
+		int r = 0;
 		
+		System.out.println(userInfo.getRecSeq());
 		data.setSeq(userInfo);
 		
 		switch (userInfo.getRecSubmit()) {
 			case "N": {
-				callbackMsg = recruitService.updateRecruit(data.getRecData().get(0)) + recruitService.mergeEdu(data.getEduData())
-				 + recruitService.mergeCareer(data.getCarData()) + recruitService.mergeCert(data.getCertData())
-				 >= 4 ? "Y" : "N";
+				if(data.getCarData() != null && data.getCertData() != null) {
+					r = recruitService.updateRecruit(data.getRecData().get(0)) + recruitService.mergeEdu(data.getEduData())
+					 + recruitService.mergeCareer(data.getCarData()) + recruitService.mergeCert(data.getCertData());
+					callbackMsg = r >= 3 ? "Y" : "N";
+					break;
+					
+				}
+				
+				if(data.getCarData() != null) {
+					r = recruitService.updateRecruit(data.getRecData().get(0)) + recruitService.mergeEdu(data.getEduData())
+					+ recruitService.mergeCareer(data.getCarData());
+					callbackMsg = r >= 2 ? "Y" : "N";
+					break;
+				}
+				
+				if(data.getCertData() != null) {
+					r = recruitService.updateRecruit(data.getRecData().get(0)) + recruitService.mergeEdu(data.getEduData())
+					+ recruitService.mergeCert(data.getCertData());
+					callbackMsg = r >= 2 ? "Y" : "N";
+					break;
+				} 
+				
+				r = recruitService.updateRecruit(data.getRecData().get(0)) + recruitService.mergeEdu(data.getEduData());
+				callbackMsg = r >= 1 ? "Y" : "N";
 				break;
 			}
 			
@@ -101,6 +125,7 @@ public class RecruitController {
 				return CommonUtil.getJsonCallBackString("", result);
 			}
 		}
+		System.out.println(r);
 		
 		result.put("success", callbackMsg);
 		return CommonUtil.getJsonCallBackString("", result);
@@ -142,50 +167,62 @@ public class RecruitController {
 		Map<String, String> result = new HashMap<String, String>();
 		HttpSession session = request.getSession(false);
 		RecruitVo userInfo = (RecruitVo)session.getAttribute("userInfo");
+		Map<String, Integer> sqlResult = new HashMap<>();
+		sqlResult.put("eduResult", 1);
+		sqlResult.put("carResult", 1);
+		sqlResult.put("certResult", 1);
 		
 		if(checkSeq.getEdu() != null) {
 			List<EduVo> eduList = new ArrayList<EduVo>();
-			EduVo eduVo = new EduVo();
+			
 			checkSeq.getEdu().forEach(new Consumer<String>() {
 				@Override
 				public void accept(String t) {
+					EduVo eduVo = new EduVo();
 					eduVo.setEduSeq(t);
 					eduVo.setRecSeq(userInfo.getRecSeq());
 					eduList.add(eduVo);
 				}
 			});
-			recruitService.deleteEdu(eduList);
+			sqlResult.replace("eduResult", recruitService.deleteEdu(eduList)) ;
 		}
 		
 		if(checkSeq.getCar() != null) {
 			List<CareerVo> carList = new ArrayList<CareerVo>();
-			CareerVo carVo = new CareerVo();
+			
 			checkSeq.getCar().forEach(new Consumer<String>() {
 				@Override
 				public void accept(String t) {
+					CareerVo carVo = new CareerVo();
 					carVo.setCarSeq(t);
 					carVo.setRecSeq(userInfo.getRecSeq());
 					carList.add(carVo);
 				}
 			});
-			recruitService.deleteCareer(carList);
+			sqlResult.replace("carResult", recruitService.deleteCareer(carList)) ;
 		}
 		
 		if(checkSeq.getCert() != null) {
 			List<CertVo> certList = new ArrayList<CertVo>();
-			CertVo certVo = new CertVo();
+			
 			checkSeq.getCert().forEach(new Consumer<String>() {
 				@Override
 				public void accept(String t) {
+					CertVo certVo = new CertVo();
 					certVo.setCertSeq(t);
 					certVo.setRecSeq(userInfo.getRecSeq());
 					certList.add(certVo);
 				}
 			});
-			result.put("success", recruitService.deleteCert(certList) == 0 ? "N" : "Y");
+			sqlResult.replace("certResult", recruitService.deleteCert(certList)) ;
 		}
 		
-		result.put("success", "N");
+		if(sqlResult.containsValue(0)) {
+			result.put("success", "N");
+			return CommonUtil.getJsonCallBackString("", result);
+		} 
+		
+		result.put("success", "Y");
 		return CommonUtil.getJsonCallBackString("", result);
 	}
 }

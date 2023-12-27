@@ -6,6 +6,7 @@ import com.spring.recruit.vo.CareerVo;
 import com.spring.recruit.vo.CertVo;
 import com.spring.recruit.vo.EduVo;
 import com.spring.recruit.vo.RecruitVo;
+import com.spring.recruit.vo.UserInfoVo;
 
 public interface RecruitDao {
 	
@@ -32,4 +33,6 @@ public interface RecruitDao {
 	public int deleteCareer(List<CareerVo> carList) throws Exception;
 
 	public int deleteEdu(List<EduVo> eduList) throws Exception;
+	
+	public UserInfoVo selectUserInfo(RecruitVo recruitVo) throws Exception;
 }
