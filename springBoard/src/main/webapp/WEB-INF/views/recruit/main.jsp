@@ -13,29 +13,25 @@
 		var result = [];
 		var obj = null;
 		
-		var objInit = function(obj) {
+		var objInsert = function(obj) {
 			result.push(Object.assign({}, obj));
 			return {};
 		}
 		
 		try {
 			var arr = this.serializeArray();
-			var arrSize = args.includes("rec") ? 1 
-					: [...arr].filter((el) => el.name.includes("Seq")).length;
-			var arrLength = arr.length / arrSize;
-			
+
 			if(arr) {
 				obj = {};
 				$j.each(arr, function(index) {
-					obj.hasOwnProperty(this.name) ? obj = objInit(obj) : "";
+					obj.hasOwnProperty(this.name) ? obj = objInsert(obj) : "";
 					this.value ? obj[this.name] = this.value : "";
 				});
-				arrLength == Object.keys(obj).length ? result.push(Object.assign({}, obj)) : "";
+				objInsert(obj);
 			}
 		} catch (e) {
 			alert(e.message);
 		}
-		console.log(result);
 		return result;
 	}
 
@@ -43,7 +39,7 @@
 		let copyRow = $j(`#\${category}Table tbody`).children("tr:eq(0)").clone();
 		let rowLength = $j(`#\${category}Table tbody`).children().length;
 		let copyId = "";
-
+		
 		$j(copyRow).find(`input[name^=\${category}], select[name^=\${category}]`).each(function() {
 			$j(this).removeAttr("value");
 			copyId = $j(this).attr("id").slice(0,-1);
@@ -82,27 +78,52 @@
 				}
 				rowAdd(category);
 			}
-			
-			$j.each(removeList, function() {
-				$j(this).remove();
-			});
-			
-			// 데이터가 들어있지 않은 행을 걸러내는 코드
+
 			if(checkSeq[category].includes("on")) 
 				checkSeq[category] = checkSeq[category].filter((val) => val !== "on");
 			
-			if(checkSeq[category].length == 0) return;
+			if(checkSeq[category].length == 0) {
+				$j.each(removeList, function() {
+					$j(this).remove();
+				});
+				return;
+			}
 			
-			$j.ajax({
-				url : "/recruit/delete",
-				type : "POST",
-				data : JSON.stringify(checkSeq),
-				dataType : "json",
-				contentType : "application/json",
-				success : function(data) {
-					if(data.success == "N")
-						alert("삭제 실패");
-				}
+			let promise = new Promise(function(resolve, reject) { 
+				$j.ajax({
+					url : "/recruit/delete",
+					type : "POST",
+					data : JSON.stringify(checkSeq),
+					dataType : "json",
+					contentType : "application/json",
+					success : function(data) {
+						console.log(data.success);
+						switch (data.success) {
+						case "Y":
+							resolve();
+							break;
+							
+						case "N":
+							alert("삭제 실패");
+							break;
+							
+						case "S":
+							alert("제출 후 수정은 불가능합니다.");
+							break;
+
+						default:
+							alert("삭제 실패");
+							break;
+						}
+					}
+				});
+			});
+			
+			promise
+			.then(function() {
+				$j.each(removeList, function() {
+					$j(this).remove();
+				});
 			});
 		}
 	}
@@ -126,8 +147,10 @@
 			date : /^\d{4}\.\d{2}\$/,
 			phone : /^01([0|1|6|7|8|9])-?\d{3,4}-?\d{4}$/,
 			grade : /^\d{1}\.\d{1}$/,
-			task : /[\uac00-\ud7a3\/\w]/,
-			email : /^\w*@\w*\.\w*$/,
+			task : /[\uac00-\ud7a3\w]+\/[\uac00-\ud7a3\w]+\/[\uac00-\ud7a3\w]+/,
+			email : /^\w*@\w*\.\w*(\.\w*)?$/,
+			birth2 : /^\d{4}\.(0[1-9]|1[012]).(0[1-9]|[12][0-9]|3[01])$/,
+			date2 : /^\d{4}\.(0[1-9]|1[012])\$/
 			
 		}
 		
@@ -140,18 +163,39 @@
 			grade : "을 x.x 형식으로 입력해주세요.",
 			task : "을 부서/직책/직급 형태로 입력해주세요.",
 			email : "을 xxx@xxx.xxx 형식으로 입력해주세요.",
-			
+			birth2 : "에 월(01-12) 또는 일(01-31)을 정확히 입력해주세요.",
+			date2 : "에 월(01-12)을 정확히 입력해주세요."
 		}
 		
 		let check = function(data, type) { 
 			if(emptyWarn(data)) return false;
 			
-			if(!regex[type].test($j(`#\${data}`).val())) {
-				alert($j(`label[for=\${$j(`#\${data}`).attr('id').slice(0,-1)+0}]`).text().trim()
-				+comment[type]);
-				$j(`#\${data}`).focus();
-				return false;
-			}
+			switch(type) {
+				case "birth": case "date":
+					if(!regex[type].test($j(`#\${data}`).val())) {
+						alert($j(`label[for=\${$j(`#\${data}`).attr('id').slice(0,-1)+0}]`).text().trim()
+								+comment[type]);
+						$j(`#\${data}`).focus();
+						return false;
+					}
+					
+					if(!regex[type+2].test($j(`#\${data}`).val())) {
+						alert($j(`label[for=\${$j(`#\${data}`).attr('id').slice(0,-1)+0}]`).text().trim()
+								+comment[type+2]);
+						$j(`#\${data}`).focus();
+						return false;
+					}
+					break;
+					
+				default:
+					if(!regex[type].test($j(`#\${data}`).val())) {
+						alert($j(`label[for=\${$j(`#\${data}`).attr('id').slice(0,-1)+0}]`).text().trim()
+								+comment[type]);
+						$j(`#\${data}`).focus();
+						return false;
+					}
+			}				
+			
 			return true;
 		}
 		
@@ -164,7 +208,26 @@
 					result = false;
 					break;
 					
-				case "Start": case "End": 
+				case "Start":
+					if(!check(this, "date")) {
+						result = false;
+						break;
+					}
+					
+					if(!check(this.replace("Start", "End"), "date")) {
+						result = false;
+						break;
+					}
+					
+					let start = new Date($j(`#\${this}`).val());
+					let end = new Date($j(`#\${this.replace("Start", "End")}`).val())
+					
+					if((end - start) < 0) {
+						alert("시작날짜 끝날짜 순으로 입력해주세요.");
+						$j(`#\${this}`).focus();
+					}
+					break;
+					
 				case "Acqu":
 					if(check(this, "date")) break;
 					result = false;
@@ -208,6 +271,7 @@
 	}
 	
 	var validation = function(data) {
+		let valList = [];
 		let idList = [];
 		let testList = [];
 		
@@ -231,16 +295,18 @@
 		var certData = $j("input[name^='cert']").serializeObject();
 		
 		if(carData.length != 0) {
-			if(!validation($j("input[name^='car']"))) return
+			if(!validation($j("input[name^='car']").filter(function() {
+				return !!$j(this).val()?.trim()
+			}))) return;
 			data["carData"] = carData;
 		}
 		
 		if(certData.length != 0) {
-			if(!validation($j("input[name^='car']"))) return
+			if(!validation($j("input[name^='cert']").filter(function() {
+				return !!$j(this).val()?.trim()
+			}))) return;
 			data["certData"] = certData;
 		}
-		
-		console.log(data);
 		
 		$j.ajax({
 			url : `/recruit/\${type}`,
@@ -262,7 +328,6 @@
 					
 				case "S":
 					alert("제출 후 수정은 불가능합니다.");
-					location.href="/recruit/login";
 					break;
 
 				default:
@@ -278,6 +343,18 @@
 	}
 
 	$j(document).ready(function() {
+		$j("#recBirth0").on("keypress", function() {
+			$j(this).val().length == 4 ? $j(this).val($j(this).val() + ".") : "";
+			$j(this).val().length == 7 ? $j(this).val($j(this).val() + ".") : "";
+		});
+		
+		$j(document).on("keypress", "input[name*=Start], input[name*=End], input[name*=Acqu]", function() {
+			$j(this).val().length == 4 ? $j(this).val($j(this).val() + ".") : "";
+		});
+		
+		$j(document).on("keypress", "input[name*=Grade]", function() {
+			$j(this).val().length == 1 ? $j(this).val($j(this).val() + ".") : "";
+		});
 		
 		$j("#save").on("click", function() {
 			$j("input[type=checkbox]").prop("checked", true);
@@ -556,7 +633,7 @@
 					<c:otherwise>
 							<tr>
 								<td>
-									<input type="checkbox" name="eduSeq">
+									<input type="checkbox" id="eduSeq0" name="eduSeq">
 								</td>
 								<td>
 									<input type="text" id="eduStart0" name="eduStart"  maxlength="7"
@@ -581,7 +658,7 @@
 									<input type="text" id="eduSchool0" name="eduSchool"  maxlength="50"
 									oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\s]/, '')"
 									required>
-									<select id="eduLoc" name="eduLoc" required>
+									<select id="eduLoc0" name="eduLoc" required>
 										<c:forEach items="${location}" var="loc">
 										<option value="${loc.codeId}" 
 										<c:if test="${edu.eduLoc eq loc.codeId 

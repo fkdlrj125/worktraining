@@ -107,28 +107,28 @@
 	    WHERE
 	     	SEQ = #{recSeq, jdbcType=VARCHAR}
     </update>
-
+	<!-- 
+		merge에서는 그냥 nextval호출해도 사용 가능한 듯 하다.
+		using에 있는 로우당 한 번씩 호출하는 거라 가능한 것 같음
+	 -->
     <update id="mergeEdu" parameterType="java.util.List">
-    <selectKey order="BEFORE" keyProperty="eduSeq" resultType="string">
-    	SELECT CAST(EDU_SEQ.NEXTVAL AS VARCHAR2(255)) FROM DUAL
-    </selectKey>
     	MERGE INTO 
     		EDUCATION edu
     	USING (
-    		<foreach collection="list" item="item" separator="UNION">
-    			SELECT
-    				#{item.eduSeq, jdbcType=VARCHAR} as eduSeq
-    				,#{item.recSeq, jdbcType=VARCHAR} as recSeq
-    				,#{item.eduSchool, jdbcType=VARCHAR} as eduSchool
-    				,#{item.eduDiv, jdbcType=VARCHAR} as eduDiv
-    				,#{item.eduLoc, jdbcType=VARCHAR} as eduLoc
-    				,#{item.eduStart, jdbcType=VARCHAR} as eduStart
-    				,#{item.eduEnd, jdbcType=VARCHAR} as eduEnd
-    				,#{item.eduMajor, jdbcType=VARCHAR} as eduMajor
-    				,#{item.eduGrade, jdbcType=VARCHAR} as eduGrade
-    			FROM
-		    		DUAL
-    		</foreach>
+	    		<foreach collection="list" item="item" separator="UNION">
+	    			SELECT
+	    				#{item.eduSeq, jdbcType=VARCHAR} as eduSeq
+	    				,#{item.recSeq, jdbcType=VARCHAR} as recSeq
+	    				,#{item.eduSchool, jdbcType=VARCHAR} as eduSchool
+	    				,#{item.eduDiv, jdbcType=VARCHAR} as eduDiv
+	    				,#{item.eduLoc, jdbcType=VARCHAR} as eduLoc
+	    				,#{item.eduStart, jdbcType=VARCHAR} as eduStart
+	    				,#{item.eduEnd, jdbcType=VARCHAR} as eduEnd
+	    				,#{item.eduMajor, jdbcType=VARCHAR} as eduMajor
+	    				,#{item.eduGrade, jdbcType=VARCHAR} as eduGrade
+	    			FROM
+			    		DUAL
+	    		</foreach>
    		) du
    		ON
    			(edu.EDU_SEQ = du.eduSeq AND edu.SEQ = du.recSeq)
@@ -144,6 +144,10 @@
 				,edu.GRADE = du.eduGrade
 				,edu.LOCATION = du.eduLoc
 				
+			DELETE
+            WHERE
+                du.eduSchool is null
+				
     	WHEN NOT MATCHED THEN
 	    	INSERT (
 	    			EDU_SEQ
@@ -156,23 +160,20 @@
 					,GRADE
 					,LOCATION
 	    		)
-	    		VALUES(
-	    			#{eduSeq}
-	    			,du.recSeq
-	    			,du.eduSchool
-					,du.eduDiv
-					,du.eduStart
-					,du.eduEnd
-					,du.eduMajor
-					,du.eduGrade
-					,du.eduLoc
-	    		)
+    		VALUES (
+                CAST(CAREER_SEQ.NEXTVAL AS VARCHAR2(255))
+                ,du.recSeq
+                ,du.eduSchool
+                ,du.eduDiv
+                ,du.eduStart
+                ,du.eduEnd
+                ,du.eduMajor
+                ,du.eduGrade
+                ,du.eduLoc
+            )
     </update>
     
     <update id="mergeCar" parameterType="java.util.List">
-    <selectKey keyProperty="carSeq" resultType="String" order="BEFORE">
-    	SELECT CAST(CAREER_SEQ.NEXTVAL AS VARCHAR2(255)) FROM DUAL
-    </selectKey>
     	MERGE INTO 
     		CAREER car
     	USING (
@@ -201,7 +202,10 @@
 				,car.END_PERIOD = du.carEnd
 				,car.TASK = du.carTask
 				,car.SALARY = du.carSalary
-				
+			
+			DELETE
+            WHERE
+                du.carCompany is null
     	WHEN NOT MATCHED THEN
 	    	INSERT (
 	    			CAR_SEQ
@@ -214,7 +218,7 @@
 					,SALARY
 	    		)
 	    		VALUES(
-	    			#{carSeq}
+	    			CAST(CAREER_SEQ.NEXTVAL AS VARCHAR2(255))
 	    			,du.recSeq
 					,du.carCompany
 	    			,du.carLoc
@@ -226,9 +230,6 @@
     </update>
     
     <update id="mergeCert" parameterType="java.util.List">
-    <selectKey order="BEFORE" keyProperty="certSeq" resultType="string">
-    	SELECT CAST(CERT_SEQ.NEXTVAL AS VARCHAR2(255)) FROM DUAL
-    </selectKey>
     	MERGE INTO 
     		CERTIFICATE cert
     	USING (
@@ -245,14 +246,16 @@
    		) du
    		ON
    			(cert.CERT_SEQ = du.certSeq AND cert.SEQ = du.recSeq)
-   			
+   		
 		WHEN MATCHED THEN 
 			UPDATE 
  			SET
 				cert.QUALIFI_NAME = du.certQualifi
 				,cert.ACQU_DATE = du.certAcqu
 				,cert.ORGANIZE_NAME = du.certOrganize
-				
+			DELETE
+            WHERE
+                du.certQualifi is null
     	WHEN NOT MATCHED THEN
 	    	INSERT (
 	    			CERT_SEQ
@@ -262,7 +265,7 @@
 					,ORGANIZE_NAME
 	    		)
 	    		VALUES(
-	    			#{certSeq}
+	    			CAST(CERT_SEQ.NEXTVAL AS VARCHAR2(255))
 	    			,du.recSeq
 	    			,du.certQualifi
 					,du.certAcqu
@@ -344,7 +347,7 @@
 	            FROM 
 	                CAREER
 	            WHERE
-	               SEQ = 22
+	               SEQ = #{recSeq}
             ) car_period
     		,r.LOCATION work_loc
     		,r.WORK_TYPE work_type
@@ -360,6 +363,6 @@
 			        EDUCATION
     		) e
     	WHERE
-    		e.SEQ = 22 AND r.SEQ = 22 AND e.period = 1
+    		e.SEQ = #{recSeq} AND r.SEQ = #{recSeq} AND e.period = 1
     </select>
 </mapper>

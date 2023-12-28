@@ -40,6 +40,14 @@ public class FormRequestDto {
 	}
 	
 	public void setSeq(RecruitVo userInfo) {
+		recData.forEach(new Consumer<RecruitVo>() {
+			@Override
+			public void accept(RecruitVo recruitVo) {
+				recruitVo.setRecSeq(userInfo.getRecSeq());
+				recruitVo.setRecSubmit(userInfo.getRecSubmit());
+			}
+		});
+		
 		eduData.forEach(new Consumer<EduVo>() {
 			@Override
 			public void accept(EduVo eduVo) {
