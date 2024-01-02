@@ -9,12 +9,39 @@
 <title>main</title>
 </head>
 <script type="text/javascript">
-	$j.fn.serializeObject = function(...args) {
+/*
+ * 1차 피드백
+ * 이름과 연락처는 고정으로 x
+ * 생년월일과 다른 기간과의 비교 x
+ * 학교, 전공, 회사명, 부서/직책/직급, 자격증명, 발행처에 영어나 숫자 허용 x
+ * 알람창에 형식 알려주기(주소, 학교명, 전공) x
+ * 빈 행이 들어가는 문제 해결 x
+ *	- 기본적으로 모든 행을 추가해주던가 
+ *	- 막아버리기
+ 	-> 막아버리기로 해결(직렬화 시 값이 없는 게 있다면 제외)
+ * 학점에 소수점은 선택으로 x
+ 	-> 정규표현식 수정
+ * 경력이랑 자격증에 다른 값이 있을 때 빈 값 체크 x
+ 	-> 행 단위로 끊어서 input에 값이 있으면 검사
+ */
+	$j.fn.serializeObject = function() {
 		var result = [];
 		var obj = null;
 		
 		var objInsert = function(obj) {
-			result.push(Object.assign({}, obj));
+			let fullObj = true;
+			
+			$j.each(obj, function() {
+				if(!this?.trim()) {
+					fullObj = false;
+					return false;
+				}
+			});
+			
+			if(fullObj) {
+				result.push(Object.assign({}, obj));
+			}
+			
 			return {};
 		}
 		
@@ -25,7 +52,7 @@
 				obj = {};
 				$j.each(arr, function(index) {
 					obj.hasOwnProperty(this.name) ? obj = objInsert(obj) : "";
-					this.value ? obj[this.name] = this.value : "";
+					obj[this.name] = this.value;
 				});
 				objInsert(obj);
 			}
@@ -71,18 +98,18 @@
 		
 		if(confirm("삭제하시겠습니까?")) {
 			
-			if(removeList.length == checkBox.length) {
-				if(category == "edu") {
-					alert("최소 한 개의 행을 남겨주세요");
-					return;
-				}
-				rowAdd(category);
-			}
-
 			if(checkSeq[category].includes("on")) 
 				checkSeq[category] = checkSeq[category].filter((val) => val !== "on");
 			
 			if(checkSeq[category].length == 0) {
+				if(removeList.length == checkBox.length) {
+					if(category == "edu") {
+						alert("최소 한 개의 행을 남겨주세요");
+						return;
+					}
+					rowAdd(category);
+				}
+				
 				$j.each(removeList, function() {
 					$j(this).remove();
 				});
@@ -121,6 +148,14 @@
 			
 			promise
 			.then(function() {
+				if(removeList.length == checkBox.length) {
+					if(category == "edu") {
+						alert("최소 한 개의 행을 남겨주세요");
+						return;
+					}
+					rowAdd(category);
+				}
+				
 				$j.each(removeList, function() {
 					$j(this).remove();
 				});
@@ -139,32 +174,38 @@
 	}
 	
 	var checkFunc = function(idList, testList) {
+		let now = new Date();
+		let birth = new Date($j("#recBirth0").val()); 
 		let result = true;
 		let regex = {
 			name : /[\uac00-\ud7a3]/,
-			string : /[\uac00-\ud7a3\w\-\/\s]/,
-			birth : /^\d{4}\.\d{2}\.\d{2}$/,
-			date : /^\d{4}\.\d{2}\$/,
-			phone : /^01([0|1|6|7|8|9])-?\d{3,4}-?\d{4}$/,
-			grade : /^\d{1}\.\d{1}$/,
-			task : /[\uac00-\ud7a3\w]+\/[\uac00-\ud7a3\w]+\/[\uac00-\ud7a3\w]+/,
-			email : /^\w*@\w*\.\w*(\.\w*)?$/,
-			birth2 : /^\d{4}\.(0[1-9]|1[012]).(0[1-9]|[12][0-9]|3[01])$/,
-			date2 : /^\d{4}\.(0[1-9]|1[012])\$/
+			string	: /^[\uac00-\ud7a3a-zA-Z][\uac00-\ud7a3\w\-\/\s]*/,
+			birth	: /^\d{4}\.\d{2}\.\d{2}$/,
+			birth2	: /^\d{4}\.(0[1-9]|1[012]).(0[1-9]|[12][0-9]|3[01])$/,
+			phone	: /^01([0|1|6|7|8|9])-?\d{3,4}-?\d{4}$/,
+			email	: /^\w*@\w*\.\w*(\.\w*)?$/,
+			addr	: /^[\uac00-\ud7a3\w]+[\uc2dc|\ub3c4|si|do][\uac00-\ud7a3\d\-\/\s]+/,
+			date	: /^\d{4}\.\d{2}\$/,
+			date2	: /^\d{4}\.(0[1-9]|1[012])\$/,
+			school	: /.+(\ud559\uad50|school|university)$/i,
+			grade	: /^\d{1}(\.\d{1})?$/,
+			task	: /[\uac00-\ud7a3\w]+\/[\uac00-\ud7a3\w]+\/[\uac00-\ud7a3\w]+/,
 			
 		}
 		
 		let comment = {
-			name : "을 입력해주세요.",
-			string : "을(를) 입력해주세요.",
-			birth : "을 xxxx.xx.xx 형식으로 입력해주세요.",
-			date : "을 xxxx.xx 형식으로 입력해주세요.",
-			phone : "를 입력해주세요.",
-			grade : "을 x.x 형식으로 입력해주세요.",
-			task : "을 부서/직책/직급 형태로 입력해주세요.",
-			email : "을 xxx@xxx.xxx 형식으로 입력해주세요.",
-			birth2 : "에 월(01-12) 또는 일(01-31)을 정확히 입력해주세요.",
-			date2 : "에 월(01-12)을 정확히 입력해주세요."
+			name	: "을 입력해주세요.",
+			string	: "을(를) 입력해주세요.",
+			birth	: "을 xxxx.xx.xx 형식으로 입력해주세요.",
+			birth2	: "에 월(01-12) 또는 일(01-31)을 정확히 입력해주세요.",
+			phone	: "를 입력해주세요.",
+			email	: "을 xxx@xxx.xxx 또는 xxx@xxx.xx.xx 형식으로 입력해주세요.",
+			addr	: "를 광역시도 시군구 도로명 (건물)번호형식으로 입력해주세요.",
+			date	: "을 xxxx.xx 형식으로 입력해주세요.",
+			date2	: "에 월(01-12)을 정확히 입력해주세요.",
+			school	: "를 xxx학교, xxx school, xxx university 형식으로 입력해주세요.",
+			grade	: "을 xxx 또는 x.x 형식으로 입력해주세요.",
+			task	: "을 부서/직책/직급 형태로 입력해주세요.",
 		}
 		
 		let check = function(data, type) { 
@@ -201,8 +242,17 @@
 		
 		$j.each(idList, function(index) {
 			switch(testList[index]) {
-			 	case "School": case "Major":
-				case "Addr": case "Company": case "Loc":
+			 	case "School": 
+			 		if(check(this, "school")) break;
+					result = false;
+					break;
+					
+				case "Addr": 
+					if(check(this, "addr")) break;
+					result = false;
+					break;
+					
+				case "Major": case "Company": case "Loc": 
 				case "Qualifi": case "Organize":
 					if(check(this, "string")) break;
 					result = false;
@@ -222,13 +272,37 @@
 					let start = new Date($j(`#\${this}`).val());
 					let end = new Date($j(`#\${this.replace("Start", "End")}`).val())
 					
-					if((end - start) < 0) {
+					if(now < start) {
+						alert("현재 날짜를 넘어선 날짜입니다. 다시 입력해주세요.");
+						$j(`#\${this}`).focus();
+						result = false;
+						break;
+					}
+					
+					if(start < birth) {
+						alert("생년월일 이전 날짜입니다. 다시 입력해주세요.");
+						$j(`#\${this}`).focus();
+						result = false;
+						break;
+					}
+					
+					if(start > end) {
 						alert("시작날짜 끝날짜 순으로 입력해주세요.");
 						$j(`#\${this}`).focus();
+						result = false;
 					}
 					break;
 					
 				case "Acqu":
+					let acqu = new Date($j(`#\${this}`).val());
+					
+					if(acqu < birth) {
+						alert("생년월일 이전 날짜입니다. 다시 입력해주세요.");
+						$j(`#\${this}`).focus();
+						result = false;
+						break;
+					}
+					
 					if(check(this, "date")) break;
 					result = false;
 					break;
@@ -239,6 +313,13 @@
 					break;
 					
 				case "Birth":
+					if(now < birth) {
+						alert("현재 날짜를 넘어선 날짜입니다. 다시 입력해주세요.");
+						$j("#recBirth0").focus();
+						result = false;
+						break;
+					}
+					
 					if(check(this, "birth")) break;
 					result = false;
 					break;
@@ -271,11 +352,30 @@
 	}
 	
 	var validation = function(data) {
-		let valList = [];
 		let idList = [];
 		let testList = [];
+		let testObj = typeof(data) == "object" ? data : {};
 		
-		$j.each(data, function(index) {
+		if(typeof(data) == "string") {
+			$j.each($j(`table[id^='\${data}'] tbody tr`), function(index) {
+				let row = $j(this).find("input:text");
+				
+				$j.each(row, function() {
+					if(!!$j(this).val()?.trim()) {
+						$j.each(row, function(index) {
+							testObj[index] = this;
+						});
+						return false;
+					}
+				});
+			});
+		}
+		
+		if(Object.keys(testObj).length == 0) {
+			return true;
+		}
+		
+		$j.each(testObj, function(index) {
 			idList.push($j(this).attr('id'));
 			testList.push($j(this).attr('id').match(/[A-Z][a-z]*/)[0]);
 		});
@@ -283,30 +383,25 @@
 		return checkFunc(idList, testList);
 	}
 	
-	var sendData = function(type, ...args) {
+	var sendData = function(type) {
 		var requiredData = $j("input[required]");
 		let data = {};
 		
 		if(!validation(requiredData)) return;
 		
-		data["recData"]= $j("input[name^='rec'], select[name^='rec']").serializeObject("rec");
+		data["recData"] = $j("input[name^='rec'], select[name^='rec']").serializeObject();
 		data["eduData"] = $j("input[name^='edu'], select[name^='edu']").serializeObject();
-		var carData = $j("input[name^='car']").serializeObject();
-		var certData = $j("input[name^='cert']").serializeObject();
 		
-		if(carData.length != 0) {
-			if(!validation($j("input[name^='car']").filter(function() {
-				return !!$j(this).val()?.trim()
-			}))) return;
-			data["carData"] = carData;
-		}
+		if(!validation('car')) return;
+		if(!validation('cert')) return;
+			
+		let carData = $j("input[name^='car']").serializeObject();
+		let certData = $j("input[name^='cert']").serializeObject();
 		
-		if(certData.length != 0) {
-			if(!validation($j("input[name^='cert']").filter(function() {
-				return !!$j(this).val()?.trim()
-			}))) return;
-			data["certData"] = certData;
-		}
+		if(carData.length != 0) data["carData"] = carData;
+		if(certData.length != 0) data["certData"] = certData;
+		
+		console.log(data);
 		
 		$j.ajax({
 			url : `/recruit/\${type}`,
@@ -343,28 +438,42 @@
 	}
 
 	$j(document).ready(function() {
-		$j("#recBirth0").on("keypress", function() {
-			$j(this).val().length == 4 ? $j(this).val($j(this).val() + ".") : "";
-			$j(this).val().length == 7 ? $j(this).val($j(this).val() + ".") : "";
+		var userSubmit = '${userSubmit}';
+
+		if(userSubmit == 'Y') {
+			$j("input, select, button:not(#backBtn button)").prop("disabled", true);
+			$j("#svsbBtn").css("display", "none");
+			$j("#backBtn").css("display", "block");
+		}
+		
+		$j("#recBirth0").on("keypress", function(e) {
+			if(e.keyCode != 46) {
+				$j(this).val().length == 4 ? $j(this).val($j(this).val() + ".") : "";
+				$j(this).val().length == 7 ? $j(this).val($j(this).val() + ".") : "";
+			}
 		});
 		
-		$j(document).on("keypress", "input[name*=Start], input[name*=End], input[name*=Acqu]", function() {
-			$j(this).val().length == 4 ? $j(this).val($j(this).val() + ".") : "";
+		$j(document).on("keypress", "input[name*=Start], input[name*=End], input[name*=Acqu]", function(e) {
+			if(e.keyCode != 46) 
+				$j(this).val().length == 4 ? $j(this).val($j(this).val() + ".") : "";
 		});
 		
-		$j(document).on("keypress", "input[name*=Grade]", function() {
-			$j(this).val().length == 1 ? $j(this).val($j(this).val() + ".") : "";
+		$j(document).on("keypress", "input[name*=Grade]", function(e) {
+			if(e.keyCode != 46) 
+				$j(this).val().length == 1 ? $j(this).val($j(this).val() + ".") : "";
 		});
 		
 		$j("#save").on("click", function() {
 			$j("input[type=checkbox]").prop("checked", true);
 			sendData("save");
+			$j("input[type=checkbox]").prop("checked", false);
 		});
 		
 		$j("#submit").on("click", function() {
 			if(confirm("제출 후 수정이 불가능합니다. 제출하시겠습니까?")) {
 				$j("input[type=checkbox]").prop("checked", true);
 				sendData("submit");
+				$j("input[type=checkbox]").prop("checked", false);
 			}
 		});
 		
@@ -406,10 +515,11 @@
 								이름
 							</label>
 						</th>
-						<td class="birth">
+						<td class="name">
 							<input type="text" id="recName0" name="recName" width="150" maxlength="5"
 							value="${userInfo.recName}" 
 							oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3]/, '')"
+							readonly
 							required>
 						</td>
 						<th>
@@ -450,6 +560,7 @@
 							<input type="text" id="recPhone0" name="recPhone"  maxlength="11"
 							value="${userInfo.recPhone}"
 							oninput="this.value = this.value.replace(/[^\d]/, '')"
+							readonly
 							required>
 						</td>
 					</tr>
@@ -604,7 +715,7 @@
 								<td>
 									<input type="text" id="eduSchool${status.index}" name="eduSchool"  maxlength="50"
 									value = "${edu.eduSchool}"
-									oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\s]/, '')"
+									oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\s\w]/, '')"
 									required>
 									<select id="eduLoc${status.index}" name="eduLoc" required>
 										<c:forEach items="${location}" var="loc">
@@ -617,7 +728,7 @@
 								</td>
 								<td>
 									<input type="text" id="eduMajor${status.index}" name="eduMajor"  maxlength="30"
-									oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\s]/, '')"
+									oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\s\w]/, '')"
 									value="${edu.eduMajor}" required>
 								</td>
 								<td>
@@ -656,7 +767,7 @@
 								</td>
 								<td>
 									<input type="text" id="eduSchool0" name="eduSchool"  maxlength="50"
-									oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\s]/, '')"
+									oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\s\w]/, '')"
 									required>
 									<select id="eduLoc0" name="eduLoc" required>
 										<c:forEach items="${location}" var="loc">
@@ -669,7 +780,7 @@
 								</td>
 								<td>
 									<input type="text" id="eduMajor0" name="eduMajor"  maxlength="30"
-									oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\s]/, '')"
+									oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\s\w]/, '')"
 									required>
 								</td>
 								<td>
@@ -729,7 +840,7 @@
 								</td>
 								<td>
 									<input type="text" id="carCompany${status.index}" name="carCompany"  maxlength="50"
-									oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\d\s]/, '')"
+									oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\d\s\w]/, '')"
 									value="${car.carCompany}">
 								</td>
 								<td>
@@ -748,7 +859,7 @@
 					<c:otherwise>
 							<tr>
 								<td>
-									<input type="checkbox" id="carSeq" name="carSeq">
+									<input type="checkbox" id="carSeq0" name="carSeq">
 								</td>
 								<td>
 									<input type="text" id="carStart0" name="carStart"  maxlength="7"
@@ -761,7 +872,7 @@
 								</td>
 								<td>
 									<input type="text" id="carCompany0" name="carCompany"  maxlength="50"
-									oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\d\s]/, '')"
+									oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\d\s\w]/, '')"
 									>
 								</td>
 								<td>
@@ -855,6 +966,9 @@
 			<div id="svsbBtn">
 				<button type="button" id="save">저장</button>
 				<button type="button" id="submit">제출</button>
+			</div>
+			<div id="backBtn">
+				<button type="button" onclick="location.href='/recruit/login'">뒤로</button>
 			</div>
 		</form>
 	</div>

@@ -357,12 +357,13 @@
    			    SELECT 
 			        SCHOOL_NAME
 			        ,DIVISION
-			        ,SEQ
 			        ,ROW_NUMBER() OVER(ORDER BY TO_DATE(START_PERIOD, 'YYYY.MM') DESC) period
 			    FROM 
 			        EDUCATION
+			     WHERE 
+			     	SEQ = #{recSeq}
     		) e
     	WHERE
-    		e.SEQ = #{recSeq} AND r.SEQ = #{recSeq} AND e.period = 1
+    		r.SEQ = #{recSeq} AND e.period = 1
     </select>
 </mapper>

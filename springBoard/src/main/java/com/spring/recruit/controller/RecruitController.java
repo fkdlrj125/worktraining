@@ -71,6 +71,7 @@ public class RecruitController {
 		}
 		
 		model.addAttribute("userInfo", userInfo);
+		model.addAttribute("userSubmit", userInfo.getRecSubmit());
 		model.addAttribute("location", recruitService.selectTypeList());
 		model.addAttribute("eduList", recruitService.selectEdu(userInfo));
 		model.addAttribute("carList", recruitService.selectCareer(userInfo));

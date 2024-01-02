@@ -59,13 +59,7 @@
 		
 		$j("#RecName").on("change", function() {
 			$j(this).val(($j(this).val().length > 5) ? $j(this).val().slice(0,5) : $j(this).val());
-			
-			if(nameCheck()) return;
 		});
-		
-		$j("#RecPhone").on("change", function() {
-			if(phoneCheck()) return;
-		})
 	});
 </script>
 <body>
