@@ -316,6 +316,8 @@
     		EDUCATION
     	WHERE 
     		SEQ = #{recSeq, jdbcType=VARCHAR}
+   		ORDER BY
+    		START_PERIOD DESC
     </select>
     
     <select id="selectCareer" parameterType="com.spring.recruit.vo.CareerVo" resultMap="careerVo">
@@ -325,6 +327,8 @@
     		CAREER
     	WHERE 
     		SEQ = #{recSeq, jdbcType=VARCHAR}
+    	ORDER BY
+    		START_PERIOD DESC
     </select>
     
     <select id="selectCert" parameterType="com.spring.recruit.vo.CertVo" resultMap="certVo">
@@ -334,6 +338,8 @@
     		CERTIFICATE
     	WHERE 
     		SEQ = #{recSeq, jdbcType=VARCHAR}
+    	ORDER BY
+    		ACQU_DATE DESC
     </select>
     
     <select id="selectUserInfo" parameterType="com.spring.recruit.vo.RecruitVo" resultMap="userInfoVo">
@@ -343,7 +349,7 @@
     		,
     		(
 	            SELECT 
-	                SUM(MONTHS_BETWEEN(TO_DATE(END_PERIOD,'YYYY.MM'), TO_DATE(START_PERIOD, 'YYYY.MM'))) car_period
+	                SUM(MONTHS_BETWEEN(TO_DATE(END_PERIOD,'YYYY.MM'), ADD_MONTHS(TO_DATE(START_PERIOD, 'YYYY.MM'), -1))) car_period
 	            FROM 
 	                CAREER
 	            WHERE

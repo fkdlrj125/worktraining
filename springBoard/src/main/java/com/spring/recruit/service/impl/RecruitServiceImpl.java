@@ -1,13 +1,7 @@
 package com.spring.recruit.service.impl;
 
-import java.time.LocalDate;
-import java.time.Year;
-import java.time.YearMonth;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,7 +39,11 @@ public class RecruitServiceImpl implements RecruitService {
 
 	@Override
 	public List<CareerVo> selectCareer(RecruitVo recruitVo) throws Exception {
-		return recruitDao.selectCareer(recruitVo);
+		List<CareerVo> carList = recruitDao.selectCareer(recruitVo);
+		System.out.println(recruitVo.getRecSubmit());
+		if(recruitVo.getRecSubmit().equals("Y")) 
+			Collections.reverse(carList);
+		return carList;
 	}
 
 	@Override

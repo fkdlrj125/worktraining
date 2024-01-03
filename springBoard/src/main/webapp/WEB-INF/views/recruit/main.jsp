@@ -23,6 +23,21 @@
  	-> 정규표현식 수정
  * 경력이랑 자격증에 다른 값이 있을 때 빈 값 체크 x
  	-> 행 단위로 끊어서 input에 값이 있으면 검사
+ * 2차 피드백
+ * 입력사항 최근 날짜 순으로 정렬(해결)
+ 	-> 조회하는 행 수가 적어 쿼리에 order by 사용
+ * 근무기간 계산 확인(해결)
+ 	-> 쿼리에 시작 기간 달을 1 줄임
+ * 기간입력할 때 '.' 찍히는 거 수정(해결)
+ 	-> 정규표현식과 includes를 사용
+ * 행 하나 남았을 때 삭제 막기(해결)
+ 	-> 기존 코드에서 edu만 삭제 막는 것을 지움
+ * 부서/직책/직급 멘트 수정(해결)
+ * 3차 피드백
+ * 경력에 근무기간 저장은 오름차순 제출은 내림차순으로(해결)
+ * 자격증 취득일 정렬(해결)
+ * 제출 시 input이 아니라 그냥 텍스트로(해결)
+   버튼이나 셀렉트는 안 보이게
  */
 	$j.fn.serializeObject = function() {
 		var result = [];
@@ -97,19 +112,16 @@
 		}
 		
 		if(confirm("삭제하시겠습니까?")) {
+			if(removeList.length == checkBox.length) {
+				alert("최소 한 개의 행을 남겨주세요");
+				checkBox.prop("checked", false);
+				return;
+			}
 			
 			if(checkSeq[category].includes("on")) 
 				checkSeq[category] = checkSeq[category].filter((val) => val !== "on");
 			
 			if(checkSeq[category].length == 0) {
-				if(removeList.length == checkBox.length) {
-					if(category == "edu") {
-						alert("최소 한 개의 행을 남겨주세요");
-						return;
-					}
-					rowAdd(category);
-				}
-				
 				$j.each(removeList, function() {
 					$j(this).remove();
 				});
@@ -124,7 +136,6 @@
 					dataType : "json",
 					contentType : "application/json",
 					success : function(data) {
-						console.log(data.success);
 						switch (data.success) {
 						case "Y":
 							resolve();
@@ -148,14 +159,6 @@
 			
 			promise
 			.then(function() {
-				if(removeList.length == checkBox.length) {
-					if(category == "edu") {
-						alert("최소 한 개의 행을 남겨주세요");
-						return;
-					}
-					rowAdd(category);
-				}
-				
 				$j.each(removeList, function() {
 					$j(this).remove();
 				});
@@ -179,12 +182,12 @@
 		let result = true;
 		let regex = {
 			name : /[\uac00-\ud7a3]/,
-			string	: /^[\uac00-\ud7a3a-zA-Z][\uac00-\ud7a3\w\-\/\s]*/,
+			string	: /^[\uac00-\ud7a3\w][\uac00-\ud7a3\w\-\/\s]*/,
 			birth	: /^\d{4}\.\d{2}\.\d{2}$/,
 			birth2	: /^\d{4}\.(0[1-9]|1[012]).(0[1-9]|[12][0-9]|3[01])$/,
-			phone	: /^01([0|1|6|7|8|9])-?\d{3,4}-?\d{4}$/,
+			phone	: /^(01[0|1|6|7|8|9])-?\d{3,4}-?\d{4}$/,
 			email	: /^\w*@\w*\.\w*(\.\w*)?$/,
-			addr	: /^[\uac00-\ud7a3\w]+[\uc2dc|\ub3c4|si|do][\uac00-\ud7a3\d\-\/\s]+/,
+			addr	: /^([\uac00-\ud7a3\w]+[\uc2dc|\ub3c4|si|do])[\uac00-\ud7a3\d\-\/\s]+/,
 			date	: /^\d{4}\.\d{2}\$/,
 			date2	: /^\d{4}\.(0[1-9]|1[012])\$/,
 			school	: /.+(\ud559\uad50|school|university)$/i,
@@ -205,7 +208,7 @@
 			date2	: "에 월(01-12)을 정확히 입력해주세요.",
 			school	: "를 xxx학교, xxx school, xxx university 형식으로 입력해주세요.",
 			grade	: "을 xxx 또는 x.x 형식으로 입력해주세요.",
-			task	: "을 부서/직책/직급 형태로 입력해주세요.",
+			task	: "을 입력해주세요.",
 		}
 		
 		let check = function(data, type) { 
@@ -362,8 +365,8 @@
 				
 				$j.each(row, function() {
 					if(!!$j(this).val()?.trim()) {
-						$j.each(row, function(index) {
-							testObj[index] = this;
+						$j.each(row, function() {
+							testObj[Object.keys(testObj).length] = this;
 						});
 						return false;
 					}
@@ -401,8 +404,6 @@
 		if(carData.length != 0) data["carData"] = carData;
 		if(certData.length != 0) data["certData"] = certData;
 		
-		console.log(data);
-		
 		$j.ajax({
 			url : `/recruit/\${type}`,
 			type : "POST",
@@ -410,7 +411,6 @@
 			data : JSON.stringify(data),
 			dataType : "json",
 			success : function(data) {
-				console.log(data.success);
 				switch (data.success) {
 				case "Y":
 					alert("저장 완료");
@@ -441,25 +441,24 @@
 		var userSubmit = '${userSubmit}';
 
 		if(userSubmit == 'Y') {
-			$j("input, select, button:not(#backBtn button)").prop("disabled", true);
-			$j("#svsbBtn").css("display", "none");
+			$j("button:not(#backBtn button)").addClass("hidden");
 			$j("#backBtn").css("display", "block");
 		}
 		
 		$j("#recBirth0").on("keypress", function(e) {
-			if(e.keyCode != 46) {
+			if(e.keyCode != 46 && !(/^\d{1,4}\.\d{1,2}\.\d{1,2}$/.test($j(this).val()))) {
 				$j(this).val().length == 4 ? $j(this).val($j(this).val() + ".") : "";
 				$j(this).val().length == 7 ? $j(this).val($j(this).val() + ".") : "";
 			}
 		});
 		
 		$j(document).on("keypress", "input[name*=Start], input[name*=End], input[name*=Acqu]", function(e) {
-			if(e.keyCode != 46) 
+			if(e.keyCode != 46 && !($j(this).val().includes('.'))) 
 				$j(this).val().length == 4 ? $j(this).val($j(this).val() + ".") : "";
 		});
 		
 		$j(document).on("keypress", "input[name*=Grade]", function(e) {
-			if(e.keyCode != 46) 
+			if(e.keyCode != 46 && !($j(this).val().includes('.'))) 
 				$j(this).val().length == 1 ? $j(this).val($j(this).val() + ".") : "";
 		});
 		
@@ -509,118 +508,203 @@
 			<h1>입사 지원서</h1>
 			<div class="tableBox">
 				<table id="recTable" border="1">
-					<tr>
-						<th class="name">
-							<label for="recName0">
-								이름
-							</label>
-						</th>
-						<td class="name">
-							<input type="text" id="recName0" name="recName" width="150" maxlength="5"
-							value="${userInfo.recName}" 
-							oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3]/, '')"
-							readonly
-							required>
-						</td>
-						<th>
-							<label for="recBirth0">
-								생년월일
-							</label>
-						</th>
-						<td>
-							<input type="text" id="recBirth0" name="recBirth"  maxlength="10"
-							oninput="this.value = this.value.replace(/[^\d\.]/, '')"
-							value="${userInfo.recBirth}" required>
-						</td>
-					</tr>
-					<tr>
-						<th>
-							<label for="recGender0">
-								성별
-							</label>
-						</th>
-						<td>
-							<select id="recGender0" name="recGender" required>
-								<option value="m" 
-								<c:if test="${userInfo.recGender eq 'm' 
-								|| empty userInfo.recGender}">selected='selected'</c:if>>
-								남자</option>
-								
-								<option value="fm" 
-								<c:if test="${userInfo.recGender eq 'fm'}">selected='selected'</c:if>>
-								여자</option>
-							</select>
-						</td>
-						<th>
-							<label for="recPhone0">
-								연락처
-							</label>
-						</th>
-						<td>
-							<input type="text" id="recPhone0" name="recPhone"  maxlength="11"
-							value="${userInfo.recPhone}"
-							oninput="this.value = this.value.replace(/[^\d]/, '')"
-							readonly
-							required>
-						</td>
-					</tr>
-					<tr>
-						<th>
-							<label for="recEmail0">
-								email
-							</label>
-						</th>
-						<td>
-							<input type="text" id="recEmail0" name="recEmail"  maxlength="50"
-							value="${userInfo.recEmail}"
-							oninput="this.value = this.value.replace(/[^\@\.\w]/g, '')"
-							required>
-						</td>
-						<th>
-							<label for="recAddr0">
-								주소
-							</label>
-						</th>
-						<td>
-							<input type="text" id="recAddr0" name="recAddr"  maxlength="50"
-							value="${userInfo.recAddr}"
-							oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\d\-\s]/, '')"
-							required>
-						</td>
-					</tr>
-					<tr>
-						<th>
-							<label for="recLoc0">
-								희망근무지
-							</label>
-						</th>
-						<td>
-							<select id="recLoc0" name="recLoc" required>
-								<c:forEach items="${location}" var="loc">
-									<option value="${loc.codeId}" 
-									<c:if test="${userInfo.recLoc eq loc.codeId 
-									|| loc.codeName eq '서울'}">selected='selected'</c:if>>
-									${loc.codeName}</option>
-								</c:forEach>
-							</select>
-						</td>
-						<th>
-							<label for="recWt0">
-								근무형태
-							</label>
-						</th>
-						<td>
-							<select id="recWt0" name="recWt" required>
-								<option value="정규직"
-								<c:if test="${userInfo.recWt eq '정규직' 
-								|| empty userInfo.recWt}">selected='selected'</c:if>>
-								정규직</option>
-								<option value="계약직"
-								<c:if test="${userInfo.recWt eq '계약직'}">selected='selected'</c:if>>
-								계약직</option>
-							</select>
-						</td>
-					</tr>
+					<c:choose>
+					<c:when test="${userInfo.recSubmit eq 'Y'}">
+						<tr>
+							<th class="name">
+								<label for="recName0">
+									이름
+								</label>
+							</th>
+							<td class="name">
+								<div id="recName0">${userInfo.recName}</div>
+							</td>
+							<th>
+								<label for="recBirth0">
+									생년월일
+								</label>
+							</th>
+							<td>
+								<div id="recBirth0">${userInfo.recBirth}</div>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<label for="recGender0">
+									성별
+								</label>
+							</th>
+							<td>
+								<div id="recGender0">
+									<c:if test="${userInfo.recGender eq 'm'}">남자</c:if>
+									<c:if test="${userInfo.recGender eq 'fm'}">여자</c:if>
+								</div>
+							</td>
+							<th>
+								<label for="recPhone0">
+									연락처
+								</label>
+							</th>
+							<td>
+								<div id="recPhone0">${userInfo.recPhone}</div>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<label for="recEmail0">
+									email
+								</label>
+							</th>
+							<td>
+								<div id="recEmail0">${userInfo.recEmail}</div>
+							</td>
+							<th>
+								<label for="recAddr0">
+									주소
+								</label>
+							</th>
+							<td>
+								<div id="recAddr0">${userInfo.recAddr}</div>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<label for="recLoc0">
+									희망근무지
+								</label>
+							</th>
+							<td>
+								<div id="recLoc0"></div>
+									<c:forEach items="${location}" var="loc">
+										<c:if test="${userInfo.recLoc eq loc.codeId}">${loc.codeName}</c:if>
+									</c:forEach>
+								</div>
+							</td>
+							<th>
+								<label for="recWt0">
+									근무형태
+								</label>
+							</th>
+							<td>
+								<div id="recWt0">${userInfo.recWt}</div>
+							</td>
+						</tr>
+					</c:when>
+					<c:otherwise>
+						<tr>
+							<th class="name">
+								<label for="recName0">
+									이름
+								</label>
+							</th>
+							<td class="name">
+								<input type="text" id="recName0" name="recName" width="150" maxlength="5"
+								value="${userInfo.recName}" 
+								oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3]/, '')"
+								readonly
+								required>
+							</td>
+							<th>
+								<label for="recBirth0">
+									생년월일
+								</label>
+							</th>
+							<td>
+								<input type="text" id="recBirth0" name="recBirth"  maxlength="10"
+								oninput="this.value = this.value.replace(/[^\d\.]/, '')"
+								value="${userInfo.recBirth}" required>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<label for="recGender0">
+									성별
+								</label>
+							</th>
+							<td>
+								<select id="recGender0" name="recGender" required>
+									<option value="m" 
+									<c:if test="${userInfo.recGender eq 'm' 
+									|| empty userInfo.recGender}">selected='selected'</c:if>>
+									남자</option>
+									
+									<option value="fm" 
+									<c:if test="${userInfo.recGender eq 'fm'}">selected='selected'</c:if>>
+									여자</option>
+								</select>
+							</td>
+							<th>
+								<label for="recPhone0">
+									연락처
+								</label>
+							</th>
+							<td>
+								<input type="text" id="recPhone0" name="recPhone"  maxlength="11"
+								value="${userInfo.recPhone}"
+								oninput="this.value = this.value.replace(/[^\d]/, '')"
+								readonly
+								required>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<label for="recEmail0">
+									email
+								</label>
+							</th>
+							<td>
+								<input type="text" id="recEmail0" name="recEmail"  maxlength="50"
+								value="${userInfo.recEmail}"
+								oninput="this.value = this.value.replace(/[^\@\.\w]/g, '')"
+								required>
+							</td>
+							<th>
+								<label for="recAddr0">
+									주소
+								</label>
+							</th>
+							<td>
+								<input type="text" id="recAddr0" name="recAddr"  maxlength="50"
+								value="${userInfo.recAddr}"
+								oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\d\-\s]/, '')"
+								required>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<label for="recLoc0">
+									희망근무지
+								</label>
+							</th>
+							<td>
+								<select id="recLoc0" name="recLoc" required>
+									<c:forEach items="${location}" var="loc">
+										<option value="${loc.codeId}" 
+										<c:if test="${userInfo.recLoc eq loc.codeId 
+										|| loc.codeName eq '서울'}">selected='selected'</c:if>>
+										${loc.codeName}</option>
+									</c:forEach>
+								</select>
+							</td>
+							<th>
+								<label for="recWt0">
+									근무형태
+								</label>
+							</th>
+							<td>
+								<select id="recWt0" name="recWt" required>
+									<option value="정규직"
+									<c:if test="${userInfo.recWt eq '정규직' 
+									|| empty userInfo.recWt}">selected='selected'</c:if>>
+									정규직</option>
+									<option value="계약직"
+									<c:if test="${userInfo.recWt eq '계약직'}">selected='selected'</c:if>>
+									계약직</option>
+								</select>
+							</td>
+						</tr>
+					</c:otherwise>
+					</c:choose>
 				</table>
 				
 				<table border="1" <c:if test="${not empty userInfo.recBirth}">style="display: table"</c:if>>
@@ -664,10 +748,9 @@
 				<table border="1" id="eduTable">
 					<thead>
 						<tr>
-							<th></th>
 							<th>
 								<label for="eduStart0">재학기간</label>
-								<label for="eduEnd0" class="hiddenLabel">재학기간</label>
+								<label for="eduEnd0" class="hidden">재학기간</label>
 							</th>
 							<th>
 								<label for="eduDiv0">구분</label>
@@ -685,6 +768,34 @@
 					</thead>
 					<tbody>
 					<c:choose>
+					<c:when test="${userInfo.recSubmit eq 'Y'}">
+					<c:forEach items="${eduList}" var="edu" varStatus="status">
+							<tr>
+								<td>
+									<div id="eduStart${status.index}">${edu.eduStart}</div>
+									<div>~</div>
+									<div id="eduEnd${status.index}">${edu.eduEnd}</div>
+								</td>
+								<td>
+									<div id="eduDiv${status.index}">${edu.eduDiv}</div>
+								</td>
+								<td>
+									<div id="eduSchool${status.index}">${edu.eduSchool}</div>
+									<div id="eduLoc${status.index}">
+										<c:forEach items="${location}" var="loc">
+											<c:if test="${edu.eduLoc eq loc.codeId}">${loc.codeName}</c:if>
+										</c:forEach>
+									</div>
+								</td>
+								<td>
+									<div id="eduMajor${status.index}">${edu.eduMajor}</div>
+								</td>
+								<td>
+									<div id="eduGrade${status.index}">${edu.eduGrade}</div>
+								</td>
+							</tr>
+					</c:forEach>
+					</c:when>
 					<c:when test="${not empty eduList}">
 						<c:forEach items="${eduList}" var="edu" varStatus="status">
 							<tr>
@@ -805,10 +916,9 @@
 				<table border="1" id="carTable">
 					<thead>
 						<tr>
-							<th></th>
 							<th>
 								<label for="carStart0">근무기간</label>
-								<label for="carEnd0" class="hiddenLabel">근무기간</label>
+								<label for="carEnd0" class="hidden">근무기간</label>
 							</th>
 							<th>
 								<label for="carCompany0">회사명</label>
@@ -823,11 +933,30 @@
 					</thead>
 					<tbody>
 					<c:choose>
+					<c:when test="${userInfo.recSubmit eq 'Y'}">
+					<c:forEach items="${carList}" var="car" varStatus="status">
+							<tr>
+								<td>
+									<div id="carStart${status.index}">${car.carStart}</div>
+									<div>-</div>
+									<div id="carEnd${status.index}">${car.carEnd}</div>
+								</td>
+								<td>
+									<div id="carCompany${status.index}">${car.carCompany}</div>
+								</td>
+								<td>
+									<div id="carTask${status.index}">${car.carTask}</div>
+								</td>
+								<td>
+									<div id="carLoc${status.index}">${car.carLoc}</div>
+								</td>
+							</tr>
+					</c:forEach>
+					</c:when>
 					<c:when test="${not empty carList}">
 					<c:forEach items="${carList}" var="car" varStatus="status">
 							<tr>
 								<td>
-									<input type="checkbox" id="carSeq${status.index}" name="carSeq" value="${car.carSeq}">
 								</td>
 								<td>
 									<input type="text" id="carStart${status.index}" name="carStart"  maxlength="7"
@@ -899,7 +1028,6 @@
 				<table border="1" id="certTable">
 					<thead>
 						<tr>
-							<th></th>
 							<th>
 								<label for="certQualifi0">자격증명</label>
 							</th>
@@ -913,6 +1041,21 @@
 					</thead>
 					<tbody>
 					<c:choose>
+					<c:when test="${userInfo.recSubmit eq 'Y'}">
+					<c:forEach items="${certList}" var="cert" varStatus="status">
+							<tr>
+								<td>
+									<div id="certQualifi${status.index}">${cert.certQualifi}</div>
+								</td>
+								<td>
+									<div id="certAcqu${status.index}">${cert.certAcqu}</div>
+								</td>
+								<td>
+									<div id="certOrganize${status.index}">${cert.certOrganize}</div>
+								</td>
+							</tr>
+					</c:forEach>
+					</c:when>
 					<c:when test="${not empty certList}">
 					<c:forEach items="${certList}" var="cert" varStatus="status">
 							<tr>

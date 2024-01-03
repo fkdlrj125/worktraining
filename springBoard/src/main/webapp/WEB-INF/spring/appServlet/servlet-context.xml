@@ -30,5 +30,6 @@
 	<context:component-scan base-package="com.spring.user.controller" />
 	<context:component-scan base-package="com.spring.recruit.controller" />
 	<context:component-scan base-package="com.spring.mbti.controller" />
+	<context:component-scan base-package="com.spring.calendar.controller" />
 	
 </beans:beans>

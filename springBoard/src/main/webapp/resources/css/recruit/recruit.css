@@ -1,9 +1,14 @@
 @charset "EUC-KR";
 
+
 div.container {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+}
+
+form.main {
+	width:90%;
 }
 
 td.submitBtn {
@@ -32,7 +37,7 @@ table {
 }
 
 div.tableBox table:nth-of-type(1) {
-	width: auto;
+	width: 70%;
 	margin-bottom: 0;
 }
 
@@ -43,6 +48,7 @@ div.tableBox table:nth-of-type(2) {
 }
 
 div.tableBox table:nth-of-type(3), div.tableBox table:nth-of-type(4){
+	width: 98%;
 	margin : 10px 10px;
 }
 
@@ -67,6 +73,6 @@ div#backBtn{
 	text-align: center;
 }
 
-label.hiddenLabel {
+.hidden {
 	display: none;
 }
