@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -12,6 +15,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -24,13 +29,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.spring.calendar.vo.CalendarVo;
 
-public class POITest {
-	public static LocalDate date = LocalDate.now();
+public class CalendarUtil {
 	public static DateTimeFormatter format = DateTimeFormatter.ofPattern("YYYY-MM");
-	
-	public static String path = POITest.class.getResource("").getPath();
-	public static File file = new File(path + date.format(format) +"_test.xlsx");
-	
+	public static String path = CalendarUtil.class.getResource("").getPath();
+
 	private static Map<Integer, CellStyle> calendarStyle(XSSFWorkbook wb) {
 		Map<Integer, CellStyle> calendarForm = new HashMap<>();
 		String filePath = "D:\\coding\\worktraining";
@@ -64,10 +66,15 @@ public class POITest {
 		return calendarForm;
 	}
 	
-	private static void writeCalendar(CalendarVo calendarVo) {
+	public static File writeCalendar(CalendarVo calendarVo) {
 		LocalDate calendarDate = LocalDate.of(Integer.parseInt(calendarVo.getYear())
 												,Integer.parseInt(calendarVo.getMonth())
 												,1);
+		File file = new File(path + calendarDate.format(format) +"_calendar.xlsx");
+		
+//		if(file.exists())
+//			return file;
+		
 		int day = calendarDate.getDayOfWeek().getValue();
 		int lastDay = calendarDate.lengthOfMonth();
 		List<String> dayOfWeek = Arrays.asList("월", "화", "수", "목", "금", "토", "일");
@@ -115,11 +122,11 @@ public class POITest {
         // 달력 출력
         int date = 1;
         int dayCheck = 1;
-        int cnt = 4;
-        
-        for(int j = 2; date <= lastDay; j++) {
-        	row = sheet.createRow(j);
-        	for(int i = 1; date <= lastDay; i++) {
+        int maxRow = (lastDay + day - 1) % 7 > 0 ? ((lastDay + day - 1) / 7) + 1 : (lastDay + day - 1) / 7;
+         
+        for(int j = 0; j < maxRow; j++) {
+        	row = sheet.createRow(j * 4 + 2);
+        	for(int i = 1; i < 8; i++) {
         		cell = row.createCell((i-1)*3);
         		cell.setCellStyle(styleList.get(0));
         		
@@ -129,29 +136,44 @@ public class POITest {
         		cell = row.createCell((i-1)*3+2);
         		cell.setCellStyle(styleList.get(2));
         		
-        		if(cnt != 4 && dayCheck++ < day) continue;
+        		if(dayCheck++ < day) continue;
         		
     			if(i > 5) cell.setCellStyle(i == 6 ? satStyle : sunStyle);
 
     			if(date <= lastDay) cell.setCellValue(date++);
-    			
-    			if(i % 7 == 0) break;
         	}
-        	cnt++;
+        	
+        	row = sheet.createRow(j * 4 + 3);
+        	for(int i = 1; i < 8; i++) {
+        		cell = row.createCell((i-1)*3);
+        		cell.setCellStyle(styleList.get(3));
+        		
+        		cell = row.createCell((i-1)*3+2);
+        		cell.setCellStyle(styleList.get(4));
+        	}
+        	
+        	row = sheet.createRow(j * 4 + 4);
+        	for(int i = 1; i < 8; i++) {
+        		cell = row.createCell((i-1)*3);
+        		cell.setCellStyle(styleList.get(5));
+        		
+        		cell = row.createCell((i-1)*3+2);
+        		cell.setCellStyle(styleList.get(6));
+        	}
+        	
+        	row = sheet.createRow(j * 4 + 5);
+        	for(int i = 1; i < 8; i++) {
+        		cell = row.createCell((i-1)*3);
+        		cell.setCellStyle(styleList.get(7));
+        		
+        		cell = row.createCell((i-1)*3+1);
+        		cell.setCellStyle(styleList.get(8));
+        		
+        		cell = row.createCell((i-1)*3+2);
+        		cell.setCellStyle(styleList.get(9));
+        	}
+        	
         }
-    	
-    	// 일요일까지 체우기 위한 것
-    	if(row.getLastCellNum() != 21)
-	    	for(int i = row.getLastCellNum() / 3; row.getLastCellNum() < 21; i++) {
-	    		cell = row.createCell((i-1)*3);
-	    		cell.setCellStyle(styleList.get(0));
-	    		
-	    		cell = row.createCell((i-1)*3+1);
-	    		cell.setCellStyle(styleList.get(1));
-	    		
-	    		cell = row.createCell((i-1)*3+2);
-	    		cell.setCellStyle(styleList.get(2));
-	    	}
     	
         // 엑셀파일로 저장
         try {
@@ -165,13 +187,6 @@ public class POITest {
 		}
         
         System.out.println(file);
-	}
-	
-	public static void main(String[] args) {
-		CalendarVo calendarVo = new CalendarVo();
-		calendarVo.setYear("2024");
-		calendarVo.setMonth("2");
-		
-		writeCalendar(calendarVo);
+        return file;
 	}
 }

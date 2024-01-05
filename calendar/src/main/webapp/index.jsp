@@ -34,7 +34,7 @@
 			<div class="header"></div>
 			<div class="content">
 				<div class="calendarBox" style="text-align: center;">
-					<form action="/download/calendar" method="POST">
+					<form action="/download/calendar" method="GET">
 						<select id="calendarYear" name="year">
 						</select>
 						<select id="calendarMonth" name="month">

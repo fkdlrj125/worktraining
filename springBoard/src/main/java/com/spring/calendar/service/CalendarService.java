@@ -1,7 +1,9 @@
 package com.spring.calendar.service;
 
-import com.spring.calendar.vo.CalendarVo;
+import java.io.File;
+
+import javax.servlet.http.HttpServletResponse;
 
 public interface CalendarService {
-	public void downloadCalendar(CalendarVo calendarVo) throws Exception;
+	public void downloadCalendar(File file, HttpServletResponse response) throws Exception;
 }
