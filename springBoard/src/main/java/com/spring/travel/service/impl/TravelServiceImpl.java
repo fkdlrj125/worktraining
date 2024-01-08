@@ -2,52 +2,54 @@ package com.spring.travel.service.impl;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.spring.travel.dao.TravelDao;
 import com.spring.travel.service.TravelService;
 import com.spring.travel.vo.ClientInfoVo;
 import com.spring.travel.vo.TravelInfoVo;
 
+@Service
 public class TravelServiceImpl implements TravelService{
 
+	@Autowired
+	TravelDao travelDao;
+	
 	@Override
-	public int insertUser(ClientInfoVo cInfoVo) throws Exception {
+	public int mergeUser(ClientInfoVo cInfoVo) throws Exception {
 		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int updateUser(ClientInfoVo cInfoVo) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
+		return travelDao.mergeUser(cInfoVo);
 	}
 
 	@Override
 	public int mergeTravelList(List<TravelInfoVo> tInfoVoList) throws Exception {
 		// TODO Auto-generated method stub
-		return 0;
+		return travelDao.mergeTravelList(tInfoVoList);
 	}
 
 	@Override
-	public int deleteTravelList(List<TravelInfoVo> tInfoVoList) throws Exception {
+	public int deleteTravel(TravelInfoVo tInfoVo) throws Exception {
 		// TODO Auto-generated method stub
-		return 0;
+		return travelDao.deleteTravel(tInfoVo);
 	}
 
 	@Override
 	public ClientInfoVo selectUser(ClientInfoVo cInfoVo) throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		return travelDao.selectUser(cInfoVo);
 	}
 
 	@Override
 	public List<ClientInfoVo> selectUserList() throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		return travelDao.selectUserList();
 	}
 
 	@Override
-	public List<TravelInfoVo> selectTravelList(ClientInfoVo cInfoVo) throws Exception {
+	public List<TravelInfoVo> selectTravelList(TravelInfoVo tInfoVo) throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		return travelDao.selectTravelList(tInfoVo);
 	}
 
 }

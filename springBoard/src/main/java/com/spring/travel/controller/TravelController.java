@@ -1,15 +1,32 @@
 package com.spring.travel.controller;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.spring.common.CommonUtil;
+import com.spring.travel.dto.FormDTO;
+import com.spring.travel.service.TravelService;
 import com.spring.travel.vo.ClientInfoVo;
 import com.spring.travel.vo.TravelInfoVo;
 
 @Controller
 public class TravelController {
+	
+	@Autowired
+	TravelService travelService;
 	
 	@RequestMapping(value = "/travel/login", method = RequestMethod.GET) 
 	public String travelLogin() throws Exception {
@@ -18,39 +35,97 @@ public class TravelController {
 	
 	@RequestMapping(value = "/travel/login", method = RequestMethod.POST) 
 	@ResponseBody
-	public String travelLoginAction(ClientInfoVo cInfoVo) throws Exception {
-		return "travel/login";
+	public String travelLoginAction(ClientInfoVo cInfoVo, HttpServletRequest request) throws Exception {
+		Map<String, String> callbackMsg = new HashMap<>();
+		HttpSession session = request.getSession();
+		ClientInfoVo selectUser = travelService.selectUser(cInfoVo);
+		
+		if(selectUser == null) {
+			int result = travelService.mergeUser(cInfoVo);
+			System.out.println(result);
+			callbackMsg.put("success",  result == 1 ? "Y" : "N");
+			session.setAttribute("loginUser", travelService.selectUser(cInfoVo));
+			return CommonUtil.getJsonCallBackString("", callbackMsg);
+		}
+		
+		if(selectUser.getUserName().equals(cInfoVo.getUserName())  
+				&& selectUser.getUserPhone().equals(cInfoVo.getUserPhone())) {
+			callbackMsg.put("success", "Y");
+			session.setAttribute("loginUser", selectUser);
+			return CommonUtil.getJsonCallBackString("", callbackMsg);
+		}
+		
+		callbackMsg.put("success", "N");
+		return CommonUtil.getJsonCallBackString("", callbackMsg);
 	}
 	
 	@RequestMapping(value = "/travel/book", method = RequestMethod.GET) 
-	public String travelBook() throws Exception {
+	public String travelBook(HttpServletRequest request, Model model) throws Exception {
+		HttpSession session = request.getSession();
+		ClientInfoVo loginUser = (ClientInfoVo)session.getAttribute("loginUser");
+		TravelInfoVo tInfoVo = new TravelInfoVo();
+		tInfoVo.setTravelSeq(loginUser.getUserSeq());
+		tInfoVo.setTravelDay("1");
+		
+		List<TravelInfoVo> tInfoList = travelService.selectTravelList(tInfoVo);
+		
+		if(Optional.ofNullable(tInfoList).isPresent())
+			model.addAttribute("travelInfoList", tInfoList);
+		
+		model.addAttribute("loginUser", loginUser);
+		
 		return "travel/book";
 	}
 	
 	@RequestMapping(value = "/travel/book", method = RequestMethod.POST)
 	@ResponseBody
-	public String travelBookAction(ClientInfoVo tInfoVo) throws Exception {
-		return "travel/login";
+	public String travelBookAction(@RequestBody FormDTO formDTO, Model model) throws Exception {
+		Map<String, String> callbackMsg = new HashMap<>();
+		int result = 0;
+		result += travelService.mergeUser(formDTO.getClientVo());
+		
+		if(Optional.ofNullable(formDTO.getTravelList()).isPresent()) {
+			formDTO.setModify();
+			result += travelService.mergeTravelList(formDTO.getTravelList());
+		}
+		
+		callbackMsg.put("success", result > 0 ? "Y" : "N");
+		
+		return CommonUtil.getJsonCallBackString("", callbackMsg);
 	}
 	
 	@RequestMapping(value = "/travel/admin", method = RequestMethod.GET) 
-	public String travelAdmin() throws Exception {
+	public String travelAdmin(Model model) throws Exception {
+		model.addAttribute("userList", travelService.selectUserList());
 		return "travel/admin";
 	}
 	
 	@RequestMapping(value = "/travel/admin", method = RequestMethod.POST) 
-	public String travelAdminAction() throws Exception {
-		return "travel/login";
+	@ResponseBody
+	public String travelAdminAction(@RequestBody FormDTO formDTO) throws Exception {
+		Map<String, String> callbackMsg = new HashMap<>();
+		
+		callbackMsg.put("success", travelService.mergeTravelList(formDTO.getTravelList())
+				== formDTO.getTravelList().size() ? "Y" : "N") ;
+		
+		return CommonUtil.getJsonCallBackString("", callbackMsg);
 	}
 	
-	@RequestMapping(value = "/travel/list", method = RequestMethod.GET) 
-	public String travelList() throws Exception {
-		return "travel/login";
+	@RequestMapping(value = "/travel/{userSeq}/{travelDay}/list", method = RequestMethod.GET)
+	@ResponseBody
+	public String travelList(TravelInfoVo tInfoVo, Model model) throws Exception {
+		model.addAttribute("travelList", travelService.selectTravelList(tInfoVo));
+		
+		return "Y";
 	}
 	
 	@RequestMapping(value = "/travel/delete", method = RequestMethod.POST) 
-	public String travelDelete() throws Exception {
-		return "travel/login";
+	@ResponseBody
+	public String travelDelete(TravelInfoVo tInfoVo) throws Exception {
+		Map<String, String> callbackMsg = new HashMap<>();
+		callbackMsg.put("success", travelService.deleteTravel(tInfoVo) == 1 ? "Y" : "N"); 
+		
+		return CommonUtil.getJsonCallBackString("", callbackMsg);
 	}
 }
 

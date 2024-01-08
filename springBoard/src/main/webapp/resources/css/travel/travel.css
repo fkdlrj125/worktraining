@@ -1,2 +1,35 @@
 @charset "EUC-KR";
 
+form {
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 10px;
+}
+
+.hidden {
+	display: none;
+}
+
+.userTable {
+	margin: 0 auto;
+}
+
+.submitBtn {
+	text-align: center;
+}
+
+#dayBtnBox {
+	align-self: start;
+}
+
+#adjustBtn {
+	align-self: start;
+}
+
+#tableBtn {
+	align-self: start;
+}

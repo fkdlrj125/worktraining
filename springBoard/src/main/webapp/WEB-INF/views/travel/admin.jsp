@@ -121,33 +121,33 @@
 			<table border="1" class="travelTable">
 				<thead>
 					<tr>
-						<td>
-						</td>
-						<td>
+						<th>
+						</th>
+						<th>
 							<label for="travelTime">시간</label>
-						</td>
-						<td>
+						</th>
+						<th>
 							<label for="travelCity">지역</label>
 							<label for="travelCounty" class="hidden"></label>
-						</td>
-						<td>
+						</th>
+						<th>
 							<label for="travelLoc">장소명</label>
-						</td>
-						<td>
+						</th>
+						<th>
 							<label for="travelTrans">교통편</label>
-						</td>
-						<td>
+						</th>
+						<th>
 							<label for="useTime">예상이동시간</label>
-						</td>
-						<td>
+						</th>
+						<th>
 							<label for="useExpend">이용요금(예상지출비용)</label>
-						</td>
-						<td>
+						</th>
+						<th>
 							<label for="travelDetail">계획상세</label>
-						</td>
-						<td>
-							<label for="transExpend">교통비</label>
-						</td>
+						</th>
+						<th>
+							교통비
+						</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -188,8 +188,7 @@
 							oninput="this.value = this.value.replace()">
 						</td>
 						<td>
-							<input id="transExpend" type="text" value=""
-							oninput="this.value = this.value.replace()">
+							<div></div>
 						</td>
 					</tr>
 				</tbody>

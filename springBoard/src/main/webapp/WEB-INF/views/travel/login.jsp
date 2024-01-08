@@ -13,9 +13,9 @@
 var nameCheck = function() {
 	const nameRegex = /[\uac00-\ud7a3]/g;
 	
-	if(!nameRegex.test($j("#travelName").val())) {
+	if(!nameRegex.test($j("#userName").val())) {
 		alert("이름을 입력해주세요.");
-		$j("#travelName").focus();
+		$j("#userName").focus();
 		return false;
 	}
 	return true;
@@ -24,15 +24,15 @@ var nameCheck = function() {
 var phoneCheck = function() {
 	const phoneRegex = /^01([0|1|6|7|8|9])-\d{3,4}-\d{4}$/;
 	
-	if(!$j("#travelPhone").val()?.trim()) {
+	if(!$j("#userPhone").val()?.trim()) {
 		alert("휴대폰번호를 입력해주세요.");
-		$j("#travelPhone").focus();
+		$j("#userPhone").focus();
 		return false;
 	}
 	
-	if(!phoneRegex.test($j("#travelPhone").val())) {
+	if(!phoneRegex.test($j("#userPhone").val())) {
 		alert("휴대폰번호를 xxx-xxxx-xxxx 또는 xxx-xxx-xxxx형식으로 입력해주세요.");
-		$j("#travelPhone").focus();
+		$j("#userPhone").focus();
 		return false;
 	}
 	return true;
@@ -54,7 +54,7 @@ $j(document).ready(function() {
 			data : param.serialize(),
 			dataType : "json",
 			success : function(data) {
-				data.success == "Y" ? location.href = "/recruit/main" : alert("실패");
+				data.success == "Y" ? location.href = "/travel/book" : alert("실패");
 			},
 			error : function(errorThrown) {
 				console.log(errorThrown);
@@ -62,12 +62,12 @@ $j(document).ready(function() {
 		});
 	});
 	
-	$j("#travelName").on("change", function() {
+	$j("#userName").on("change", function() {
 		$j(this).val(($j(this).val().length > 5) ? $j(this).val().slice(0,5) : $j(this).val());
 	});
 	
-	$j("#travelPhone").on("keypress", function(e) {
-		if(e.keyCode != 45 && !/^\d{3}-\d{3,4}-\d{4}$/.test($j(this).val())) {
+	$j("#userPhone").on("keypress", function(e) {
+		if(e.keyCode != 45 && !/^\d{0,3}-\d{0,4}-\d{0,4}$/.test($j(this).val())) {
 			$j(this).val().length == 3 ? $j(this).val($j(this).val() + "-") : "";
 			$j(this).val().length == 8 ? $j(this).val($j(this).val() + "-") : "";
 		}
@@ -80,23 +80,23 @@ $j(document).ready(function() {
 		<table border="1">
 			<tr>
 				<th>
-					<label for="travelName">
+					<label for="userName">
 						이름
 					</label>
 				</th>
 				<td>
-					<input type="text" id="travelName" name="travelName" maxlength="5"
+					<input type="text" id="userName" name="userName" maxlength="5"
 					oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3]/, '')">
 				</td>
 			</tr>
 			<tr>
 				<th>
-					<label for="travelPhone">
+					<label for="userPhone">
 						휴대폰번호
 					</label>
 				</th>
 				<td>
-					<input type="text" id="travelPhone" name="travelPhone" maxlength="13"
+					<input type="text" id="userPhone" name="userPhone" maxlength="13"
 					oninput="this.value = this.value.replace(/[^0-9-]/g, '')">
 				</td>
 			</tr>

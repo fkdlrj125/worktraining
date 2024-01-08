@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="travel">
+    
+    <resultMap type="com.spring.travel.vo.ClientInfoVo" id="clientInfoVo">
+    	<result property="userSeq" 	column="SEQ"/>
+    	<result property="userName" 	column="USER_NAME"/>
+    	<result property="userPhone" 	column="USER_PHONE"/>
+    	<result property="travelCity" 	column="TRAVE_CITY"/>
+    	<result property="period" 	column="PERIOD"/>
+    	<result property="expend" 	column="EXPEND"/>
+    	<result property="transport" 	column="TRANSPORT"/>
+    </resultMap>
+    
+    <resultMap type="com.spring.travel.vo.TravelInfoVo" id="travelInfoVo">
+    	<result property="userSeq" 	column="SEQ"/>
+    	<result property="travelSeq" 	column="TRAVE_SEQ"/>
+    	<result property="travelDay" 	column="TRAVE_DAY"/>
+    	<result property="travelTime" 	column="TRAVE_TIME"/>
+    	<result property="travelCity" 	column="TRAVE_CITY"/>
+    	<result property="travelCounty" 	column="TRAVE_COUNTY"/>
+    	<result property="travelLoc" 	column="TRAVE_LOC"/>
+    	<result property="travelTrans" 	column="TRAVE_TRANS"/>
+    	<result property="transTime" 	column="TRAVE_TIME"/>
+    	<result property="useTime" 	column="USE_TIME"/>
+    	<result property="useExpend" 	column="USE_EXPEND"/>
+    	<result property="travelDetail" 	column="TRAVE_DETAIL"/>
+    	<result property="request" 	column="REQUEST"/>
+    </resultMap>
+    
+    <!-- 
+    	myBatis에서 null을 넣을 땐 타입을 지정해줘야 함
+    	-> JDBC driver에서 타입 입력을 요구하는 메소드 때문
+    	참조 : https://velog.io/@dailylifecoding/mybatis-null-parameter-and-jdbc-type-for-null-configuration
+     -->
+     
+	<update id="mergeUser" parameterType="com.spring.travel.vo.ClientInfoVo">
+	MERGE INTO     
+		CLIENT_INFO c
+	USING 
+		(
+			SELECT
+				#{userSeq} as userSeq
+				,#{userName} as userName
+				,#{userPhone} as userPhone
+				,#{travelCity} as travelCity
+				,#{period} as period
+				,#{expend} as expend
+				,#{transport} as transport
+				,(
+	 				SELECT 
+	 					NVL(MAX(SEQ)+1, 1) 
+	 				FROM
+	 					CLIENT_INFO
+ 				) as numrow
+			FROM
+				DUAL
+		) du
+	ON
+		(c.SEQ = du.userSeq)
+ 	WHEN MATCHED THEN
+  	 	UPDATE
+  	 	SET
+	 		c.USER_NAME = du.userName
+	 		,c.USER_PHONE = du.userPhone
+	 		,c.TRAVE_CITY = du.travelCity
+	 		,c.PERIOD = du.period
+	 		,c.EXPEND = du.expend
+	 		,c.TRANSPORT = du.transport
+		 	
+  	 WHEN NOT MATCHED THEN
+  	 	INSERT
+  	 		(
+  	 			SEQ
+  	 			,USER_NAME
+  	 			,USER_PHONE
+  	 			,TRAVE_CITY
+  	 			,PERIOD
+  	 			,EXPEND
+  	 			,TRANSPORT
+  	 		)
+ 		VALUES
+ 			(
+ 				du.numrow
+ 				,du.userName
+ 				,du.userPhone
+ 				,du.travelCity
+ 				,du.period
+ 				,du.expend
+ 				,du.transport
+ 			)
+    </update>
+     
+    <update id="mergeTravelList" parameterType="java.util.List">
+    MERGE INTO
+    	TRAVE_INFO t
+    USING 
+    	(
+    		<foreach collection="list" item="item" separator="UNION ALL" index="index">
+    			SELECT
+    				#{item.userSeq} AS userSeq
+    				,#{item.travelSeq} AS travelSeq
+    				,#{item.travelDay} AS travelDay
+    				,#{item.travelTime} AS travelTime
+    				,#{item.travelCity} AS travelCity
+    				,#{item.travelCounty} AS travelCounty
+    				,#{item.travelLoc} AS travelLoc
+    				,#{item.travelTrans} AS travelTrans
+    				,#{item.transTime} AS transTime
+    				,#{item.useTime} AS useTime
+    				,#{item.useExpend} AS useExpend
+    				,#{item.travelDetail} AS travelDetail
+    				,#{item.request} AS request
+    				,(
+	 				SELECT 
+	 					NVL(MAX(TRAVE_SEQ)+1, 1) + #{index}
+	 				FROM
+	 					TRAVE_INFO
+ 					) AS numrow
+    			FROM
+    				DUAL
+    		</foreach>
+    	) du
+    ON
+    	(t.SEQ = du.userSeq AND t.TRAVE_SEQ = du.travelSeq)
+    	
+    WHEN MATCHED THEN
+    	UPDATE
+    	SET
+   			t.TRAVE_DAY = du.travelDay
+   			,t.TRAVE_TIME = du.travelTime
+   			,t.TRAVE_CITY = du.travelCity
+   			,t.TRAVE_COUNTY = du.travelCounty
+   			,t.TRAVE_LOC = du.travelLoc
+   			,t.TRAVE_TRANS = du.travelTrans
+   			,t.TRANS_TIME = du.transTime
+   			,t.USE_TIME = du.useTime
+   			,t.USE_EXPEND = du.useExpend
+   			,t.TRAVE_DETAIL = du.travelDetail
+   			,t.REQUEST = du.request
+    		
+    WHEN NOT MATCHED THEN
+    	INSERT
+    		(
+				SEQ
+    			,TRAVE_SEQ
+				,TRAVE_DAY
+				,TRAVE_TIME
+				,TRAVE_CITY
+				,TRAVE_COUNTY
+				,TRAVE_LOC
+				,TRAVE_TRANS
+				,TRANS_TIME
+				,USE_TIME
+				,USE_EXPEND
+				,TRAVE_DETAIL
+				,REQUEST
+    		)
+    	VALUES
+    		(
+    			du.userSeq
+    			,du.numrow
+    			,du.travelDay
+    			,du.travelTime
+    			,du.travelCity
+    			,du.travelCounty
+    			,du.travelLoc
+    			,du.travelTrans
+    			,du.transTime
+    			,du.useTime
+    			,du.useExpend
+    			,du.travelDetail
+    			,du.request
+    		)
+    </update>
+    
+    <delete id="deleteTravel" parameterType="com.spring.travel.vo.TravelInfoVo">
+    	DELETE
+    		TRAVE_INFO
+   		WHERE
+			SEQ = #{item.userSeq} AND TRAVE_SEQ = #{item.travelSeq}
+    </delete>
+    
+    <select id="selectUser" parameterType="com.spring.travel.vo.ClientInfoVo" resultMap="clientInfoVo">
+    	SELECT
+    		*
+    	FROM
+    		CLIENT_INFO
+   		WHERE
+   			USER_NAME = #{userName} AND USER_PHONE = #{userPhone}
+    </select>
+    
+    <select id="selectUserList" resultMap="clientInfoVo">
+    	SELECT
+    		*
+    	FROM
+    		CLIENT_INFO
+    </select>
+    
+    <select id="selectTravelList" parameterType="com.spring.travel.vo.TravelInfoVo" resultMap="travelInfoVo">
+    	SELECT
+    		*
+    	FROM
+    		TRAVE_INFO
+   		WHERE
+   			SEQ = #{userSeq} AND TRAVE_DAY = #{travelDay}
+    </select>
+</mapper>

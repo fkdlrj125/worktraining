@@ -32,6 +32,14 @@
 	  	- api로 받기
  -->
 <script type="text/javascript">
+	$j.ajax({
+		url 	: "https://api.vworld.kr/req/data?key=990C9653-E457-3637-8610-FFE3CA0A9247&domain=http://localhost:8080/travel/book&service=data&version=2.0&request=getfeature&format=json&size=1000&page=1&geometry=false&attribute=true&crs=EPSG:3857&geomfilter=BOX(13663271.680031825,3894007.9689600193,14817776.555251127,4688953.0631258525)&data=LT_C_ADSIDO_INFO&callback=jQuery111107369229617841166_1704700345340&_=1704700345341",
+		type	: "GET",
+		dataType : "jsonp",
+		success : function(data) {
+			console.log(data);
+		}
+	})
 </script>
 <body>
 	<div class="container">
@@ -42,7 +50,7 @@
 						<div>고객명</div>
 					</th>
 					<td>
-						<div id="userName"></div>
+						<div id="userName">${userName}</div>
 					</td>
 				</tr>
 				<tr>
@@ -50,7 +58,7 @@
 						<div>휴대폰번호</div>
 					</th>
 					<td>
-						<div id="userPhone"></div>
+						<div id="userPhone">${userPhone}</div>
 					</td>
 				</tr>
 				<tr>
@@ -58,7 +66,7 @@
 						<label for="period">여행 기간</label>
 					</th>
 					<td>
-						<input id="period" type="text" name="period" value=""
+						<input id="period" type="text" name="period" value="${period}"
 						oninput="this.value = this.value.replace(/[^\D]/, '')">
 					</td>
 				</tr>
@@ -68,6 +76,9 @@
 					</th>
 					<td>
 						<select id="tansport" name="tansport">
+							<option value="R" <c:if test="${transport eq 'R'}">selected = 'selected'</c:if>>렌트</option>
+							<option value="B" <c:if test="${transport eq 'B'}">selected = 'selected'</c:if>>대중교통</option>
+							<option value="C" <c:if test="${transport eq 'C'}">selected = 'selected'</c:if>>자차</option>
 						</select>
 					</td>
 				</tr>
@@ -76,7 +87,7 @@
 						<label for="expend">예상 경비</label>
 					</th>
 					<td>
-						<input id="expend" type="text" name="expend" value=""
+						<input id="expend" type="text" name="expend" value="${expend}"
 						oninput="this.value = this.value.replace(/[^\D\,]/, '')">
 					</td>
 				</tr>
@@ -90,11 +101,12 @@
 					</td>
 				</tr>
 			</table>
-
+			
 			<button type="button" id="submit">신청</button>
+			<button type="button" id="logout" class="hidden">로그아웃</button>
 		</form>
 
-		<form>
+		<form class="">
 			<div id="dayBtnBox">
 				<button type="button" class="dayBtn">1</button>
 			</div>
@@ -104,33 +116,33 @@
 			<table border="1" class="travelTable">
 				<thead>
 					<tr>
-						<td>
-						</td>
-						<td>
+						<th>
+						</th>
+						<th>
 							<label for="travelTime">시간</label>
-						</td>
-						<td>
+						</th>
+						<th>
 							<label for="travelCity">지역</label>
 							<label for="travelCounty" class="hidden"></label>
-						</td>
-						<td>
+						</th>
+						<th>
 							<label for="travelLoc">장소명</label>
-						</td>
-						<td>
+						</th>
+						<th>
 							<label for="travelTrans">교통편</label>
-						</td>
-						<td>
+						</th>
+						<th>
 							<label for="useTime">예상이동시간</label>
-						</td>
-						<td>
+						</th>
+						<th>
 							<label for="useExpend">이용요금(예상지출비용)</label>
-						</td>
-						<td>
+						</th>
+						<th>
 							<label for="travelDetail">계획상세</label>
-						</td>
-						<td>
-							<label for="transExpend">교통비</label>
-						</td>
+						</th>
+						<th>
+							교통비
+						</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -171,8 +183,7 @@
 							oninput="this.value = this.value.replace()">
 						</td>
 						<td>
-							<input id="transExpend" type="text" value=""
-							oninput="this.value = this.value.replace()">
+							<div></div>
 						</td>
 					</tr>
 				</tbody>
