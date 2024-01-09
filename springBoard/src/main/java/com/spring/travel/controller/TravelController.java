@@ -16,7 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.spring.common.CommonUtil;
+import com.spring.common.TravelAPIUtil;
 import com.spring.travel.dto.FormDTO;
 import com.spring.travel.service.TravelService;
 import com.spring.travel.vo.ClientInfoVo;
@@ -42,20 +46,13 @@ public class TravelController {
 		
 		if(selectUser == null) {
 			int result = travelService.mergeUser(cInfoVo);
-			System.out.println(result);
 			callbackMsg.put("success",  result == 1 ? "Y" : "N");
 			session.setAttribute("loginUser", travelService.selectUser(cInfoVo));
 			return CommonUtil.getJsonCallBackString("", callbackMsg);
 		}
 		
-		if(selectUser.getUserName().equals(cInfoVo.getUserName())  
-				&& selectUser.getUserPhone().equals(cInfoVo.getUserPhone())) {
-			callbackMsg.put("success", "Y");
-			session.setAttribute("loginUser", selectUser);
-			return CommonUtil.getJsonCallBackString("", callbackMsg);
-		}
-		
-		callbackMsg.put("success", "N");
+		callbackMsg.put("success", "Y");
+		session.setAttribute("loginUser", selectUser);
 		return CommonUtil.getJsonCallBackString("", callbackMsg);
 	}
 	
@@ -64,15 +61,17 @@ public class TravelController {
 		HttpSession session = request.getSession();
 		ClientInfoVo loginUser = (ClientInfoVo)session.getAttribute("loginUser");
 		TravelInfoVo tInfoVo = new TravelInfoVo();
-		tInfoVo.setTravelSeq(loginUser.getUserSeq());
+		tInfoVo.setUserSeq(loginUser.getUserSeq());
 		tInfoVo.setTravelDay("1");
 		
 		List<TravelInfoVo> tInfoList = travelService.selectTravelList(tInfoVo);
+		System.out.println(!tInfoList.isEmpty());
 		
-		if(Optional.ofNullable(tInfoList).isPresent())
+		if(!tInfoList.isEmpty())
 			model.addAttribute("travelInfoList", tInfoList);
 		
 		model.addAttribute("loginUser", loginUser);
+		model.addAttribute("cityList", TravelAPIUtil.getData("city"));
 		
 		return "travel/book";
 	}
@@ -126,6 +125,25 @@ public class TravelController {
 		callbackMsg.put("success", travelService.deleteTravel(tInfoVo) == 1 ? "Y" : "N"); 
 		
 		return CommonUtil.getJsonCallBackString("", callbackMsg);
+	}
+	
+	@RequestMapping(value = "/travel/county", method = RequestMethod.POST)
+	@ResponseBody
+	public JsonArray travelCounty(String city) throws Exception {
+		JsonArray jsonArray = new JsonArray();
+		
+		for(Map<String, Object> map : TravelAPIUtil.getData("county", city)) {
+			JsonObject jsonObject = new JsonObject();
+			
+			for(Map.Entry<String, Object> entry : map.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+				jsonObject.add(key, (JsonElement) value);
+				jsonArray.add(jsonObject);
+			}
+		}
+		
+		return jsonArray;
 	}
 }
 

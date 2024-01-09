@@ -32,25 +32,106 @@
 	  	- api로 받기
  -->
 <script type="text/javascript">
-	$j.ajax({
-		url 	: "https://api.vworld.kr/req/data?key=990C9653-E457-3637-8610-FFE3CA0A9247&domain=http://localhost:8080/travel/book&service=data&version=2.0&request=getfeature&format=json&size=1000&page=1&geometry=false&attribute=true&crs=EPSG:3857&geomfilter=BOX(13663271.680031825,3894007.9689600193,14817776.555251127,4688953.0631258525)&data=LT_C_ADSIDO_INFO&callback=jQuery111107369229617841166_1704700345340&_=1704700345341",
-		type	: "GET",
-		dataType : "jsonp",
-		success : function(data) {
-			console.log(data);
+	$j.fn.serializeObject = function() {
+		var result = [];
+		var obj = null;
+		
+		try {
+			var arr = this.serializeArray();
+			
+			if(arr) {
+				obj = {};
+				
+				$j.each(arr, function() {
+					obj[this.name] = this.value;
+				});
+				result.push(Object.assign({}, obj));
+			}
+		} catch (e) {
+			alert(e.message);
 		}
-	})
+		return result;
+	}
+
+	var validation = function(data) {
+		let result = true;
+		
+		$j.each(data, function() {
+			if(!$j(this).val()?.trim()) {
+				alert($j(`label[for=\${$j(this).attr('id')}]`).text() + "을 입력해주세요.");
+				$j(this).focus();
+				result = false;
+				return false;
+			}
+		});
+		
+		if(result == false) return;
+		
+		let periodReg = /^(1[0-9]|2[0-9]|30|[1-9])$/
+		
+		if(!periodReg.test($j(period).val())) {
+			alert($j(`label[for=\${$j(period).attr('id')}]`).text() + "을 1~30일 사이로 입력해주세요.");
+			$j(period).focus();
+			result = false;
+		}
+		
+		return result;
+	}
+
+	$j(document).ready(function() {
+		
+		$j("#expend").on("keypress", function(e) {
+			let insertPosition = ($j(this).val().replaceAll(",", "").length % 3) + 1;
+			let cnt = Math.floor($j(this).val().replaceAll(",", "").length / 3);
+			
+			if(cnt > 0) {
+				$j(this).val($j(this).val().replaceAll(",", ""));
+				for(let i = 0; i < cnt; i++) {
+					$j(this).val($j(this).val().slice(0, insertPosition) + "," + $j(this).val().slice(insertPosition));
+					insertPosition += 4;
+				}
+			}
+		});
+		
+		$j("#submit").on("click", function() {
+			let data = $j("form:eq(0) input, form:eq(0) select");
+			if(!validation(data)) return;
+			
+			let sendData = {
+				userName : $j("#userName").text(),
+				userPhone : $j("#userPhone").text()
+			}
+			Object.assign({}, sendData, data.serializeObject());
+			
+			console.log(sendData);
+			
+			return;
+			$j.ajax({
+				url : "/travel/book",
+				type : "post",
+				data : sendData,
+				dataType : "json",
+				contentType : "application/json",
+				success : function(res) {
+					res.success == "Y" ? location.href = "/travel/login" : alert("신청 실패");
+				},
+				error : function(e) {
+					alert(e);
+				}			
+			})
+		});
+	});
 </script>
 <body>
 	<div class="container">
-		<form action="">
+		<form>
 			<table border="1">
 				<tr>
 					<th>
 						<div>고객명</div>
 					</th>
 					<td>
-						<div id="userName">${userName}</div>
+						<div id="userName">${loginUser.userName}</div>
 					</td>
 				</tr>
 				<tr>
@@ -58,7 +139,7 @@
 						<div>휴대폰번호</div>
 					</th>
 					<td>
-						<div id="userPhone">${userPhone}</div>
+						<div id="userPhone">${loginUser.userPhone}</div>
 					</td>
 				</tr>
 				<tr>
@@ -66,8 +147,8 @@
 						<label for="period">여행 기간</label>
 					</th>
 					<td>
-						<input id="period" type="text" name="period" value="${period}"
-						oninput="this.value = this.value.replace(/[^\D]/, '')">
+						<input id="period" type="text" name="period" value="${loginUser.period}"
+						oninput="this.value = this.value.replace(/[\D]/, '')">
 					</td>
 				</tr>
 				<tr>
@@ -76,9 +157,9 @@
 					</th>
 					<td>
 						<select id="tansport" name="tansport">
-							<option value="R" <c:if test="${transport eq 'R'}">selected = 'selected'</c:if>>렌트</option>
-							<option value="B" <c:if test="${transport eq 'B'}">selected = 'selected'</c:if>>대중교통</option>
-							<option value="C" <c:if test="${transport eq 'C'}">selected = 'selected'</c:if>>자차</option>
+							<option value="R" <c:if test="${loginUser eq null || loginUser.transport eq 'R'}">selected = 'selected'</c:if>>렌트</option>
+							<option value="B" <c:if test="${loginUser.transport eq 'B'}">selected = 'selected'</c:if>>대중교통</option>
+							<option value="C" <c:if test="${loginUser.transport eq 'C'}">selected = 'selected'</c:if>>자차</option>
 						</select>
 					</td>
 				</tr>
@@ -87,8 +168,8 @@
 						<label for="expend">예상 경비</label>
 					</th>
 					<td>
-						<input id="expend" type="text" name="expend" value="${expend}"
-						oninput="this.value = this.value.replace(/[^\D\,]/, '')">
+						<input id="expend" type="text" name="expend" value="${loginUser.expend}"
+						oninput="this.value = this.value.replace(/[^\d\,]/, '')">
 					</td>
 				</tr>
 				<tr>
@@ -97,6 +178,15 @@
 					</th>
 					<td>
 						<select id="travelCity" name="travelCity">
+						<c:forEach items="${cityList}" var="item">
+							<option value="${item.code}" 
+							<c:if test="${(loginUser.travelCity eq null && item.code eq '11') 
+							|| item.code eq loginUser.travelCity}">
+								selected = 'selected'
+							</c:if>>
+								${item.name}
+							</option>
+						</c:forEach>
 						</select>
 					</td>
 				</tr>
@@ -106,7 +196,7 @@
 			<button type="button" id="logout" class="hidden">로그아웃</button>
 		</form>
 
-		<form class="">
+		<form <c:if test="${travelInfoList eq null}">class="hidden"</c:if>>
 			<div id="dayBtnBox">
 				<button type="button" class="dayBtn">1</button>
 			</div>
