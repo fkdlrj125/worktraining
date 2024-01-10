@@ -33,7 +33,6 @@
  -->
 <script type="text/javascript">
 	$j.fn.serializeObject = function() {
-		var result = [];
 		var obj = null;
 		
 		try {
@@ -45,12 +44,11 @@
 				$j.each(arr, function() {
 					obj[this.name] = this.value;
 				});
-				result.push(Object.assign({}, obj));
 			}
 		} catch (e) {
 			alert(e.message);
 		}
-		return result;
+		return obj;
 	}
 
 	var validation = function(data) {
@@ -97,21 +95,23 @@
 			let data = $j("form:eq(0) input, form:eq(0) select");
 			if(!validation(data)) return;
 			
-			let sendData = {
-				userName : $j("#userName").text(),
-				userPhone : $j("#userPhone").text()
-			}
-			Object.assign({}, sendData, data.serializeObject());
+			let sendData = 
+				{
+					clientVo : {
+						userSeq : ${loginUser.userSeq},
+						userName : $j("#userName").text(),
+						userPhone : $j("#userPhone").text()
+					}
+				}
 			
-			console.log(sendData);
+			Object.assign(sendData["clientVo"], data.serializeObject());
 			
-			return;
 			$j.ajax({
 				url : "/travel/book",
 				type : "post",
-				data : sendData,
-				dataType : "json",
 				contentType : "application/json",
+				data : JSON.stringify(sendData),
+				dataType : "json",
 				success : function(res) {
 					res.success == "Y" ? location.href = "/travel/login" : alert("신청 실패");
 				},
@@ -153,10 +153,10 @@
 				</tr>
 				<tr>
 					<th>
-						<label for="tansport">이동 수단</label>
+						<label for="transport">이동 수단</label>
 					</th>
 					<td>
-						<select id="tansport" name="tansport">
+						<select id="transport" name="transport">
 							<option value="R" <c:if test="${loginUser eq null || loginUser.transport eq 'R'}">selected = 'selected'</c:if>>렌트</option>
 							<option value="B" <c:if test="${loginUser.transport eq 'B'}">selected = 'selected'</c:if>>대중교통</option>
 							<option value="C" <c:if test="${loginUser.transport eq 'C'}">selected = 'selected'</c:if>>자차</option>
@@ -179,9 +179,9 @@
 					<td>
 						<select id="travelCity" name="travelCity">
 						<c:forEach items="${cityList}" var="item">
-							<option value="${item.code}" 
-							<c:if test="${(loginUser.travelCity eq null && item.code eq '11') 
-							|| item.code eq loginUser.travelCity}">
+							<option value="${item.name}" 
+							<c:if test="${(item.name eq loginUser.travelCity) 
+							|| loginUser.travelCity eq null && item.name eq '서울'}">
 								selected = 'selected'
 							</c:if>>
 								${item.name}

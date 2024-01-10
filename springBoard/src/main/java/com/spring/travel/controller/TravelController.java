@@ -11,9 +11,11 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.JsonArray;
@@ -94,8 +96,29 @@ public class TravelController {
 	}
 	
 	@RequestMapping(value = "/travel/admin", method = RequestMethod.GET) 
-	public String travelAdmin(Model model) throws Exception {
+	public String travelAdmin(@RequestParam(required = false) String userSeq,
+							@RequestParam(required = false, defaultValue = "1") String day,
+							Model model) throws Exception {
+		if(userSeq == null) {
+			model.addAttribute("userList", travelService.selectUserList());
+			return "travel/admin";
+		}
+		
+		TravelInfoVo tInfoVo = new TravelInfoVo();
+		tInfoVo.setUserSeq(userSeq);
+		tInfoVo.setTravelDay(day);
+		
+		ClientInfoVo cInfoVo = new ClientInfoVo();
+		cInfoVo.setUserSeq(userSeq);
+		
+		cInfoVo = travelService.selectUser(cInfoVo);
+		
 		model.addAttribute("userList", travelService.selectUserList());
+		model.addAttribute("travelList", travelService.selectTravelList(tInfoVo));
+		model.addAttribute("selectUser", cInfoVo);
+		model.addAttribute("selectDay", day);
+		model.addAttribute("cityList", TravelAPIUtil.getData("city"));
+		model.addAttribute("countyList", TravelAPIUtil.getData("county", cInfoVo.getTravelCity()));
 		return "travel/admin";
 	}
 	
@@ -103,19 +126,14 @@ public class TravelController {
 	@ResponseBody
 	public String travelAdminAction(@RequestBody FormDTO formDTO) throws Exception {
 		Map<String, String> callbackMsg = new HashMap<>();
+		ClientInfoVo cInfoVo = formDTO.getClientVo();
+		
+		formDTO.setSeq(cInfoVo);
 		
 		callbackMsg.put("success", travelService.mergeTravelList(formDTO.getTravelList())
 				== formDTO.getTravelList().size() ? "Y" : "N") ;
 		
 		return CommonUtil.getJsonCallBackString("", callbackMsg);
-	}
-	
-	@RequestMapping(value = "/travel/{userSeq}/{travelDay}/list", method = RequestMethod.GET)
-	@ResponseBody
-	public String travelList(TravelInfoVo tInfoVo, Model model) throws Exception {
-		model.addAttribute("travelList", travelService.selectTravelList(tInfoVo));
-		
-		return "Y";
 	}
 	
 	@RequestMapping(value = "/travel/delete", method = RequestMethod.POST) 

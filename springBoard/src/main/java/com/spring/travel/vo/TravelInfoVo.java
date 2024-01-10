@@ -1,8 +1,8 @@
 package com.spring.travel.vo;
 
 public class TravelInfoVo {
-	Long userSeq;
-	Long travelSeq;
+	String userSeq;
+	String travelSeq;
 	String travelDay;
 	String travelTime;
 	String travelCity;
@@ -15,16 +15,16 @@ public class TravelInfoVo {
 	String travelDetail;
 	String request;
 	
-	public Long getUserSeq() {
+	public String getUserSeq() {
 		return userSeq;
 	}
-	public void setUserSeq(Long userSeq) {
+	public void setUserSeq(String userSeq) {
 		this.userSeq = userSeq;
 	}
-	public Long getTravelSeq() {
+	public String getTravelSeq() {
 		return travelSeq;
 	}
-	public void setTravelSeq(Long travelSeq) {
+	public void setTravelSeq(String travelSeq) {
 		this.travelSeq = travelSeq;
 	}
 	public String getTravelDay() {

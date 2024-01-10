@@ -1,7 +1,7 @@
 package com.spring.travel.vo;
 
 public class ClientInfoVo {
-	Long userSeq;
+	String userSeq;
 	String userName;
 	String userPhone;
 	String travelCity;
@@ -9,10 +9,10 @@ public class ClientInfoVo {
 	String expend;
 	String transport;
 	
-	public Long getUserSeq() {
+	public String getUserSeq() {
 		return userSeq;
 	}
-	public void setUserSeq(Long userSeq) {
+	public void setUserSeq(String userSeq) {
 		this.userSeq = userSeq;
 	}
 	public String getUserName() {

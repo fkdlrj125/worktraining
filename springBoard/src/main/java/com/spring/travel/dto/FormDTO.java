@@ -2,6 +2,7 @@ package com.spring.travel.dto;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import com.spring.travel.vo.ClientInfoVo;
 import com.spring.travel.vo.TravelInfoVo;
@@ -24,6 +25,17 @@ public class FormDTO {
 
 	public void setTravelList(List<TravelInfoVo> travelList) {
 		this.travelList = travelList;
+	}
+	
+	public void setSeq(ClientInfoVo cInfoVo) {
+		clientVo.setUserSeq(cInfoVo.getUserSeq());
+		
+		travelList.forEach(new Consumer<TravelInfoVo>() {
+			@Override
+			public void accept(TravelInfoVo t) {
+				t.setUserSeq(cInfoVo.getUserSeq());
+			}
+		});
 	}
 
 	public void setModify() {

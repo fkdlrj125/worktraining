@@ -170,7 +170,7 @@
     			,du.useTime
     			,du.useExpend
     			,du.travelDetail
-    			,du.request
+    			,"C"
     		)
     </update>
     
@@ -187,14 +187,27 @@
     	FROM
     		CLIENT_INFO
    		WHERE
-   			USER_NAME = #{userName} AND USER_PHONE = #{userPhone}
+   			<choose>
+	   			<when test="userSeq == null">
+	   				USER_NAME = #{userName} AND USER_PHONE = #{userPhone}
+	   			</when>
+	   			<otherwise>
+	   				SEQ = #{userSeq}
+	   			</otherwise>
+   			</choose>
     </select>
     
     <select id="selectUserList" resultMap="clientInfoVo">
     	SELECT
-    		*
-    	FROM
-    		CLIENT_INFO
+		    distinct c.*
+		FROM
+		    CLIENT_INFO c
+		RIGHT OUTER JOIN
+		    TRAVE_INFO t
+		ON 
+		    c.SEQ = t.SEQ
+		WHERE
+		    t.REQUEST = 'M' OR t.REQUEST is null;
     </select>
     
     <select id="selectTravelList" parameterType="com.spring.travel.vo.TravelInfoVo" resultMap="travelInfoVo">
