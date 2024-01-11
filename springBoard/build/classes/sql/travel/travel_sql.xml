@@ -202,12 +202,12 @@
 		    distinct c.*
 		FROM
 		    CLIENT_INFO c
-		RIGHT OUTER JOIN
+		LEFT OUTER JOIN
 		    TRAVE_INFO t
 		ON 
 		    c.SEQ = t.SEQ
 		WHERE
-		    t.REQUEST = 'M' OR t.REQUEST is null;
+		    t.REQUEST = 'M' OR t.REQUEST is null
     </select>
     
     <select id="selectTravelList" parameterType="com.spring.travel.vo.TravelInfoVo" resultMap="travelInfoVo">
