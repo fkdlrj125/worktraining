@@ -11,7 +11,6 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,6 +22,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.spring.common.CommonUtil;
 import com.spring.common.TravelAPIUtil;
+import com.spring.common.TravelUtil;
+import com.spring.travel.dto.CalculateDTO;
 import com.spring.travel.dto.FormDTO;
 import com.spring.travel.service.TravelService;
 import com.spring.travel.vo.ClientInfoVo;
@@ -162,6 +163,16 @@ public class TravelController {
 		}
 		
 		return jsonArray;
+	}
+	
+	@RequestMapping(value = "/travel/calculate", method = RequestMethod.GET)
+	@ResponseBody
+	public String travelCalculate(CalculateDTO cal) throws Exception {
+		Map<String, Integer> result = new HashMap<>();
+		
+		result.put("expend", TravelUtil.CalculateExpend(cal));
+
+		return CommonUtil.getJsonCallBackString("", result);
 	}
 }
 

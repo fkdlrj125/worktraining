@@ -9,28 +9,28 @@
 <title>Travel Admin</title>
 </head>
 <!-- 
-    [페이지]
+    [페이지] x
     - 고객리스트 테이블
     - 일별 버튼 들어올 공간
     - 추가 삭제 버튼 들어올 공간
     - 일정 리스트 테이블
     - 저장버튼
 
-	[JS]
-	- [고객리스트]
+	[JS] 
+	- [고객리스트] x
 	  - 고객리스트에서 고객명 클릭 시 ajax로 일정 리스트 요청
-	- 선택한 고객의 여행 기간에 따라 일별 버튼 생성
+	- 선택한 고객의 여행 기간에 따라 일별 버튼 생성 x
 	  - 여행 기간만큼 반복해서 버튼 생성
 	  - 버튼 클릭 시 기존 입력 정보는 세션스토리지에 저장
-	- 추가 및 삭제 버튼으로 일정 리스트 추가 및 삭제
+	- 추가 및 삭제 버튼으로 일정 리스트 추가 및 삭제 x
 	  - 삭제를 버튼 누르자마자 요청할지 백단에서 할지 타이밍을 생각해 보기
 	
 	- [일정리스트]
-	  시간, 지역(시/도, 시군구), 장소, 이동수단, 이동시간, 이용요금, 계획상세 입력
-	  교통비는 교통편 및 예상이동시간에 따라 계산하여 출력
-	  - 스케쥴이 겹치는 시간은 선택 불가(이건 찾아봐야함)
+	  시간, 지역(시/도, 시군구), 장소, 이동수단, 이동시간, 이용요금, 계획상세 입력 x
+	  교통비는 교통편 및 예상이동시간에 따라 계산하여 출력 x - 계산 요청보내는 이벤트를 바꿔야 할듯
+	  - 스케쥴이 겹치는 시간은 선택 불가(이건 찾아봐야함) 
 	    시간은 오전 7시 ~ 다음날 오전 4시까지 등록 가능
-	  - 이동수단
+	  - 이동수단 x
 	    - 도보(W)
 	    - 버스(B)
 	      - 1400원
@@ -51,7 +51,17 @@
 	    - 자차(C)
 	- 일정 리스트 작성 후 저장버튼 클릭 시 이용요금 및 교통비 합산하여 고객 리스트 견적경비에 출력
 	  예상 경비 초과 시 견적경비는 붉은색으로 변경
-  	- 입력한 일정들은 POST요청 
+  	- 입력한 일정들은 POST요청 x
+  	
+  	- 남은 거
+  		- 스케쥴 겹치는 시간 선택 불가
+  		- 시간 오전 7시 ~ 다음날 오전 4시까지로 제한
+  		- 일정 리스트 작성 후 저장버튼 클릭 시 이용요금 및 교통비 합산하여 고객 리스트 견적경비에 출력
+  		  예상 경비 초과 시 견적경비는 붉은색으로 변경
+  		- 일정 리스트 전달 시 여러 개 처리되나 확인
+  		- 날짜 선택
+  		- 저장하지 않고 날짜 옮길 시 세션 스토리지에 저장
+  		- 저장 버튼 클릭 시 세션 스토리지 확인 후 데이터 있다면 가져와서 같이 전송
  -->
 <script type="text/javascript">
 	$j.fn.serializeObject = function(day) {
@@ -87,8 +97,6 @@
 		let testObj = {};
 		let result = true;
 		
-		// 여기부터
-		// 빈 값 체크하고 있는 중
 		$j.each(data, function() {
 			if(!$j(this).val()?.trim()) {
 				alert(`\${$j(`label[for='\${$j(this).attr('id').replace(/\d/g, '0')}']`).text()}을 입력해주세요`);
@@ -124,6 +132,9 @@
 		$j.each(Object.keys(testObj), function(index) {
 			let id = this;
 			$j.each(testObj[id], function() {
+				console.log(this);
+				console.log(regex[id]);
+				console.log(!regex[id].test(this));
 				if(!regex[id].test(this)) {
 					alert(`\${$j(`label[for="\${id}0"]`).text()}` + alertComment[id]);
 					$j(`[id*=\${id}]:eq(\${index})`).focus();
@@ -142,25 +153,13 @@
 		
 	}
 	
-	// 교통비 계산(예상이동시간 적으면)
-	var calTransExpend = function() {
-		
-	}
-	
-	
 	$j(document).ready(function() {
 		var rowNum = $j("table:eq(1) tbody tr").length;
-		var transExpend = {
-			R : 500,
-			B : 200,
-			T : 5000
-		}
-		var defaultExpend = {
-			R : 1400,
-			S : 1450,
-			R : 100000,
-			T : 3800
-		}
+		var rentExpend = 100000 - (10000 * (Math.round(($j("#dayBtnBox").data("period")) / 2) - 1));
+		var currentRent = {
+			row : 0,
+			add : 0
+		};
 		
 		// 이용금액 , 찍기
 		$j(document).on("keypress", "input[name='useExpend']",function(e) {
@@ -178,84 +177,55 @@
 		});
 		
 		// 교통비 찍기
-		$j(document).on("change", "input[name='transTime']", "select[name='travelTrans	']", function() {
+		$j(document).on("change", "input[name='transTime']", "select[name='travelTrans']", function() {
 			let transport = $j(this).closest("tr").find("[name=travelTrans]").val();
-			let transTime = parseInt($j(this).val().slice(0, -1));
-			let resultExpend = 0;
+			let travelTime = $j(this).closest("tr").find("[name=travelTime]").val();
+			let transTime = $j(this).val().replace(/\D/, "");
+			let textPosition = $j(this).closest("tr").find("[id*=transExpend]");
+			let row = $j(textPosition).attr("id").replace(/\D/g, "");
+		
+			if(transport == "R" && row == currentRent.row)
+				rentExpend -= currentRent.add;
 			
-			switch (transport) {
-			case "B": case "S":
-				resultExpend += defaultExpend[transport];
-				if(transTime > 20)
-					resultExpend += transExpend["B"] * Math.floor(transTime / 20);
-				break;
-				
-			// 한국시간은 9시간을 더해줘야 완성
-			// 현재 이동시간을 구하면 9시간이 빠진 상태로 계산됨
-			case "T":
-				let time = $j(this).closest("tr").find("[name=travelTime]").val();
-				let travelTime = new Date("1970/01/01/"+time);
-				let transTimeDate = new Date("1970/01/01/"+Math.floor(transTime/60) + ":" + transTime%60);
-				let compareTime1 = new Date("1970/01/01/04:00");
-				let compareTime2 = new Date("1970/01/01/22:00");
-				let compareTime3 = new Date("1970/01/01/24:00");
-				
-				console.log(travelTime.getTime());
-				console.log(transTime);
-				console.log(transTimeDate);
-				console.log(transTimeDate.getTime());
-				console.log(compareTime2.getTime());
-				console.log(compareTime3.getTime());
+			$j.ajax({
+				url : `/travel/calculate?ts=\${transport}&tlt=\${travelTime}&tst=\${transTime}`,
+				type : "GET",
+				success : function(res) {
+					res = JSON.parse(res);
 
-				resultExpend += defaultExpend[transport];
-				
-				
-				if(transTime > 10)
-					resultExpend += transExpend[transport] * Math.floor(transTime / 10);
-				
-				if(travelTime < compareTime1)
-					travelTime.setDate(travelTime.getDate() + 1);
-				
-				travelTime.setTime(travelTime.getTime() + transTimeDate.getTime());
-				
-				if(travelTime < compareTime2)
-					break;
-				
-				// 9시 50분에 타서 30분 달리면 20분은 할증 붙어야 되는데...
-				if(travelTime > compareTime3) {
-					resultExpend += Math.floor(resultExpend * 0.4);
-					break;
+					if(transport == "R") {
+						currentRent.row = row;
+						currentRent.add = res.expend;
+						rentExpend += currentRent.add;
+						$j(textPosition).text(rentExpend);
+						return;
+					}
+					console.log(res.expend);
+					$j(textPosition).text(res.expend);
+				},
+				error : function(errorThrown) {
+					alert(errorThrown);
 				}
-				
-				resultExpend += Math.floor(resultExpend * 0.2);
-				break;
-				
-			case "R":
-				
-				break;
-				
-			case "C":
-				
-				break;
-
-			default:
-				break;
-			}
-			
-			console.log(resultExpend);
+			});
 		});
 		
 		// 추가 버튼 - ㅇ
 		$j("#addBtn").on("click", function() {
 			let copyRow = $j("table:eq(1) tbody tr:eq(0)").clone();
 
-			$j.each($j(copyRow).find("input:not(:checkBox), select"), function() {
-				if($j(this).prop("tagName") == "INPUT") {
+			$j.each($j(copyRow).find("input:not(:checkBox), select, div"), function() {
+				switch ($j(this).prop("tagName")) {
+				case "INPUT":
 					$j(this).val("");
-				}
-
-				if($j(this).prop("tagName") == "SELECT") {
+					break;
+					
+				case "SELECT":
 					$j(this).find("option:eq(0)").attr("selected", "selected");
+					break;
+					
+				case "DIV":
+					$j(this).text("");
+					break;
 				}
 				
 				if($j(this).data("seq")) 
@@ -326,7 +296,6 @@
 			
 			console.log(sendData);
 			
-			return;
 			$j.ajax({
 				url : "/travel/admin",
 				type : "POST",
@@ -517,7 +486,7 @@
 											oninput="this.value = this.value.replace()">
 										</td>
 										<td>
-											<div></div>
+											<div id="transExpend${status.index}"></div>
 										</td>
 									</tr>
 								</c:forEach>
@@ -579,7 +548,7 @@
 									oninput="this.value = this.value.replace()">
 								</td>
 								<td>
-									<div></div>
+									<div id="transExpend0"></div>
 								</td>
 							</tr>
 							</c:otherwise>
