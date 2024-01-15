@@ -21,7 +21,7 @@
     	<result property="travelCounty" 	column="TRAVE_COUNTY"/>
     	<result property="travelLoc" 	column="TRAVE_LOC"/>
     	<result property="travelTrans" 	column="TRAVE_TRANS"/>
-    	<result property="transTime" 	column="TRAVE_TIME"/>
+    	<result property="transTime" 	column="TRANS_TIME"/>
     	<result property="useTime" 	column="USE_TIME"/>
     	<result property="useExpend" 	column="USE_EXPEND"/>
     	<result property="travelDetail" 	column="TRAVE_DETAIL"/>
@@ -170,6 +170,7 @@
     			,du.useTime
     			,du.useExpend
     			,du.travelDetail
+    			,'C'
     		)
     </update>
     
@@ -202,11 +203,21 @@
 		FROM
 		    CLIENT_INFO c
 		LEFT OUTER JOIN
-		    TRAVE_INFO t
+            TRAVE_INFO t
 		ON 
 		    c.SEQ = t.SEQ
 		WHERE
-		    t.REQUEST = 'M' OR t.REQUEST is null
+		    t.REQUEST = 'M' 
+  			OR 
+	   		t.REQUEST IS NULL 
+ 			OR 
+	   		c.PERIOD > (
+                        SELECT
+                            NVL(MAX(TRAVE_DAY), 1)
+                        FROM
+                            TRAVE_INFO
+                        WHERE SEQ = C.SEQ
+                        );
     </select>
     
     <select id="selectTravelList" parameterType="com.spring.travel.vo.TravelInfoVo" resultMap="travelInfoVo">

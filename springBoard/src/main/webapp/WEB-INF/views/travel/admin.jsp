@@ -54,14 +54,12 @@
   	- 입력한 일정들은 POST요청 x
   	
   	- 남은 거
-  		- 스케쥴 겹치는 시간 선택 불가
-  		- 시간 오전 7시 ~ 다음날 오전 4시까지로 제한
+  		- 스케쥴 겹치는 시간 선택 불가 x 
+  		- 시간 오전 7시 ~ 다음날 오전 4시까지로 제한 x 
   		- 일정 리스트 작성 후 저장버튼 클릭 시 이용요금 및 교통비 합산하여 고객 리스트 견적경비에 출력
-  		  예상 경비 초과 시 견적경비는 붉은색으로 변경
-  		- 일정 리스트 전달 시 여러 개 처리되나 확인
-  		- 날짜 선택
-  		- 저장하지 않고 날짜 옮길 시 세션 스토리지에 저장
-  		- 저장 버튼 클릭 시 세션 스토리지 확인 후 데이터 있다면 가져와서 같이 전송
+  		  예상 경비 초과 시 견적경비는 붉은색으로 변경 
+  		- 일정 리스트 전달 시 여러 개 처리되나 확인 x
+  		- 날짜 선택 x
  -->
 <script type="text/javascript">
 	$j.fn.serializeObject = function(day) {
@@ -96,6 +94,12 @@
 	var validation = function(data) {
 		let testObj = {};
 		let result = true;
+		let checkTime = new Date();
+		let transTime = parseInt($j(data).closest("tr").find("input[name='transTime']").val().replace(/\D/g, ""));
+		let prevTime = null;
+		let time = null;
+		let checkDateStart = new Date();
+		let checkDateEnd = new Date();
 		
 		$j.each(data, function() {
 			if(!$j(this).val()?.trim()) {
@@ -113,28 +117,53 @@
 				testObj[$j(this).attr("name")].push($j(this).val());
 				
 				break;
+				
+			case "travelTime":
+				time = $j(this).val().split(":");
+				
+				checkTime.setHours(time[0]);
+				checkTime.setMinutes(time[1]);
+				checkDateStart.setHours("7","0","0");
+				checkDateEnd.setDate(checkDateEnd.getDate() + 1);
+				checkDateEnd.setHours("4","0","0");
+				
+				if(checkTime < checkDateStart || checkTime > checkDateEnd) {
+					alert("스케쥴 시간은 오전 7시 ~ 다음날 오전 4시까지 등록 가능합니다.");
+					$j(this).focus();
+					result = false;
+					break;
+				}
+				
+				if(prevTime == null) {
+					checkTime.setMinutes(checkTime.getMinutes() + transTime);
+					prevTime = new Date(checkTime.getTime());
+					break;
+				}
+				
+				if(checkTime < prevTime) {
+					alert("이전 스케쥴 시간과 겹치지 않게 설정해주세요.");
+					$j(this).focus();
+					result = false;
+				}
+				
+				checkTime.setMinutes(checkTime.getMinutes() + transTime);
+				prevTime = checkTime;
 			}
 		});
 		
 		if(!result) return result;
 		
 		let regex = {
-			transTime : /^(([0-5][1-9]|[0-9])\ubd84)$/,
-			useExpend : /^[^\,].*[^\,]$/
+			transTime : /^(([1-9]?[0-9][0-9]|[0-9])\ubd84)$/,
 		}
 		
 		let alertComment = {
-			transTime : "을 xx분 형식으로 입력해주세요.",
-			useExpend : "을 xxx,xxx 형식으로 입력해주세요." 
+			transTime : "을 분 단위로 입력해주세요.",
 		}
 		
-		// 장소명, 예상이동시간, 이용금액(앞 뒤에 , 있는지) 검사
 		$j.each(Object.keys(testObj), function(index) {
 			let id = this;
 			$j.each(testObj[id], function() {
-				console.log(this);
-				console.log(regex[id]);
-				console.log(!regex[id].test(this));
 				if(!regex[id].test(this)) {
 					alert(`\${$j(`label[for="\${id}0"]`).text()}` + alertComment[id]);
 					$j(`[id*=\${id}]:eq(\${index})`).focus();
@@ -148,66 +177,134 @@
 		return result;
 	}
 	
-	// 견적 비용 계산
-	var calTravelExpend = function() {
-		
-	}
-	
 	$j(document).ready(function() {
 		var rowNum = $j("table:eq(1) tbody tr").length;
+		// 세션스토리지에 저장된 값이 있는지 확인 후 없다면 새로 생성 있다면 세션스토리지 값 사용
+		// 렌트값 변경도 세션스토리지를 통해 변경해야 값 누적이 가능할 것 같음
+		// 견적 경비 계산할 때 기존 렌트값을 빼주고 다시 계산하는 식으로 진행해봐야될듯
 		var rentExpend = 100000 - (10000 * (Math.round(($j("#dayBtnBox").data("period")) / 2) - 1));
-		var currentRent = {
-			row : 0,
-			add : 0
-		};
+		var preRentExpend = 0;
+		var validationCheck = false;
+		var userSeq = $j("[data-seq]").data("seq");
 		
-		// 이용금액 , 찍기
-		$j(document).on("keypress", "input[name='useExpend']",function(e) {
-			let insertPosition = ($j(this).val().replaceAll(",", "").length % 3) + 1;
-			let cnt = Math.floor($j(this).val().replaceAll(",", "").length / 3);
-			
-			if(e.keyCode < 48 || e.keyCode > 57)
-				insertPosition -= 1;
-			
-			$j(this).val($j(this).val().replaceAll(",", ""));
-			for(let i = 0; i < cnt; i++) {
-				$j(this).val($j(this).val().slice(0, insertPosition) + "," + $j(this).val().slice(insertPosition));
-				insertPosition += 4;
-			}
-		});
+		for(let key of Object.keys(localStorage)) {
+		 	let saveData = JSON.parse(localStorage.getItem(key));
+		 	let inputPosition = key.replace(/\D/g, "")
+		 	
+		 	if(saveData.travelExpendOver)
+				$j(`#travelExpend\${inputPosition}`).css("color", "red");
+		 	
+		 	$j(`#travelExpend\${inputPosition}`).text(saveData.travelExpend);
+		}
 		
-		// 교통비 찍기
-		$j(document).on("change", "input[name='transTime']", "select[name='travelTrans']", function() {
-			let transport = $j(this).closest("tr").find("[name=travelTrans]").val();
-			let travelTime = $j(this).closest("tr").find("[name=travelTime]").val();
-			let transTime = $j(this).val().replace(/\D/, "");
-			let textPosition = $j(this).closest("tr").find("[id*=transExpend]");
+		var calTransExpend = function(data) {
+			let transport = $j(data).closest("tr").find("[name=travelTrans]").val();
+			let travelTime = $j(data).closest("tr").find("[name=travelTime]").val();
+			let transTime = $j(data).closest("tr").find("input[name='transTime']").val().replace(/\D/g, "");
+			let textPosition = $j(data).closest("tr").find("[id*=transExpend]");
 			let row = $j(textPosition).attr("id").replace(/\D/g, "");
-		
-			if(transport == "R" && row == currentRent.row)
-				rentExpend -= currentRent.add;
+			
+			if(transport == "R") {
+				let filterSelect = $j(".travelTable").find("select option:selected").filter((idx, value) => $j(value).val() == "R");
+				let expend = 0
+				transTime = 0;
+				
+				$j.each(filterSelect.closest("tr").find("input[name='transTime']"), function() {
+					textPosition = $j(this).closest("tr").find("[id*=transExpend]");
+					transTime += parseInt($j(this).val().replace(/\D/g, ""));
+					
+					expend = 500 * (transTime > 9 ? Math.floor(transTime / 10) : 0);
+					rentExpend += expend;
+					rentExpend -= preRentExpend;
+					preRentExpend = expend;
+					
+					$j(textPosition).text(`\${rentExpend}원`);
+				});
+				
+				return;
+			}
 			
 			$j.ajax({
 				url : `/travel/calculate?ts=\${transport}&tlt=\${travelTime}&tst=\${transTime}`,
 				type : "GET",
+				async : false,
 				success : function(res) {
 					res = JSON.parse(res);
-
-					if(transport == "R") {
-						currentRent.row = row;
-						currentRent.add = res.expend;
-						rentExpend += currentRent.add;
-						$j(textPosition).text(rentExpend);
-						return;
-					}
-					console.log(res.expend);
-					$j(textPosition).text(res.expend);
+					$j(textPosition).text(`\${res.expend}원`);
 				},
 				error : function(errorThrown) {
 					alert(errorThrown);
 				}
 			});
+		}
+		
+		// 견적 비용 계산
+		var calTravelExpend = function() {
+			let userSeq = $j("[data-seq]").data("seq");
+			let userExpend = parseInt($j(`#userExpend\${userSeq}`).text().replace(/\D/g, ""));
+			let useExpend = 0;
+			let transExpend = 0;
+			let travelExpend = 0;
+			let travelExpendOver = 0;
+			let preTravelExpend = 0;
+			let saveObj = {}
+			
+			$j("[name=useExpend]").each(function() {
+				useExpend += parseInt($j(this).val().replace(/\D/g, ""));
+			});
+			
+			$j("[id*=transExpend]").each(function() {
+				transExpend += parseInt($j(this).text().replace(/\D/g, ""));
+			});
+			
+			if(localStorage.getItem(`travelExpend\${userSeq}`)) {
+				saveData = localStorage.getItem(`travelExpend\${userSeq}`);
+				saveData = JSON.parse(saveData);
+				travelExpend = parseInt(saveData.travelExpend.replace(/\D/g, ""));
+				preTravelExpend = parseInt(saveData.preTravelExpend);
+			}
+			
+			travelExpend += useExpend + transExpend - preTravelExpend;
+			travelExpendOver = userExpend < travelExpend ? 1 : 0;
+			
+			$j(`#travelExpend\${userSeq}`).css("color", "black");
+			if(travelExpendOver)
+				$j(`#travelExpend\${userSeq}`).css("color", "red");
+			
+			travelExpend = travelExpend.toLocaleString('ko-KR');
+			$j(`#travelExpend\${userSeq}`).text(travelExpend);
+			
+			preTravelExpend = useExpend + transExpend;
+			
+			saveObj = {
+				travelExpend : travelExpend,
+				travelExpendOver : travelExpendOver,
+				preTravelExpend : preTravelExpend
+			};
+			
+			localStorage.setItem(`travelExpend\${userSeq}`, JSON.stringify(saveObj));
+			
+			return travelExpendOver;
+		}
+		
+		// 이용금액 , 찍기
+		$j(document).on("keyup", "input[name='useExpend']",function(e) {
+			let parseValue = parseInt($j(this).val().replace(/\D/g, ""));
+			
+			if(parseValue)
+				$j(this).val(parseValue.toLocaleString('ko-KR'));
 		});
+		
+		// 교통비 찍기
+		$j(document).on("change", "input[name='transTime'], select[name='travelTrans']", function() {
+			calTransExpend(this);
+		});
+		
+		if(!!$j("input[name='transTime']").val()?.trim()) {
+			$j.each($j("input[name='transTime']"), function() {
+				calTransExpend(this);
+			});
+		}
 		
 		// 추가 버튼 - ㅇ
 		$j("#addBtn").on("click", function() {
@@ -270,31 +367,35 @@
 		
 		// 날짜 버튼 - 
 		$j(".dayBtn").on("click", function() {
-			let userSeq = $j("[data-seq]").data("seq");
 			let day = $j(this).text();
 			
-			// ajax로 요청하면 됨
-			console.log(userSeq);
-			console.log(day);
+			if(!validationCheck) {
+				if(confirm("편집한 내용을 저장하지 않고 이동하시겠습니까?"))
+					location.href=`/travel/admin?userSeq=\${userSeq}&day=\${day}`;
+				return;
+			}
+				
+			location.href=`/travel/admin?userSeq=\${userSeq}&day=\${day}`;
 		});
 		
 		// 저장 버튼 
 		$j("#submit").on("click", function() {
-			let validationData = $j("table:eq(1) tbody input:not(:checkBox)");
 			let day = $j("[data-day]").data("day");
+			let validationData = $j("table:eq(1) tbody input:not(:checkBox)");
 			
-			if(!validation(validationData)) return;
+			validationCheck = validation(validationData);
+			if(!validationCheck) return;
+			
+			if(calTravelExpend()) alert("예상 경비를 초과했습니다.");
 			
 			let data = $j("table:eq(1) tbody input:not(:checkBox), table:eq(1) tbody select");
 			
 			let sendData = {
 				clientVo : {
-					userSeq : $j("[data-seq]").data("seq")
+					userSeq : userSeq
 				},
 				travelList : data.serializeObject(day)
 			}
-			
-			console.log(sendData);
 			
 			$j.ajax({
 				url : "/travel/admin",
@@ -303,7 +404,7 @@
 				dataType : "json",
 				contentType : "application/json",
 				success : function(res) {
-					res.success == "Y" ? calTravelExpend() : alert("저장 실패");
+					res.success == "Y" ? alert("저장 완료") : alert("저장 실패");
 				},
 				error : function(thrownError) {
 					alert(thrownError);
@@ -363,10 +464,10 @@
 							</div>
 						</td>
 						<td>
-							<div class="userListTableContent">${user.expend}</div>
+							<div id="userExpend${user.userSeq}" class="userListTableContent">${user.expend}</div>
 						</td>
 						<td>
-							<div id="travelExpend" class="userListTableContent"></div>
+							<div id="travelExpend${user.userSeq}" class="userListTableContent"></div>
 						</td>
 					</tr>
 				</c:forEach>

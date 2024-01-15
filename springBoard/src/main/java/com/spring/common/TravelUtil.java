@@ -12,8 +12,7 @@ enum TravelExpend {
 	C(0, 0),
 	B(1400, 200),
 	S(1450, 200),
-	T(3800, 5000),
-	R(100000, 500);
+	T(3800, 5000);
 	
 	private int expend;
 	private int addExpend;
@@ -53,7 +52,7 @@ public class TravelUtil {
 			
 			resultExpend += defaultExpend 
 					+ addExpend
-					* (Integer.parseInt(cal.getTst()) > 10 ? Integer.parseInt(cal.getTst()) / 10 : 0);
+					* (Integer.parseInt(cal.getTst()) > 9 ? Integer.parseInt(cal.getTst()) / 10 : 0);
 			
 			if(travelTime.isBefore(fourClock))
 				travelTime = travelTime.plusDays(1);
@@ -89,10 +88,6 @@ public class TravelUtil {
 			duration = Duration.between(twentyTwoClock, totalTime.minusMinutes(duration.toMinutes()));
 			resultExpend += addExpend
 							* (0.2) * (duration.toMinutes() / 10);
-			break;
-			
-		case "R": 
-			resultExpend += addExpend * Integer.parseInt(cal.getTst());
 			break;
 		}
 		
