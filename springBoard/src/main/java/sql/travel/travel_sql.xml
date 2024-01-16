@@ -217,7 +217,7 @@
                         FROM
                             TRAVE_INFO
                         WHERE SEQ = C.SEQ
-                        );
+                        )
     </select>
     
     <select id="selectTravelList" parameterType="com.spring.travel.vo.TravelInfoVo" resultMap="travelInfoVo">

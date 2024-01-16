@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -60,12 +61,14 @@ public class TravelController {
 	}
 	
 	@RequestMapping(value = "/travel/book", method = RequestMethod.GET) 
-	public String travelBook(HttpServletRequest request, Model model) throws Exception {
+	public String travelBook(HttpServletRequest request, 
+							Model model,
+							@RequestParam(required = false, defaultValue = "1") String day) throws Exception {
 		HttpSession session = request.getSession();
 		ClientInfoVo loginUser = (ClientInfoVo)session.getAttribute("loginUser");
 		TravelInfoVo tInfoVo = new TravelInfoVo();
 		tInfoVo.setUserSeq(loginUser.getUserSeq());
-		tInfoVo.setTravelDay("1");
+		tInfoVo.setTravelDay(day);
 		
 		List<TravelInfoVo> tInfoList = travelService.selectTravelList(tInfoVo);
 		System.out.println(!tInfoList.isEmpty());
@@ -75,6 +78,7 @@ public class TravelController {
 		
 		model.addAttribute("loginUser", loginUser);
 		model.addAttribute("cityList", TravelAPIUtil.getData("city"));
+		model.addAttribute("countyList", TravelAPIUtil.getData("county", loginUser.getTravelCity()));
 		
 		return "travel/book";
 	}
@@ -173,6 +177,31 @@ public class TravelController {
 		result.put("expend", TravelUtil.CalculateExpend(cal));
 
 		return CommonUtil.getJsonCallBackString("", result);
+	}
+	
+	@RequestMapping(value = "/travel/mod", method = RequestMethod.POST)
+	@ResponseBody
+	public String travelMod(@RequestBody FormDTO formDTO, HttpServletRequest request) throws Exception {
+		HttpSession session = request.getSession(false);
+		ClientInfoVo cInfoVo = (ClientInfoVo)session.getAttribute("loginUser");
+		
+		formDTO.setModify(cInfoVo);
+		
+		Map<String, String> result = new HashMap<>();
+		
+		String callBackMsg = travelService.mergeTravelList(formDTO.getTravelList()) > 1 ? "Y" : "N";
+		
+		result.put("success", callBackMsg);
+		
+		return CommonUtil.getJsonCallBackString("", result);
+	}
+	
+	@RequestMapping(value = "/travel/logout", method = RequestMethod.POST)
+	@ResponseBody
+	public String travelLogout(HttpServletRequest request) throws Exception {
+		request.getSession(false).invalidate();
+		
+		return "Y";
 	}
 }
 

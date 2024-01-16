@@ -39,9 +39,22 @@ public class FormDTO {
 	}
 
 	public void setModify() {
-		for(TravelInfoVo tinfoVo : travelList) {
-			tinfoVo.setUserSeq(clientVo.getUserSeq());
-			tinfoVo.setRequest("M");
-		}
+		travelList.forEach(new Consumer<TravelInfoVo>() {
+			@Override
+			public void accept(TravelInfoVo t) {
+				t.setUserSeq(clientVo.getUserSeq());
+				t.setRequest("M");
+			}
+		});
+	}
+	
+	public void setModify(ClientInfoVo cInfoVo) {
+		travelList.forEach(new Consumer<TravelInfoVo>() {
+			@Override
+			public void accept(TravelInfoVo t) {
+				t.setUserSeq(cInfoVo.getUserSeq());
+				t.setRequest("M");
+			}
+		});
 	}
 }

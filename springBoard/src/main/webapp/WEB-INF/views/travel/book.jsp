@@ -32,24 +32,34 @@
 	  	- api로 받기
  -->
 <script type="text/javascript">
-	$j.fn.serializeObject = function() {
-		var obj = null;
-		
-		try {
-			var arr = this.serializeArray();
-			
-			if(arr) {
-				obj = {};
-				
-				$j.each(arr, function() {
-					obj[this.name] = this.value;
-				});
-			}
-		} catch (e) {
-			alert(e.message);
-		}
-		return obj;
+$j.fn.serializeObject = function(day) {
+	let result = [];
+	let obj = null;
+	
+	let pushObj = function(obj) {
+		obj["travelDay"] = `\${day}`;
+		result.push(Object.assign({}, obj));
+		return {};
 	}
+	
+	try {
+		let arr = this.serializeArray();
+
+		if(arr.length > 0) {
+			let obj = {};
+			
+			$j.each(arr, function() {
+				obj.hasOwnProperty(this.name) ? obj = pushObj(obj) : "";
+				obj[this.name] = this.value;
+			});
+			pushObj(obj);
+		} 
+	} catch (e) {
+		alert(e.message);
+	}
+	
+	return result;
+}
 
 	var validation = function(data) {
 		let result = true;
@@ -77,18 +87,118 @@
 	}
 
 	$j(document).ready(function() {
+		var userSeq = ${loginUser.userSeq}
+		var rentInfo = sessionStorage.getItem(`\${userSeq}rent`) ? 
+				JSON.parse(sessionStorage.getItem(`\${userSeq}rent`)) :
+				{
+					transTime : 0,
+				};
+		var period = Math.round(($j("#dayBtnBox").data("period")) / 2) - 1;
+		var rentExpend = 100000 - (10000 * (period > 3 ? 3 : period));
+		var preRentExpend = 0;
 		
-		$j("#expend").on("keypress", function(e) {
-			let insertPosition = ($j(this).val().replaceAll(",", "").length % 3) + 1;
-			let cnt = Math.floor($j(this).val().replaceAll(",", "").length / 3);
+		var calTransExpend = function(data) {
+			let transport = $j(data).closest("tr").find("[name=travelTrans]").val();
+			let travelTime = $j(data).closest("tr").find("[name=travelTime]").val();
+			let transTime = $j(data).closest("tr").find("input[name='transTime']").val().replace(/\D/g, "");
+			let textPosition = $j(data).closest("tr").find("[id*=transExpend]");
 			
-			if(cnt > 0) {
-				$j(this).val($j(this).val().replaceAll(",", ""));
-				for(let i = 0; i < cnt; i++) {
-					$j(this).val($j(this).val().slice(0, insertPosition) + "," + $j(this).val().slice(insertPosition));
-					insertPosition += 4;
-				}
+			if(transport == "R") {
+				let filterOption = $j(".travelTable").find("select option:selected").filter((idx, value) => $j(value).val() == "R");
+				let expend = 0
+				transTime = parseInt(rentInfo.transTime);
+
+				$j.each(filterOption.closest("tr").find("input[name='transTime']"), function() {
+					textPosition = $j(this).closest("tr").find("[id*=transExpend]");
+					
+					transTime += parseInt($j(this).val().replace(/\D/g, ""));
+					
+					expend = 500 * (transTime > 9 ? Math.floor(transTime / 10) : 0);
+					rentExpend += expend;
+					rentExpend -= preRentExpend;
+					preRentExpend = expend;
+					
+					$j(textPosition).text(`\${rentExpend}원`);
+				});
+				
+				sessionStorage.setItem(`\${userSeq}rent`, JSON.stringify(rentInfo));
+				return;
 			}
+			
+			$j.ajax({
+				url : `/travel/calculate?ts=\${transport}&tlt=\${travelTime}&tst=\${transTime}`,
+				type : "GET",
+				async : false,
+				success : function(res) {
+					res = JSON.parse(res);
+					$j(textPosition).text(`\${res.expend}원`);
+				},
+				error : function(errorThrown) {
+					alert(errorThrown);
+				}
+			});
+		}
+		
+		calTransExpend($j("input[name='transTime']"));
+		
+		
+		$j(".travelTable").find("input, select").each(function() {
+			$j(this).prop("disabled", true);
+			
+			if($j(this).closest("tr").data("request") == "C")
+				$j(this).closest("tr").find("input:checkBox, input.hidden").prop("disabled", false);
+		})
+		
+		$j("#expend").on("keyup", function(e) {
+			let parseValue = parseInt($j(this).val().replace(/\D/g, ""));
+			
+			if(parseValue)
+				$j(this).val(parseValue.toLocaleString('ko-KR'));
+		});
+		
+		$j("#logout").on("click", function() {
+			$j.ajax({
+				url : "/travel/logout",
+				type : "post",
+				success : function() {
+					location.href = "/travel/login";
+				},
+				error : function() {
+					alert("로그아웃 실패");
+				}
+			})
+		});
+		
+		$j(".dayBtn").on("click", function() {
+			let day = $j(this).text();
+			
+			location.href=`/travel/book?day=\${day}`;
+		});
+		
+		$j("#modBtn").on("click", function() {
+			let day = $j("[data-day]").data("day");
+			let checkBoxes = $j("input:checkBox:checked");
+			let data = checkBoxes.closest("tr").find("input, select");
+			data.prop("disabled", false);
+			
+			let sendData = {
+				travelList : data.serializeObject(day)
+			}
+			
+			$j.ajax({
+				url : "/travel/mod",
+				type : "post",
+				data : JSON.stringify(sendData),
+				dataType : "json",
+				contentType : "application/json",
+				success : function(res) {
+					res.success == "Y" ? alert("요청 완료") : alert("요청 실패");
+				},
+				error : function() {
+					alert("요청 실패");
+				}
+			});
+			data.prop("disabled", true);
 		});
 		
 		$j("#submit").on("click", function() {
@@ -192,16 +302,26 @@
 				</tr>
 			</table>
 			
-			<button type="button" id="submit">신청</button>
-			<button type="button" id="logout" class="hidden">로그아웃</button>
+			<button type="button" id="submit" <c:if test="${travelInfoList ne null}">class="hidden"</c:if>>신청</button>
+			<button type="button" id="logout" <c:if test="${travelInfoList eq null}">class="hidden"</c:if>>로그아웃</button>
 		</form>
 
 		<form <c:if test="${travelInfoList eq null}">class="hidden"</c:if>>
-			<div id="dayBtnBox">
-				<button type="button" class="dayBtn">1</button>
+			<div id="dayBtnBox" data-period="${loginUser.period}">
+				<c:forEach begin="1" end="${loginUser.period}" var="idx" varStatus="status">
+					<c:choose>
+						<c:when test="${status.last}">
+							<button type="button" class="dayBtn">${idx}</button>
+							<c:if test="">data-selected="selected"</c:if>
+						</c:when>
+						<c:otherwise>
+							<button type="button" class="dayBtn">${idx}</button> |
+						</c:otherwise>
+					</c:choose>
+				</c:forEach>
 			</div>
-			<div id="adjustBtn">
-				<button type="button">수정요청</button>
+			<div id="modBtnBox">
+				<button id="modBtn" type="button">수정요청</button>
 			</div>
 			<table border="1" class="travelTable">
 				<thead>
@@ -209,26 +329,26 @@
 						<th>
 						</th>
 						<th>
-							<label for="travelTime">시간</label>
+							<label for="travelTime0">시간</label>
 						</th>
 						<th>
-							<label for="travelCity">지역</label>
-							<label for="travelCounty" class="hidden"></label>
+							<label for="travelCity0">지역</label>
+							<label for="travelCounty0" class="hidden"></label>
 						</th>
 						<th>
-							<label for="travelLoc">장소명</label>
+							<label for="travelLoc0">장소명</label>
 						</th>
 						<th>
-							<label for="travelTrans">교통편</label>
+							<label for="travelTrans0">교통편</label>
 						</th>
 						<th>
-							<label for="useTime">예상이동시간</label>
+							<label for="transTime0">예상이동시간</label>
 						</th>
 						<th>
-							<label for="useExpend">이용요금(예상지출비용)</label>
+							<label for="useExpend0">이용요금(예상지출비용)</label>
 						</th>
 						<th>
-							<label for="travelDetail">계획상세</label>
+							<label for="travelDetail0">계획상세</label>
 						</th>
 						<th>
 							교통비
@@ -236,46 +356,68 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td>
-							<input id="travelSeq" type="checkbox">
-						</td>
-						<td>
-							<input id="travelTime" type="time" value="">
-						</td>
-						<td>
-							<select id="travelCity">
-								
-							</select>
-							<select id="travelCounty">
-	
-							</select>
-						</td>
-						<td>
-							<input id="travelLoc" type="text" value=""
-							oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\w\d]/, '')">
-						</td>
-						<td>
-							<select id="travelTrans">
-	
-							</select>
-						</td>
-						<td>
-							<input id="useTime" type="text" value=""
-							oninput="this.value = this.value.replace()">
-						</td>
-						<td>
-							<input id="useExpend" type="text" value=""
-							oninput="this.value = this.value.replace()">
-						</td>
-						<td>
-							<input id="travelDetail" type="text" value=""
-							oninput="this.value = this.value.replace()">
-						</td>
-						<td>
-							<div></div>
-						</td>
-					</tr>
+					<c:forEach items="${travelInfoList}" var="item" varStatus="status">
+						<tr data-request="${item.request}">
+							<td>
+								<input type="checkbox">
+								<input id="travelSeq${status.index}" class="hidden" name="travelSeq" value="${item.travelSeq}">
+							</td>
+							<td>
+								<input id="travelTime${status.index}" name="travelTime" type="time" value="${item.travelTime}" data-day="${item.travelDay}">
+							</td>
+							<td>
+								<select id="travelCity${status.index}" name="travelCity">
+									<c:forEach items="${cityList}" var="city">
+										<option value="${city.name}" 
+										<c:if test="${city.name eq loginUser.travelCity}">
+											selected = 'selected'
+										</c:if>>
+											${city.name}
+										</option>
+									</c:forEach>
+								</select>
+								<select id="travelCounty${status.index}" name="travelCounty">
+									<c:forEach items="${countyList}" var="county">
+										<option value="${county.name}" 
+										<c:if test="${county.name eq item.travelCounty}">
+											selected = 'selected'
+										</c:if>>
+											${county.name}
+										</option>
+									</c:forEach>
+								</select>
+							</td>
+							<td>
+								<input id="travelLoc${status.index}" name="travelLoc" type="text" value="${item.travelLoc}"
+								oninput="this.value = this.value.replace(/[^ㄱ-ㅎ\uac00-\ud7a3\w\d]/, '')">
+							</td>
+							<td>
+								<select id="travelTrans${status.index}" name="travelTrans">
+									<option value="R" <c:if test="${selectUser.transport eq 'R'}">selected = 'selected'</c:if>>렌트</option>
+									<option value="W" <c:if test="${selectUser.transport eq 'W'}">selected = 'selected'</c:if>>도보</option>
+									<option value="S" <c:if test="${selectUser.transport eq 'S'}">selected = 'selected'</c:if>>지하철</option>
+									<option value="T" <c:if test="${selectUser.transport eq 'T'}">selected = 'selected'</c:if>>택시</option>
+									<option value="B" <c:if test="${selectUser.transport eq 'B'}">selected = 'selected'</c:if>>버스</option>
+									<option value="C" <c:if test="${selectUser.transport eq 'C'}">selected = 'selected'</c:if>>자차</option>
+								</select>
+							</td>
+							<td>
+								<input id="transTime${status.index}" name="transTime" type="text" value="${item.transTime}"
+								oninput="this.value = this.value.replace(/^\dㄱ-ㅎ\uac00-\ud7a3/)">
+							</td>
+							<td>
+								<input id="useExpend${status.index}" name="useExpend" type="text" value="${item.useExpend}"
+								oninput="this.value = this.value.replace(/[^\d\,]/, '')">
+							</td>
+							<td>
+								<input id="travelDetail${status.index}" name="travelDetail" type="text" value="${item.travelDetail}"
+								oninput="this.value = this.value.replace()">
+							</td>
+							<td>
+								<div id="transExpend${status.index}"></div>
+							</td>
+						</tr>
+					</c:forEach>
 				</tbody>
 			</table>
 		</form>

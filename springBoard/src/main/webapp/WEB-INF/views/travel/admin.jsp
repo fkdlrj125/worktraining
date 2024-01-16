@@ -68,6 +68,7 @@
 		
 		let pushObj = function(obj) {
 			obj["travelDay"] = `\${day}`;
+			obj["request"] = "C";
 			result.push(Object.assign({}, obj));
 			return {};
 		}
@@ -110,7 +111,7 @@
 			}
 			
 			switch($j(this).attr("name")) {
-			case "transTime": case "useExpend":
+			case "transTime":
 				if(testObj[$j(this).attr("name")] == null)
 					testObj[$j(this).attr("name")] = [];
 				
@@ -178,14 +179,18 @@
 	}
 	
 	$j(document).ready(function() {
-		var rowNum = $j("table:eq(1) tbody tr").length;
-		// 세션스토리지에 저장된 값이 있는지 확인 후 없다면 새로 생성 있다면 세션스토리지 값 사용
-		// 렌트값 변경도 세션스토리지를 통해 변경해야 값 누적이 가능할 것 같음
-		// 견적 경비 계산할 때 기존 렌트값을 빼주고 다시 계산하는 식으로 진행해봐야될듯
-		var rentExpend = 100000 - (10000 * (Math.round(($j("#dayBtnBox").data("period")) / 2) - 1));
-		var preRentExpend = 0;
-		var validationCheck = false;
 		var userSeq = $j("[data-seq]").data("seq");
+		var rowNum = $j("table:eq(1) tbody tr").length;
+		var day = $j("[data-day]").data("day");
+		var period = Math.round(($j("#dayBtnBox").data("period")) / 2) - 1;
+		var rentExpend = 100000 - (10000 * (period > 3 ? 3 : period));
+		var preRentExpend = 0;
+		var rentInfo = sessionStorage.getItem(`\${userSeq}rent`) ? 
+				JSON.parse(sessionStorage.getItem(`\${userSeq}rent`)) :
+				{
+					transTime : 0,
+				};
+		var isChange = false;
 		
 		for(let key of Object.keys(localStorage)) {
 		 	let saveData = JSON.parse(localStorage.getItem(key));
@@ -197,30 +202,59 @@
 		 	$j(`#travelExpend\${inputPosition}`).text(saveData.travelExpend);
 		}
 		
+		// 교통비 계산
 		var calTransExpend = function(data) {
 			let transport = $j(data).closest("tr").find("[name=travelTrans]").val();
 			let travelTime = $j(data).closest("tr").find("[name=travelTime]").val();
 			let transTime = $j(data).closest("tr").find("input[name='transTime']").val().replace(/\D/g, "");
 			let textPosition = $j(data).closest("tr").find("[id*=transExpend]");
-			let row = $j(textPosition).attr("id").replace(/\D/g, "");
+			let keys = Object.keys(rentInfo).filter((key) => /\d/.test(key));
 			
 			if(transport == "R") {
-				let filterSelect = $j(".travelTable").find("select option:selected").filter((idx, value) => $j(value).val() == "R");
-				let expend = 0
-				transTime = 0;
+				let filterOption = $j(".travelTable").find("select option:selected").filter((idx, value) => $j(value).val() == "R");
+				let expend = 0;
+				let totalTime = 0;
+				let time = 0;
+				let prevTime = rentInfo[day] ? parseInt(rentInfo[day]) : 0
+				transTime = parseInt(rentInfo.transTime) - prevTime;
 				
-				$j.each(filterSelect.closest("tr").find("input[name='transTime']"), function() {
+				$j.each(keys, function() {
+					if(this == day)
+						return true;
+					rentExpend -= 500 * Math.floor(parseInt(rentInfo[this]) / 10);
+				});
+				
+				$j.each(filterOption.closest("tr").find("input[name='transTime']"), function() {
 					textPosition = $j(this).closest("tr").find("[id*=transExpend]");
-					transTime += parseInt($j(this).val().replace(/\D/g, ""));
+					
+					time = parseInt($j(this).val().replace(/\D/g, ""))
+					totalTime += time;
+					transTime += time;
 					
 					expend = 500 * (transTime > 9 ? Math.floor(transTime / 10) : 0);
 					rentExpend += expend;
 					rentExpend -= preRentExpend;
 					preRentExpend = expend;
-					
 					$j(textPosition).text(`\${rentExpend}원`);
 				});
 				
+				if(rentInfo[day]) {
+					if(rentInfo[day] == totalTime)
+						return;
+					
+					rentInfo.transTime = transTime - rentInfo[day] + totalTime;
+					rentInfo[day] = totalTime;
+					sessionStorage.setItem(`\${userSeq}rent`, JSON.stringify(rentInfo));
+					return;
+				}
+				
+				console.log(1);
+				console.log(rentInfo[day]);
+				console.log(totalTime);
+				console.log(rentInfo[day] == totalTime);
+				rentInfo[day] = totalTime;
+				rentInfo.transTime = transTime;
+				sessionStorage.setItem(`\${userSeq}rent`, JSON.stringify(rentInfo));
 				return;
 			}
 			
@@ -240,7 +274,6 @@
 		
 		// 견적 비용 계산
 		var calTravelExpend = function() {
-			let userSeq = $j("[data-seq]").data("seq");
 			let userExpend = parseInt($j(`#userExpend\${userSeq}`).text().replace(/\D/g, ""));
 			let useExpend = 0;
 			let transExpend = 0;
@@ -301,9 +334,7 @@
 		});
 		
 		if(!!$j("input[name='transTime']").val()?.trim()) {
-			$j.each($j("input[name='transTime']"), function() {
-				calTransExpend(this);
-			});
+			calTransExpend($j("input[name='transTime']"));
 		}
 		
 		// 추가 버튼 - ㅇ
@@ -369,7 +400,7 @@
 		$j(".dayBtn").on("click", function() {
 			let day = $j(this).text();
 			
-			if(!validationCheck) {
+			if(isChange) {
 				if(confirm("편집한 내용을 저장하지 않고 이동하시겠습니까?"))
 					location.href=`/travel/admin?userSeq=\${userSeq}&day=\${day}`;
 				return;
@@ -383,7 +414,6 @@
 			let day = $j("[data-day]").data("day");
 			let validationData = $j("table:eq(1) tbody input:not(:checkBox)");
 			
-			validationCheck = validation(validationData);
 			if(!validationCheck) return;
 			
 			if(calTravelExpend()) alert("예상 경비를 초과했습니다.");
@@ -411,6 +441,11 @@
 				}
 			});
 		});
+		
+		$j(document).on("change", ".travelTable input, .travelTable select", function() {
+			isChange = true;
+		});
+		
 	});
 </script>
 <body>
@@ -489,7 +524,7 @@
 						</c:choose>
 					</c:forEach>
 				</div>
-				<div id="tableBtn">
+				<div id="tableBtnBox">
 					<button id="addBtn" type="button">추가</button>
 					|
 					<button id="subBtn" type="button">삭제</button>
