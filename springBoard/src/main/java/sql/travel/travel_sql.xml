@@ -174,11 +174,13 @@
     		)
     </update>
     
-    <delete id="deleteTravel" parameterType="com.spring.travel.vo.TravelInfoVo">
-    	DELETE
-    		TRAVE_INFO
-   		WHERE
-			SEQ = #{item.userSeq} AND TRAVE_SEQ = #{item.travelSeq}
+    <delete id="deleteTravel" parameterType="java.util.List">
+	    	DELETE
+	    		TRAVE_INFO
+	   		WHERE
+    	<foreach collection="list" item="item" separator="OR">
+				SEQ = #{item.userSeq} AND TRAVE_SEQ = #{item.travelSeq}
+		</foreach>
     </delete>
     
     <select id="selectUser" parameterType="com.spring.travel.vo.ClientInfoVo" resultMap="clientInfoVo">

@@ -202,6 +202,11 @@
 		 	$j(`#travelExpend\${inputPosition}`).text(saveData.travelExpend);
 		}
 		
+		
+		$j(document).on("change", ".travelTable input, .travelTable select", function() {
+			isChange = true;
+		});
+		
 		// 교통비 계산
 		var calTransExpend = function(data) {
 			let transport = $j(data).closest("tr").find("[name=travelTrans]").val();
@@ -215,14 +220,8 @@
 				let expend = 0;
 				let totalTime = 0;
 				let time = 0;
-				let prevTime = rentInfo[day] ? parseInt(rentInfo[day]) : 0
+				let prevTime = rentInfo[day] ? parseInt(rentInfo[day]) : 0;
 				transTime = parseInt(rentInfo.transTime) - prevTime;
-				
-				$j.each(keys, function() {
-					if(this == day)
-						return true;
-					rentExpend -= 500 * Math.floor(parseInt(rentInfo[this]) / 10);
-				});
 				
 				$j.each(filterOption.closest("tr").find("input[name='transTime']"), function() {
 					textPosition = $j(this).closest("tr").find("[id*=transExpend]");
@@ -238,20 +237,11 @@
 					$j(textPosition).text(`\${rentExpend}원`);
 				});
 				
-				if(rentInfo[day]) {
-					if(rentInfo[day] == totalTime)
-						return;
-					
-					rentInfo.transTime = transTime - rentInfo[day] + totalTime;
-					rentInfo[day] = totalTime;
-					sessionStorage.setItem(`\${userSeq}rent`, JSON.stringify(rentInfo));
-					return;
-				}
+				if(isChange) return;
 				
-				console.log(1);
-				console.log(rentInfo[day]);
-				console.log(totalTime);
-				console.log(rentInfo[day] == totalTime);
+				if(rentInfo[day] == totalTime)
+					return;
+				
 				rentInfo[day] = totalTime;
 				rentInfo.transTime = transTime;
 				sessionStorage.setItem(`\${userSeq}rent`, JSON.stringify(rentInfo));
@@ -320,14 +310,6 @@
 			return travelExpendOver;
 		}
 		
-		// 이용금액 , 찍기
-		$j(document).on("keyup", "input[name='useExpend']",function(e) {
-			let parseValue = parseInt($j(this).val().replace(/\D/g, ""));
-			
-			if(parseValue)
-				$j(this).val(parseValue.toLocaleString('ko-KR'));
-		});
-		
 		// 교통비 찍기
 		$j(document).on("change", "input[name='transTime'], select[name='travelTrans']", function() {
 			calTransExpend(this);
@@ -336,6 +318,29 @@
 		if(!!$j("input[name='transTime']").val()?.trim()) {
 			calTransExpend($j("input[name='transTime']"));
 		}
+		
+		// 이용금액 , 찍기
+		$j(document).on("keyup", "input[name='useExpend']",function(e) {
+			let parseValue = parseInt($j(this).val().replace(/\D/g, ""));
+			
+			if(parseValue)
+				$j(this).val(parseValue.toLocaleString('ko-KR'));
+		});
+		
+		// 지역 변경
+		$j(document).on("change", "[name=travelCity]", function() {
+			$j.ajax({
+				url : "/travel/county",
+				type : "get",
+				data : $j(this).serialize(),
+				dataType : "json",
+				success : function(res) {
+					JSON.parse(res);
+					console.log(res);
+					console.log(typeof res);
+				}
+			});
+		});
 		
 		// 추가 버튼 - ㅇ
 		$j("#addBtn").on("click", function() {
@@ -356,22 +361,24 @@
 					break;
 				}
 				
-				if($j(this).data("seq")) 
+				if($j(this).data("seq"))
 					$j(this).removeAttr("data-seq");
 				
 				$j(this).attr("id", $j(this).attr("id").replace(/\d/g, rowNum));
 			});
 			
+			$j(copyRow).find("input:checkBox").prop("selected", false);	
 			$j("table:eq(1) tbody").append(copyRow);
 			rowNum++;
 		});
 		
 		// 삭제 버튼
 		$j("#subBtn").on("click", function(){
-			let checkedBoxInData = $j("input[data-seq]:checked");
-			let checkedBox = $j("input:not([data-seq]):checked");
+			let checkedBox = $j("input:checked");
+			let checkedBoxInData = 
+			checkedBox.filter((index, el) => $j(el).siblings("[name='travelSeq']").val()?.trim());
 			
-			if(checkedBoxInData.length + checkedBox.length == $j("input:checkBox").length) {
+			if(checkedBox.length == $j("input:checkBox").length) {
 				alert("최소 한 개 이상의 행을 남겨주세요.");
 				$j("input:checkBox").prop("checked",false);
 				return;
@@ -384,16 +391,31 @@
 			if(checkedBoxInData.length == 0) return;
 			
 			let obj = null;
-			let data = [];
+			let tInfoList = [];
 			
-			$j.each(checkedBoxInData, function() {
+			$j.each(checkedBoxInData.siblings("[name='travelSeq']"), function() {
 				obj = {};
-				obj[$j(this).attr("id").replace(/\d/, "")] = $j(this).data("seq");
-				result.put(Object.assign({}, obj));
+				obj[$j(this).attr("id").replace(/\d/, "")] = $j(this).val();
+				obj["userSeq"] = userSeq;
+				tInfoList.push(Object.assign({}, obj));
 			});
 			
+			console.log(obj);
+			
 			// 삭제 요청 해야함
-			console.log(data);
+			$j.ajax({
+				url : "/travel/delete",
+				type : "POST",
+				data : JSON.stringify(tInfoList),
+				dataType : "json",
+				contentType : "application/json",
+				success : function(res) {
+					res.success == "Y" ? "" : alert("삭제 실패");
+				},
+				error : function() {
+					alert("삭제 실패");
+				}
+			});
 		});
 		
 		// 날짜 버튼 - 
@@ -414,9 +436,11 @@
 			let day = $j("[data-day]").data("day");
 			let validationData = $j("table:eq(1) tbody input:not(:checkBox)");
 			
-			if(!validationCheck) return;
+			if(!validation) return;
 			
-			if(calTravelExpend()) alert("예상 경비를 초과했습니다.");
+			if(calTravelExpend()) {
+				alert("예상 경비를 초과했습니다.");
+			}
 			
 			let data = $j("table:eq(1) tbody input:not(:checkBox), table:eq(1) tbody select");
 			
@@ -424,7 +448,8 @@
 				clientVo : {
 					userSeq : userSeq
 				},
-				travelList : data.serializeObject(day)
+				travelList : data.serializeObject(day),
+				travelExpendOver : JSON.parse(localStorage.getItem(`travelExpend\${userSeq}`)).travelExpendOver
 			}
 			
 			$j.ajax({
@@ -435,17 +460,14 @@
 				contentType : "application/json",
 				success : function(res) {
 					res.success == "Y" ? alert("저장 완료") : alert("저장 실패");
+					isChange = false;
+					calTransExpend($j("input[name='transTime']"));
 				},
 				error : function(thrownError) {
 					alert(thrownError);
 				}
 			});
 		});
-		
-		$j(document).on("change", ".travelTable input, .travelTable select", function() {
-			isChange = true;
-		});
-		
 	});
 </script>
 <body>

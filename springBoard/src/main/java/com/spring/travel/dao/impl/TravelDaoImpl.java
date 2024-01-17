@@ -27,8 +27,8 @@ public class TravelDaoImpl implements TravelDao{
 	}
 
 	@Override
-	public int deleteTravel(TravelInfoVo tInfoVo) throws Exception {
-		return sqlSession.delete("travel.deleteTravel", tInfoVo);
+	public int deleteTravel(List<TravelInfoVo> tInfoList) throws Exception {
+		return sqlSession.delete("travel.deleteTravel", tInfoList);
 	}
 
 	@Override

@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.spring.common.CommonUtil;
 import com.spring.common.TravelAPIUtil;
@@ -91,7 +89,7 @@ public class TravelController {
 		result += travelService.mergeUser(formDTO.getClientVo());
 		
 		if(Optional.ofNullable(formDTO.getTravelList()).isPresent()) {
-			formDTO.setModify();
+			formDTO.setMod();
 			result += travelService.mergeTravelList(formDTO.getTravelList());
 		}
 		
@@ -133,7 +131,10 @@ public class TravelController {
 		Map<String, String> callbackMsg = new HashMap<>();
 		ClientInfoVo cInfoVo = formDTO.getClientVo();
 		
-		formDTO.setSeq(cInfoVo);
+		if(formDTO.getTravelExpendOver())
+			formDTO.setMod();
+		else
+			formDTO.setCom();
 		
 		callbackMsg.put("success", travelService.mergeTravelList(formDTO.getTravelList())
 				== formDTO.getTravelList().size() ? "Y" : "N") ;
@@ -143,16 +144,17 @@ public class TravelController {
 	
 	@RequestMapping(value = "/travel/delete", method = RequestMethod.POST) 
 	@ResponseBody
-	public String travelDelete(TravelInfoVo tInfoVo) throws Exception {
+	public String travelDelete(@RequestBody List<TravelInfoVo> tInfoList) throws Exception {
 		Map<String, String> callbackMsg = new HashMap<>();
-		callbackMsg.put("success", travelService.deleteTravel(tInfoVo) == 1 ? "Y" : "N"); 
+		
+		callbackMsg.put("success", travelService.deleteTravel(tInfoList) == 1 ? "Y" : "N"); 
 		
 		return CommonUtil.getJsonCallBackString("", callbackMsg);
 	}
 	
-	@RequestMapping(value = "/travel/county", method = RequestMethod.POST)
+	@RequestMapping(value = "/travel/county", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
 	@ResponseBody
-	public JsonArray travelCounty(String city) throws Exception {
+	public String travelCounty(@RequestParam(value = "travelCity") String city) throws Exception {
 		JsonArray jsonArray = new JsonArray();
 		
 		for(Map<String, Object> map : TravelAPIUtil.getData("county", city)) {
@@ -161,12 +163,12 @@ public class TravelController {
 			for(Map.Entry<String, Object> entry : map.entrySet()) {
 				String key = entry.getKey();
 				Object value = entry.getValue();
-				jsonObject.add(key, (JsonElement) value);
-				jsonArray.add(jsonObject);
+				jsonObject.addProperty(key, (String) value);
 			}
+			
+			jsonArray.add(jsonObject);
 		}
-		
-		return jsonArray;
+		return jsonArray.toString();
 	}
 	
 	@RequestMapping(value = "/travel/calculate", method = RequestMethod.GET)
@@ -185,7 +187,7 @@ public class TravelController {
 		HttpSession session = request.getSession(false);
 		ClientInfoVo cInfoVo = (ClientInfoVo)session.getAttribute("loginUser");
 		
-		formDTO.setModify(cInfoVo);
+		formDTO.setMod(cInfoVo);
 		
 		Map<String, String> result = new HashMap<>();
 		

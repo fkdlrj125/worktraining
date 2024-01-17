@@ -141,7 +141,6 @@ $j.fn.serializeObject = function(day) {
 		
 		calTransExpend($j("input[name='transTime']"));
 		
-		
 		$j(".travelTable").find("input, select").each(function() {
 			$j(this).prop("disabled", true);
 			
@@ -154,6 +153,21 @@ $j.fn.serializeObject = function(day) {
 			
 			if(parseValue)
 				$j(this).val(parseValue.toLocaleString('ko-KR'));
+		});
+		
+		$j(document).on("change", "[name=travelCity]", function() {
+			
+			console.log($j(this).serialize());
+			
+			$j.ajax({
+				url : "/travel/county",
+				type : "get",
+				data : $j(this).serialize(),
+				success : function(res) {
+					JSON.parse(res);
+					console.log(res);
+				}
+			});
 		});
 		
 		$j("#logout").on("click", function() {

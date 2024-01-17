@@ -10,6 +10,7 @@ import com.spring.travel.vo.TravelInfoVo;
 public class FormDTO {
 	ClientInfoVo clientVo;
 	List<TravelInfoVo> travelList;
+	Boolean travelExpendOver;
 	
 	public ClientInfoVo getClientVo() {
 		return clientVo;
@@ -27,6 +28,14 @@ public class FormDTO {
 		this.travelList = travelList;
 	}
 	
+	public Boolean getTravelExpendOver() {
+		return travelExpendOver;
+	}
+
+	public void setTravelExpendOver(Boolean travelExpendOver) {
+		this.travelExpendOver = travelExpendOver;
+	}
+
 	public void setSeq(ClientInfoVo cInfoVo) {
 		clientVo.setUserSeq(cInfoVo.getUserSeq());
 		
@@ -38,7 +47,7 @@ public class FormDTO {
 		});
 	}
 
-	public void setModify() {
+	public void setMod() {
 		travelList.forEach(new Consumer<TravelInfoVo>() {
 			@Override
 			public void accept(TravelInfoVo t) {
@@ -48,11 +57,21 @@ public class FormDTO {
 		});
 	}
 	
-	public void setModify(ClientInfoVo cInfoVo) {
+	public void setMod(ClientInfoVo cInfoVo) {
 		travelList.forEach(new Consumer<TravelInfoVo>() {
 			@Override
 			public void accept(TravelInfoVo t) {
 				t.setUserSeq(cInfoVo.getUserSeq());
+				t.setRequest("M");
+			}
+		});
+	}
+	
+	public void setCom() {
+		travelList.forEach(new Consumer<TravelInfoVo>() {
+			@Override
+			public void accept(TravelInfoVo t) {
+				t.setUserSeq(clientVo.getUserSeq());
 				t.setRequest("M");
 			}
 		});

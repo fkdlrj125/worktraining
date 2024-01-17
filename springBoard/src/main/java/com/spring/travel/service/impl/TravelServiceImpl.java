@@ -29,9 +29,9 @@ public class TravelServiceImpl implements TravelService{
 	}
 
 	@Override
-	public int deleteTravel(TravelInfoVo tInfoVo) throws Exception {
+	public int deleteTravel(List<TravelInfoVo> tInfoList) throws Exception {
 		// TODO Auto-generated method stub
-		return travelDao.deleteTravel(tInfoVo);
+		return travelDao.deleteTravel(tInfoList);
 	}
 
 	@Override
