@@ -187,9 +187,7 @@
 		var preRentExpend = 0;
 		var rentInfo = sessionStorage.getItem(`\${userSeq}rent`) ? 
 				JSON.parse(sessionStorage.getItem(`\${userSeq}rent`)) :
-				{
-					transTime : 0,
-				};
+				{};
 		var isChange = false;
 		
 		for(let key of Object.keys(localStorage)) {
@@ -209,19 +207,23 @@
 		
 		// 교통비 계산
 		var calTransExpend = function(data) {
-			let transport = $j(data).closest("tr").find("[name=travelTrans]").val();
+			let transport = $j(data).closest("tr").find("[name=travelTrans]");
 			let travelTime = $j(data).closest("tr").find("[name=travelTime]").val();
 			let transTime = $j(data).closest("tr").find("input[name='transTime']").val().replace(/\D/g, "");
 			let textPosition = $j(data).closest("tr").find("[id*=transExpend]");
 			let keys = Object.keys(rentInfo).filter((key) => /\d/.test(key));
 			
-			if(transport == "R") {
-				let filterOption = $j(".travelTable").find("select option:selected").filter((idx, value) => $j(value).val() == "R");
+			if(transport.val() == "R") {
+				let filterOption = transport.find("option:selected").filter((idx, value) => $j(value).val() == "R");
 				let expend = 0;
 				let totalTime = 0;
 				let time = 0;
-				let prevTime = rentInfo[day] ? parseInt(rentInfo[day]) : 0;
-				transTime = parseInt(rentInfo.transTime) - prevTime;
+				transTime = 0;
+				
+				if(rentInfo[day-1]) {
+					for(let i = 1; i < day; i++)
+						transTime += parseInt(rentInfo[i]);
+				}
 				
 				$j.each(filterOption.closest("tr").find("input[name='transTime']"), function() {
 					textPosition = $j(this).closest("tr").find("[id*=transExpend]");
@@ -243,13 +245,12 @@
 					return;
 				
 				rentInfo[day] = totalTime;
-				rentInfo.transTime = transTime;
 				sessionStorage.setItem(`\${userSeq}rent`, JSON.stringify(rentInfo));
 				return;
 			}
 			
 			$j.ajax({
-				url : `/travel/calculate?ts=\${transport}&tlt=\${travelTime}&tst=\${transTime}`,
+				url : `/travel/calculate?ts=\${transport.val()}&tlt=\${travelTime}&tst=\${transTime}`,
 				type : "GET",
 				async : false,
 				success : function(res) {
@@ -269,25 +270,34 @@
 			let transExpend = 0;
 			let travelExpend = 0;
 			let travelExpendOver = 0;
-			let preTravelExpend = 0;
-			let saveObj = {}
+			let totalExpend = 0;
+			let dayExpend = 0;
+			let saveObj = localStorage.getItem(`travelExpend\${userSeq}`) 
+						? JSON.parse(localStorage.getItem(`travelExpend\${userSeq}`)) 
+						: {};
+			let isRent = false;
+			let prevRent = 0;
 			
 			$j("[name=useExpend]").each(function() {
 				useExpend += parseInt($j(this).val().replace(/\D/g, ""));
 			});
 			
 			$j("[id*=transExpend]").each(function() {
+				if($j(this).closest("tr").find("[name=travelTrans] option:selected").val() == "R") {
+					isRent = true;
+					transExpend += rentExpend - prevRent;
+					prevRent = rentExpend;
+					return true;
+				}
 				transExpend += parseInt($j(this).text().replace(/\D/g, ""));
 			});
 			
-			if(localStorage.getItem(`travelExpend\${userSeq}`)) {
-				saveData = localStorage.getItem(`travelExpend\${userSeq}`);
-				saveData = JSON.parse(saveData);
-				travelExpend = parseInt(saveData.travelExpend.replace(/\D/g, ""));
-				preTravelExpend = parseInt(saveData.preTravelExpend);
-			}
+			travelExpend = saveObj.travelExpend ? parseInt(saveObj.travelExpend.replace(/\D/g, "")) : 0;
+			dayExpend = saveObj[day] ? parseInt(saveObj[day]) : 0;	
 			
-			travelExpend += useExpend + transExpend - preTravelExpend;
+			totalExpend = useExpend + transExpend;
+			
+			travelExpend += totalExpend - dayExpend;
 			travelExpendOver = userExpend < travelExpend ? 1 : 0;
 			
 			$j(`#travelExpend\${userSeq}`).css("color", "black");
@@ -297,17 +307,12 @@
 			travelExpend = travelExpend.toLocaleString('ko-KR');
 			$j(`#travelExpend\${userSeq}`).text(travelExpend);
 			
-			preTravelExpend = useExpend + transExpend;
-			
-			saveObj = {
-				travelExpend : travelExpend,
-				travelExpendOver : travelExpendOver,
-				preTravelExpend : preTravelExpend
-			};
+			saveObj.travelExpend = travelExpend;
+			saveObj.travelExpendOver = travelExpendOver;
+			saveObj[day] = totalExpend;
+			saveObj.prevDay = day;
 			
 			localStorage.setItem(`travelExpend\${userSeq}`, JSON.stringify(saveObj));
-			
-			return travelExpendOver;
 		}
 		
 		// 교통비 찍기
@@ -316,7 +321,9 @@
 		});
 		
 		if(!!$j("input[name='transTime']").val()?.trim()) {
-			calTransExpend($j("input[name='transTime']"));
+			$j.each($j("input[name='transTime']"), function() {
+				calTransExpend(this);
+			});
 		}
 		
 		// 이용금액 , 찍기
@@ -329,15 +336,19 @@
 		
 		// 지역 변경
 		$j(document).on("change", "[name=travelCity]", function() {
+			let travelCounty = $j(this).siblings("[name=travelCounty]");
+			
 			$j.ajax({
 				url : "/travel/county",
 				type : "get",
 				data : $j(this).serialize(),
 				dataType : "json",
 				success : function(res) {
-					JSON.parse(res);
-					console.log(res);
-					console.log(typeof res);
+					$j(travelCounty).find("option").remove();
+					
+					$j.each(res, function() {
+						$j(travelCounty).append(`<option value="\${this.code}">\${this.name}</option>`);
+					});
 				}
 			});
 		});
@@ -402,7 +413,6 @@
 			
 			console.log(obj);
 			
-			// 삭제 요청 해야함
 			$j.ajax({
 				url : "/travel/delete",
 				type : "POST",
@@ -623,12 +633,12 @@
 										</td>
 										<td>
 											<select id="travelTrans${status.index}" name="travelTrans">
-												<option value="R" <c:if test="${selectUser.transport eq 'R'}">selected = 'selected'</c:if>>렌트</option>
-												<option value="W" <c:if test="${selectUser.transport eq 'W'}">selected = 'selected'</c:if>>도보</option>
-												<option value="S" <c:if test="${selectUser.transport eq 'S'}">selected = 'selected'</c:if>>지하철</option>
-												<option value="T" <c:if test="${selectUser.transport eq 'T'}">selected = 'selected'</c:if>>택시</option>
-												<option value="B" <c:if test="${selectUser.transport eq 'B'}">selected = 'selected'</c:if>>버스</option>
-												<option value="C" <c:if test="${selectUser.transport eq 'C'}">selected = 'selected'</c:if>>자차</option>
+												<option value="R" <c:if test="${item.travelTrans eq 'R'}">selected = 'selected'</c:if>>렌트</option>
+												<option value="W" <c:if test="${item.travelTrans eq 'W'}">selected = 'selected'</c:if>>도보</option>
+												<option value="S" <c:if test="${item.travelTrans eq 'S'}">selected = 'selected'</c:if>>지하철</option>
+												<option value="T" <c:if test="${item.travelTrans eq 'T'}">selected = 'selected'</c:if>>택시</option>
+												<option value="B" <c:if test="${item.travelTrans eq 'B'}">selected = 'selected'</c:if>>버스</option>
+												<option value="C" <c:if test="${item.travelTrans eq 'C'}">selected = 'selected'</c:if>>자차</option>
 											</select>
 										</td>
 										<td>

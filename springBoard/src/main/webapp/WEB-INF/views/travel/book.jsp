@@ -90,37 +90,50 @@ $j.fn.serializeObject = function(day) {
 		var userSeq = ${loginUser.userSeq}
 		var rentInfo = sessionStorage.getItem(`\${userSeq}rent`) ? 
 				JSON.parse(sessionStorage.getItem(`\${userSeq}rent`)) :
-				{
-					transTime : 0,
-				};
+				{};
 		var period = Math.round(($j("#dayBtnBox").data("period")) / 2) - 1;
 		var rentExpend = 100000 - (10000 * (period > 3 ? 3 : period));
+		var day = $j("[data-day]").data("day");
 		var preRentExpend = 0;
 		
+		// 교통비 계산
 		var calTransExpend = function(data) {
 			let transport = $j(data).closest("tr").find("[name=travelTrans]").val();
 			let travelTime = $j(data).closest("tr").find("[name=travelTime]").val();
 			let transTime = $j(data).closest("tr").find("input[name='transTime']").val().replace(/\D/g, "");
 			let textPosition = $j(data).closest("tr").find("[id*=transExpend]");
+			let keys = Object.keys(rentInfo).filter((key) => /\d/.test(key));
 			
 			if(transport == "R") {
 				let filterOption = $j(".travelTable").find("select option:selected").filter((idx, value) => $j(value).val() == "R");
-				let expend = 0
-				transTime = parseInt(rentInfo.transTime);
-
+				let expend = 0;
+				let totalTime = 0;
+				let time = 0;
+				transTime = 0;
+				
+				if(rentInfo[day-1]) {
+					for(let i = 1; i < day; i++)
+						transTime += parseInt(rentInfo[i]);
+				}
+				
 				$j.each(filterOption.closest("tr").find("input[name='transTime']"), function() {
 					textPosition = $j(this).closest("tr").find("[id*=transExpend]");
 					
-					transTime += parseInt($j(this).val().replace(/\D/g, ""));
+					time = parseInt($j(this).val().replace(/\D/g, ""))
+					totalTime += time;
+					transTime += time;
 					
 					expend = 500 * (transTime > 9 ? Math.floor(transTime / 10) : 0);
 					rentExpend += expend;
 					rentExpend -= preRentExpend;
 					preRentExpend = expend;
-					
 					$j(textPosition).text(`\${rentExpend}원`);
 				});
 				
+				if(rentInfo[day] == totalTime)
+					return;
+				
+				rentInfo[day] = totalTime;
 				sessionStorage.setItem(`\${userSeq}rent`, JSON.stringify(rentInfo));
 				return;
 			}
@@ -407,12 +420,12 @@ $j.fn.serializeObject = function(day) {
 							</td>
 							<td>
 								<select id="travelTrans${status.index}" name="travelTrans">
-									<option value="R" <c:if test="${selectUser.transport eq 'R'}">selected = 'selected'</c:if>>렌트</option>
-									<option value="W" <c:if test="${selectUser.transport eq 'W'}">selected = 'selected'</c:if>>도보</option>
-									<option value="S" <c:if test="${selectUser.transport eq 'S'}">selected = 'selected'</c:if>>지하철</option>
-									<option value="T" <c:if test="${selectUser.transport eq 'T'}">selected = 'selected'</c:if>>택시</option>
-									<option value="B" <c:if test="${selectUser.transport eq 'B'}">selected = 'selected'</c:if>>버스</option>
-									<option value="C" <c:if test="${selectUser.transport eq 'C'}">selected = 'selected'</c:if>>자차</option>
+									<option value="R" <c:if test="${item.travelTrans eq 'R'}">selected = 'selected'</c:if>>렌트</option>
+									<option value="W" <c:if test="${item.travelTrans eq 'W'}">selected = 'selected'</c:if>>도보</option>
+									<option value="S" <c:if test="${item.travelTrans eq 'S'}">selected = 'selected'</c:if>>지하철</option>
+									<option value="T" <c:if test="${item.travelTrans eq 'T'}">selected = 'selected'</c:if>>택시</option>
+									<option value="B" <c:if test="${item.travelTrans eq 'B'}">selected = 'selected'</c:if>>버스</option>
+									<option value="C" <c:if test="${item.travelTrans eq 'C'}">selected = 'selected'</c:if>>자차</option>
 								</select>
 							</td>
 							<td>
